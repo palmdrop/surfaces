@@ -1,8 +1,8 @@
 import React, { useRef, useEffect, useLayoutEffect, useState } from 'react'
 import GLC from '../GL/GLC'
 
-import vertexShaderSource from '../GL/shaders/vertex.glsl'
-import fragmentShaderSource from '../GL/shaders/fragment.glsl'
+import vertexShaderSource from '../GL/shaders/simple.vert'
+import fragmentShaderSource from '../GL/shaders/warp.frag'
 
 
 
