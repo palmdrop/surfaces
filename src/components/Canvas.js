@@ -1,7 +1,8 @@
 import React, { useRef, useEffect, useLayoutEffect, useState } from 'react'
 import GLC from '../GL/GLC'
-import vertexShaderSource from '../GL/shaders/vertex'
-import fragmentShaderSource from '../GL/shaders/fragment'
+
+import vertexShaderSource from '../GL/shaders/vertex.glsl'
+import fragmentShaderSource from '../GL/shaders/fragment.glsl'
 
 
 
@@ -73,9 +74,6 @@ const Canvas = (props) => {
 
     setInitialized(true);
     renderQuad();
-
-
-    var testShader = require('../GL/shaders/vertex.glsl');
   };
 
   const handleResize = () => {
