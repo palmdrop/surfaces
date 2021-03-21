@@ -1,4 +1,4 @@
-# React Webgl Experiments
+# React WebGL Experiments
 Personal, exploratory repository for learning webgl, glsl and react. 
 
 ---------------------------------------
