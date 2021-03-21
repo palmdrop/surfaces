@@ -1,3 +1,7 @@
+# React Webgl Experiments
+Personal, exploratory repository for learning webgl, glsl and react. 
+
+---------------------------------------
 # Getting Started with Create React App
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
