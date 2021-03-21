@@ -1,4 +1,4 @@
-import { useRef, useEffect } from 'react'
+import React from 'react'
 
 /////////////
 // STYLING //
@@ -10,21 +10,15 @@ import './App.css';
 ////////////////
 import Canvas from './components/Canvas'
 
-///////////
-// WEBGL //
-///////////
-import GLC from './GL/GLC'
-
-import vertexShaderSource from './GL/shaders/vertex'
-import fragmentShaderSource from './GL/shaders/fragment'
-
-const App = () => {
-
-  return (
-    <div className="App">
-      <Canvas />
-    </div>
-  );
+//const App = () => {
+class App extends React.Component {
+  render() {
+    return (
+      <div className="App">
+        <Canvas />
+      </div>
+    );
+  }
 }
 
 export default App;

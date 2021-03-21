@@ -1,16 +1,18 @@
-import React, { useRef, useEffect, forwardRef } from 'react'
+import React, { useRef, useEffect, useLayoutEffect, useState } from 'react'
 import GLC from '../GL/GLC'
 import vertexShaderSource from '../GL/shaders/vertex'
 import fragmentShaderSource from '../GL/shaders/fragment'
 
+
+
 const Canvas = (props) => {
   const canvasRef = useRef();
+  const [program, setProgram] = useState(-1);
+  const [initialized, setInitialized] = useState(false);
 
-  const initialize = (canvasRef) => {
+  const initializeQuad = (canvasRef) => {
+    if(initialized) return;
 
-  };
-
-  useEffect(() => {
     const canvas =  canvasRef.current;
 
     if(!canvas) {
@@ -32,10 +34,11 @@ const Canvas = (props) => {
 
 
     GLC.init(canvas, gl);
-    GLC.setViewport(window.innerWidth, window.innerHeight);
-    GLC.clear(0, 0.1, 0.1, 1);
+    //GLC.setViewport(window.innerWidth, window.innerHeight);
+    handleResize();
 
-    const program = GLC.createShaderProgram(vertexShaderSource, fragmentShaderSource);
+    //const program = GLC.createShaderProgram(vertexShaderSource, fragmentShaderSource);
+    setProgram(GLC.createShaderProgram(vertexShaderSource, fragmentShaderSource));
     if(program === -1) return;
 
     var triangleVertices = 
@@ -68,18 +71,44 @@ const Canvas = (props) => {
       2 * Float32Array.BYTES_PER_ELEMENT
     );
 
+    setInitialized(true);
+    renderQuad();
+
+
+    var testShader = require('../GL/shaders/vertex.glsl');
+  };
+
+  const handleResize = () => {
+    if(!initialized) return;
+    GLC.setViewport(window.innerWidth, window.innerHeight);
     GLC.draw(program, 6);
+  }
 
-  }, [canvasRef]);
+  const renderQuad = () => {
+    GLC.clear(0, 0.1, 0.1, 1);
+    GLC.draw(program, 6);
+  }
 
-    return (
-        <canvas 
-            ref={canvasRef}
-            width="400"
-            height="400"    
-            style={{ border: '1px solid black'}}
-        />
-    )
+  useEffect(() => {
+    initializeQuad(canvasRef);
+  });
+
+  useLayoutEffect(() => {
+    window.addEventListener('resize', handleResize);
+    handleResize();
+    
+    return () => {
+      window.removeEventListener('resize', handleResize);
+    }
+  });
+
+  return (
+      <canvas 
+          ref={canvasRef}
+          width="400"
+          height="400"    
+      />
+  )
 }
 
 export default Canvas;
