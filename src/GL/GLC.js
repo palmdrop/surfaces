@@ -1,7 +1,16 @@
 class GLCommander {
+    constructor() {
+        this.initialized = false;
+    }
+
     init(canvas, gl) {
         this.canvas = canvas;
         this.gl = gl;
+        this.initialized = true;
+    }
+
+    isInitialized() {
+        return this.initialized;
     }
 
     clear = (r, g, b, a) => {
@@ -90,8 +99,15 @@ class GLCommander {
         this.gl.useProgram(program);
     }
 
-    draw(program, numberOfVertices) {
-        this.setShaderProgram(program);
+    setUniform(program, name, funcName, value) {
+        //TODO cache location ((program, name) => location map)to avoid doing name lookups every time
+        const location = this.gl.getUniformLocation(program, name);
+        //TODO use function name or suffix to find function!!!!!!!!!!!! pass that instead of lambda function etc
+        this.gl["uniform" + funcName](location, value);
+    }
+
+    draw(numberOfVertices) {
+        //this.setShaderProgram(program);
         this.gl.drawArrays(this.gl.TRIANGLES,  0, numberOfVertices);
     }
 

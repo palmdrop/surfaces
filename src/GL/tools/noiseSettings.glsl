@@ -3,6 +3,7 @@ struct NoiseSettings {
     int dimensions;
     float frequency;
     vec3 offset;
+    float pow;
 };
 
 #pragma glslify: export(NoiseSettings)

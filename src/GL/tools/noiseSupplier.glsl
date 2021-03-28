@@ -43,7 +43,7 @@ float noiseSupplier(NoiseSettings settings, vec3 position) {
         }
     } 
 
-    return result;
+    return pow((0.5 + result / 2.0), settings.pow);
 }
 
 #pragma glslify: export(noiseSupplier)

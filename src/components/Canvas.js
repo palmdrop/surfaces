@@ -1,5 +1,6 @@
 import React, { useRef, useEffect, useLayoutEffect, useState } from 'react'
 import GLC from '../GL/GLC'
+import { noiseTypes, setNoiseSettings, createNoiseSettings } from '../GL/noise/NoiseSettings';
 
 import vertexShaderSource from '../GL/shaders/simple.vert'
 import fragmentShaderSource from '../GL/shaders/warp.frag'
@@ -8,10 +9,13 @@ import fragmentShaderSource from '../GL/shaders/warp.frag'
 
 const Canvas = (props) => {
   const canvasRef = useRef();
+
   const [program, setProgram] = useState(-1);
+  const [offset, setOffset] = useState([0.0, 0.0, 0.0]);
+
   const [initialized, setInitialized] = useState(false);
 
-  const initializeQuad = (canvasRef) => {
+  const initialize = (canvasRef) => {
     if(initialized) return;
 
     const canvas =  canvasRef.current;
@@ -35,12 +39,13 @@ const Canvas = (props) => {
 
 
     GLC.init(canvas, gl);
-    //GLC.setViewport(window.innerWidth, window.innerHeight);
-    handleResize();
 
-    //const program = GLC.createShaderProgram(vertexShaderSource, fragmentShaderSource);
-    setProgram(GLC.createShaderProgram(vertexShaderSource, fragmentShaderSource));
-    if(program === -1) return;
+    const p = GLC.createShaderProgram(vertexShaderSource, fragmentShaderSource);
+
+    if(!p) {
+      console.log("UUUH")  ;
+      return;
+    }
 
     var triangleVertices = 
     [
@@ -55,7 +60,7 @@ const Canvas = (props) => {
 
     var buffer = GLC.createBuffer(gl.ARRAY_BUFFER, triangleVertices, gl.STATIC_DRAW);
     GLC.setAttribLayout(
-      program, 
+      p, 
       'vertPosition',
       2,
       gl.FLOAT,
@@ -64,7 +69,7 @@ const Canvas = (props) => {
     );
 
     GLC.setAttribLayout(
-      program,
+      p,
       'vertColor',
       3,
       gl.FLOAT,
@@ -72,23 +77,68 @@ const Canvas = (props) => {
       2 * Float32Array.BYTES_PER_ELEMENT
     );
 
+    // SET UNIFORMS
+    const offset = [Math.random() * 1000, Math.random() * 1000, 1.0];
+    const source = createNoiseSettings(noiseTypes.SIMPLEX, 3, Math.random() * 0.01, offset, 0.8);
+    const angleControl = createNoiseSettings(noiseTypes.SIMPLEX, 3, Math.random() * 0.01, offset, 0.8);
+    const amountControl = createNoiseSettings(noiseTypes.SIMPLEX, 3, Math.random() * 0.01, offset, 0.8);
+    const amount = 200;
+
+    GLC.setShaderProgram(p);
+    setNoiseSettings(source, p, "source");
+    setNoiseSettings(angleControl, p, "angleControl");
+    setNoiseSettings(amountControl, p, "amountControl");
+    GLC.setUniform(p, "amount", "1f", amount);
+
     setInitialized(true);
-    renderQuad();
+    setProgram(p);
+    setOffset(offset);
+
+    return {program: p, offset: offset};
   };
 
   const handleResize = () => {
     if(!initialized) return;
     GLC.setViewport(window.innerWidth, window.innerHeight);
-    GLC.draw(program, 6);
+    renderQuad();
   }
 
   const renderQuad = () => {
     GLC.clear(0, 0.1, 0.1, 1);
-    GLC.draw(program, 6);
+    GLC.draw(6);
   }
 
   useEffect(() => {
-    initializeQuad(canvasRef);
+    let p, o;
+    if(!initialized) {
+      const r = initialize(canvasRef);
+      p = r.program;
+      o = r.offset;
+    } else {
+      p = program;
+      o = offset;
+    }
+
+    console.log(offset);
+
+    let requestId;
+    let time = 0.0;
+    const render = () => {
+      GLC.setUniform(p, "source.offset",        "3fv", [o[0], o[1], time * 1.0]);
+      GLC.setUniform(p, "angleControl.offset",  "3fv", [o[0], o[1], time * 0.5]);
+      GLC.setUniform(p, "amountControl.offset", "3fv", [o[0], o[1], time * 2]);
+      //GLC.setUniform(p, "amount", "1f", 100 * time * 2);
+      renderQuad();
+      time += 0.01;
+      requestId = requestAnimationFrame(render);
+    }
+
+    render();
+
+    return () => {
+      cancelAnimationFrame(requestId);
+    }
+
   });
 
   useLayoutEffect(() => {
