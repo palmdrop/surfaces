@@ -1,10 +1,9 @@
-import React from 'react'
-import { Slider } from '@material-ui/core'
+import React, { useState } from 'react'
 
 /////////////
 // STYLING //
 /////////////
-import './App.css';
+import './styling/App.css';
 
 ////////////////
 // COMPONENTS //
@@ -12,16 +11,12 @@ import './App.css';
 import Canvas from './components/Canvas'
 
 
-//const App = () => {
-class App extends React.Component {
-  render() {
-    return (
-      <div className="App">
-        <Slider />
-        <Canvas />
-      </div>
-    );
-  }
+const App = () => {
+  return (
+    <div className="App">
+      <Canvas />
+    </div>
+  );
 }
 
 export default App;

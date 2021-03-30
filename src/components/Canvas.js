@@ -1,5 +1,7 @@
 import React, { useRef, useEffect, useLayoutEffect, useState } from 'react'
+import { Slider } from '@material-ui/core'
 import GLC from '../GL/GLC'
+import TextureController from '../GL/TextureController'
 
 // Noise-related imports, these functions and objects
 // are adapted to work well with GLSL structs in the warp shader
@@ -8,6 +10,7 @@ import { noiseTypes, setNoiseSettings, createNoiseSettings } from '../GL/noise/N
 // Shaders imported using glslify
 import vertexShaderSource from '../GL/shaders/simple.vert'
 import fragmentShaderSource from '../GL/shaders/warp.frag'
+import TXC from '../GL/TextureController';
 
 ///////////////
 // COMPONENT //
@@ -15,31 +18,42 @@ import fragmentShaderSource from '../GL/shaders/warp.frag'
 const Canvas = (props) => {
   const canvasRef = useRef();
 
-  ////////////
-  // STATES //
-  ////////////
+  //////////////////
+  // BASIC STATES //
+  //////////////////
   // Shader program used for rendering texture
   const [program, setProgram] = useState(-1);
 
   // The offset (seed) of the noise functions
   const [offset, setOffset] = useState([0.0, 0.0, 0.0]);
 
+  // Store time in references to avoid triggering rerender on update
+  const previousMillis = useRef();
+  const time = useRef();
+
   // True if the openGL context has been initialized and 
   // the GPU has been loaded with vertex data
   const [initialized, setInitialized] = useState(false);
+
+
+  ///////////////////
+  // USER SETTINGS //
+  ///////////////////
+  const [animationSpeed, setAnimationSpeed] = useState(20);
+  const [warpAmount, setWarpAmount] = useState(100);
 
   ////////////////
   // INITIALIZE //
   ////////////////
 
   // Initializes the openGL context and loads the GPU with vertex data
-  const initialize = (canvasRef) => {
+  const initialize = (canvas) => {
     if(initialized) return 0;
 
     // INITIALIZE THE OPENGL CONTEXT
 
     // Get the canvas object
-    const canvas =  canvasRef.current;
+    //const canvas =  canvasRef.current;
 
     // If the canvas is null, we cannot proceed. Abort.
     if(!canvas) {
@@ -143,8 +157,9 @@ const Canvas = (props) => {
   // Change the viewport on resize, to ensure that the 
   // canvas covers all available space
   const handleResize = () => {
-    if(!initialized) return;
-    GLC.setViewport(window.innerWidth, window.innerHeight);
+    //if(!initialized) return;
+    //GLC.setViewport(window.innerWidth, window.innerHeight);
+    TXC.handleResize();
   }
 
   // Short function for rendering the quad to the entire screen
@@ -159,8 +174,9 @@ const Canvas = (props) => {
   useEffect(() => {
     let p, o;
     // If the canvas has not been initialized yet, initialize
-    if(!initialized) {
-      const r = initialize(canvasRef);
+    /*if(!initialized) {
+      const r = initialize(canvasRef.current);
+      time.current = 0.0;
 
       if(r === -1) {
         throw new Error("WebGL initialization failed");
@@ -172,28 +188,46 @@ const Canvas = (props) => {
       // Otherwise, use values stored in states
       p = program;
       o = offset;
+    }*/
+    if(!TXC.isInitialized()) {
+      TXC.initialize(canvasRef.current);
+      TXC.handleResize();
+      time.current = 0.0;
     }
+    //p = TXC.program;
+    //o = TXC.offset;
+
+    TXC.warpAmount = warpAmount;
 
     // Request id is stored to enable cancling the animation
     let requestId;
 
-    let time = 0.0;
+    previousMillis.current = Date.now();
 
     // Main render loop
     const render = () => {
+      let now = Date.now();
+      let deltaMillis = now - previousMillis.current;
+      time.current += animationSpeed * deltaMillis / 100000;
 
       // Update shader uniforms
-      GLC.setUniform(p, "source.offset",        "3fv", [o[0], o[1], time * 1.0]);
-      GLC.setUniform(p, "angleControl.offset",  "3fv", [o[0], o[1], time * 0.5]);
-      GLC.setUniform(p, "amountControl.offset", "3fv", [o[0], o[1], time * 2]);
-      GLC.setUniform(p, "time", "1f", 100 * time);
-      //GLC.setUniform(p, "amount", "1f", time);
+      /*GLC.setUniform(p, "source.offset",        "3fv", [o[0], o[1], time.current * 1.0]);
+      GLC.setUniform(p, "angleControl.offset",  "3fv", [o[0], o[1], time.current * 0.5]);
+      GLC.setUniform(p, "amountControl.offset", "3fv", [o[0], o[1], time.current * 2]);
+      GLC.setUniform(p, "time", "1f", time.current);
+      GLC.setUniform(p, "amount", "1f", warpAmount);
+
 
       // Render
-      renderQuad();
+      renderQuad();*/
+      TXC.render(time.current);
 
-      time += 0.01;
+      //time += 0.01;
       requestId = requestAnimationFrame(render);
+
+      previousMillis.current = now;
+
+      console.log(time.current);
     }
 
     // This call starts the render loop
@@ -205,7 +239,7 @@ const Canvas = (props) => {
       cancelAnimationFrame(requestId);
     }
 
-  });
+  }, [animationSpeed, warpAmount]);
 
   // Create a hook for handling resize events
   useLayoutEffect(() => {
@@ -219,11 +253,27 @@ const Canvas = (props) => {
 
   // Body
   return (
-      <canvas 
-          ref={canvasRef}
-          width="400"
-          height="400"    
-      />
+      <div>
+        <Slider 
+          value={animationSpeed}
+          onChange={ (e, a) => setAnimationSpeed(a) }
+          aria-labelledby="continuous-slider"
+          min={0.0}
+          max={100}
+        />
+        <Slider 
+          value={warpAmount}
+          onChange={ (e, w) => setWarpAmount(w) }
+          aria-labelledby="continuous-slider"
+          min={0.0}
+          max={1000}
+        />
+        <canvas 
+            ref={canvasRef}
+            width="400"
+            height="400"    
+        />
+      </div>
   )
 }
 
