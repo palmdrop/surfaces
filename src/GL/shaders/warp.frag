@@ -6,6 +6,9 @@ precision mediump float;
 #pragma glslify: polarWarp = require(../tools/domainWarp.glsl)
 #pragma glslify: noiseSupplier = require(../tools/noiseSupplier.glsl)
 
+#pragma glslify: fractalNoiseSupplier = require(../tools/fractalNoiseSupplier.glsl)
+#pragma glslify: FractalNoiseSettings = require(../tools/fractalNoiseSettings.glsl)
+
 #define PI 3.1415926538
 
 varying vec3 fragColor;
@@ -13,24 +16,68 @@ uniform NoiseSettings source;
 uniform NoiseSettings angleControl;
 uniform NoiseSettings amountControl;
 
-uniform float amount;
 uniform float time;
+uniform float amount;
+uniform int iterations;
 
-vec2 domainWarp(vec2 point, NoiseSettings angleControl, NoiseSettings amountControl, float max) {
-    vec3 p = vec3(point.xy, 0);
+vec2 recursiveWarp(vec2 p) {
+    if(iterations == 0) {
+    } else if(iterations == 1) {
+        p = polarWarp(p, angleControl, amountControl, amount);
+    } else if(iterations == 2) {
+        for(int i = 0; i < 2; i++) {
+            p = polarWarp(p, angleControl, amountControl, amount);
+        }
+    } else {
+        for(int i = 0; i < 3; i++) {
+            p = polarWarp(p, angleControl, amountControl, amount);
+        }
+    }
+    return p;
+}
 
-    float amount = noiseSupplier(amountControl, p) * max;
-    float angle = noiseSupplier(angleControl, p) * PI * 2.0;
-    vec2 offset = vec2(cos(angle), sin(angle)) * amount;
-
-    return point + offset;
+bool isnan( float val )
+{
+  return ( val < 0.0 || 0.0 < val || val == 0.0 ) ? false : true;
+  // important: some nVidias failed to cope with version below.
+  // Probably wrong optimization.
+  /*return ( val <= 0.0 || 0.0 <= val ) ? false : true;*/
 }
 
 void main()
 {
-    //source.offset.z += time;
-    vec2 p = gl_FragCoord.xy;
-    p = polarWarp(p, angleControl, amountControl, amount);
-    float n = noiseSupplier(source, vec3(p.x, p.y, 0));
-    gl_FragColor = vec4(fragColor * n, 1.0);
+    FractalNoiseSettings fns = FractalNoiseSettings(
+        source,
+        5,
+        2.1,
+        0.5,
+        true
+    );
+
+    FractalNoiseSettings fns2 = FractalNoiseSettings(
+        angleControl,
+        5,
+        2.04,
+        0.5,
+        true
+    );
+
+    FractalNoiseSettings fns3 = FractalNoiseSettings(
+        amountControl,
+        5,
+        2.3,
+        0.7,
+        true
+    );
+
+    vec2 p = recursiveWarp(vec2(gl_FragCoord.x, gl_FragCoord.y));
+    //float n = noiseSupplier(source, vec3(p.x, p.y, time));
+    float n = fractalNoiseSupplier(fns, vec3(p.x, p.y, time));
+
+    //float r = noiseSupplier(angleControl, vec3(p.x, p.y, 0));
+    //float g = noiseSupplier(amountControl, vec3(p.x, p.y, 0));
+    float r = fractalNoiseSupplier(fns2, vec3(p.x, p.y, 0));
+    float g = fractalNoiseSupplier(fns3, vec3(p.x, p.y, 0));
+
+    gl_FragColor = vec4(vec3(r, g, 1.0 - n) * n, 1.0);
 }

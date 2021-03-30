@@ -9,6 +9,15 @@
 int PERLIN = 0;
 int SIMPLEX = 1;
 
+bool isnan( float val )
+{
+  return ( val < 0.0 || 0.0 < val || val == 0.0 ) ? false : true;
+}
+
+bool isinf(float val) {
+    return (val != 0.0 && val * 2.0 == val) ? true : false;
+}
+
 float noiseSupplier(NoiseSettings settings, vec3 position) {
     int type = settings.type;
     int dimensions = settings.dimensions;
@@ -43,7 +52,17 @@ float noiseSupplier(NoiseSettings settings, vec3 position) {
         }
     } 
 
-    return pow((0.5 + result / 2.0), settings.pow);
+    result = pow((0.5 + result / 2.0), settings.pow);
+
+    if(isnan(result)) {
+        //TODO better fix?
+        result = 0.0;
+    }
+    if(isinf(result)) {
+        result = 1.0;
+    }
+
+    return result;
 }
 
 #pragma glslify: export(noiseSupplier)

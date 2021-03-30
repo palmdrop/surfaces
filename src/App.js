@@ -1,4 +1,5 @@
 import React from 'react'
+import { Slider } from '@material-ui/core'
 
 /////////////
 // STYLING //
@@ -16,6 +17,7 @@ class App extends React.Component {
   render() {
     return (
       <div className="App">
+        <Slider />
         <Canvas />
       </div>
     );
