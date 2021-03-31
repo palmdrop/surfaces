@@ -79,5 +79,5 @@ void main()
     float r = fractalNoiseSupplier(fns2, vec3(p.x, p.y, 0));
     float g = fractalNoiseSupplier(fns3, vec3(p.x, p.y, 0));
 
-    gl_FragColor = vec4(vec3(r, g, 1.0 - n) * n, 1.0);
+    gl_FragColor = vec4(vec3(n, g, r) * n, 1.0);
 }

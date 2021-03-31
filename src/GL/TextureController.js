@@ -13,7 +13,9 @@ class TextureController {
         this.initialized = false;
         this.program = -1;
         this.offset = null;
+
         this.warpAmount = 100;
+        this.sourceFrequency = 0.01;
     }
 
     /*get initialized() {
@@ -105,7 +107,7 @@ class TextureController {
         // DEFINE VALUES
         // TODO move this to sliders and user input etc
         const offset = [Math.random() * 1000, Math.random() * 1000, 1.0];
-        const source = createNoiseSettings(noiseTypes.SIMPLEX, 3, Math.random() * 0.004, offset, 1.0);
+        const source = createNoiseSettings(noiseTypes.SIMPLEX, 3, this.sourceFrequency, offset, 1.0);
         const angleControl = createNoiseSettings(noiseTypes.SIMPLEX, 3, Math.random() * 0.01, offset, 1.0);
         const amountControl = createNoiseSettings(noiseTypes.SIMPLEX, 3, Math.random() * 0.01, offset, 1.0);
         const amount = 100;
@@ -151,6 +153,8 @@ class TextureController {
       GLC.setUniform(this.program, "amountControl.offset", "3fv", [this.offset[0], this.offset[1], time * 2]);
       GLC.setUniform(this.program, "time", "1f", time);
       GLC.setUniform(this.program, "amount", "1f", this.warpAmount);
+
+      GLC.setUniform(this.program, "source.frequency", "1f", this.sourceFrequency);
 
       // Render
       this.renderQuad();
