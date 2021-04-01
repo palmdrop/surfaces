@@ -14,6 +14,7 @@ class TextureController {
         this.program = -1;
         this.offset = null;
 
+        this.warpIterations = 2;
         this.warpAmount = 100;
         this.sourceFrequency = 0.01;
     }
@@ -110,8 +111,6 @@ class TextureController {
         const source = createNoiseSettings(noiseTypes.SIMPLEX, 3, this.sourceFrequency, offset, 1.0);
         const angleControl = createNoiseSettings(noiseTypes.SIMPLEX, 3, Math.random() * 0.01, offset, 1.0);
         const amountControl = createNoiseSettings(noiseTypes.SIMPLEX, 3, Math.random() * 0.01, offset, 1.0);
-        const amount = 100;
-        const iterations = 2;
 
         // SET SHADER UNIFORMS 
         GLC.setShaderProgram(this.program);
@@ -120,11 +119,6 @@ class TextureController {
         setNoiseSettings(source, this.program, "source");
         setNoiseSettings(angleControl, this.program, "angleControl");
         setNoiseSettings(amountControl, this.program, "amountControl");
-        
-        // Set other data
-        GLC.setUniform(this.program, "amount", "1f", amount);
-        GLC.setUniform(this.program, "time", "1f", 0.0);
-        GLC.setUniform(this.program, "iterations", "1i", iterations);
 
         // Finally, set required states
         this.initialized = true;
@@ -148,13 +142,14 @@ class TextureController {
     // Render
     render(time) {
       // Update shader uniforms
+      //TODO only update variables that needs to be updated!?!?
       GLC.setUniform(this.program, "source.offset",        "3fv", [this.offset[0], this.offset[1], time * 1.0]);
       GLC.setUniform(this.program, "angleControl.offset",  "3fv", [this.offset[0], this.offset[1], time * 0.5]);
       GLC.setUniform(this.program, "amountControl.offset", "3fv", [this.offset[0], this.offset[1], time * 2]);
       GLC.setUniform(this.program, "time", "1f", time);
       GLC.setUniform(this.program, "amount", "1f", this.warpAmount);
-
       GLC.setUniform(this.program, "source.frequency", "1f", this.sourceFrequency);
+      GLC.setUniform(this.program, "iterations", "1i", this.warpIterations);
 
       // Render
       this.renderQuad();

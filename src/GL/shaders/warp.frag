@@ -28,8 +28,12 @@ vec2 recursiveWarp(vec2 p) {
         for(int i = 0; i < 2; i++) {
             p = polarWarp(p, angleControl, amountControl, amount);
         }
-    } else {
+    } else if(iterations == 3) {
         for(int i = 0; i < 3; i++) {
+            p = polarWarp(p, angleControl, amountControl, amount);
+        }
+    } else {
+        for(int i = 0; i < 4; i++) {
             p = polarWarp(p, angleControl, amountControl, amount);
         }
     }

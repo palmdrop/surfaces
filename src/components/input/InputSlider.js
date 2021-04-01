@@ -2,7 +2,7 @@ import React from 'react';
 import { Slider, Input } from '@material-ui/core';
 import './InputSlider.css';
 
-const InputSlider = ({ label, valueGetter, onChange, min, max, step, constrain }) => {
+const InputSlider = ({ label, valueGetter, onChange, min, max, step, constrain, marks }) => {
     const handleInputChange = (e) => {
         if(e.target.value !== '') {
             var value = Number(e.target.value);
@@ -23,6 +23,7 @@ const InputSlider = ({ label, valueGetter, onChange, min, max, step, constrain }
                     min={min}
                     max={max}
                     step={step}
+                    marks={marks}
                 />
                 <Input className="input-slider__input_field"
                     value={valueGetter()}
@@ -31,10 +32,9 @@ const InputSlider = ({ label, valueGetter, onChange, min, max, step, constrain }
                         type: 'number',
                         min: `${min}`,
                         max: `${max}`,
+                        step: `${step}`,
                     }}
                     onChange={handleInputChange}
-                    styles={{
-                    }}
                 />
             </div>
         </div>

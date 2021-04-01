@@ -34,13 +34,22 @@ const Canvas = (props) => {
     TXC.sourceFrequency = sourceFrequency / 100;
   }, [sourceFrequency]);
 
+  // warpIterations: The number of warp iterations
+  const [warpIterations, setWarpIterations] = useState(2);
+  useEffect(() => {
+    TXC.warpIterations = warpIterations;
+  }, [warpIterations]);
+
+
   ///////////////////////
   // RENDER AND UPDATE //
   ///////////////////////
   useEffect(() => {
     if(!TXC.isInitialized()) {
       // Initialize the texture controller 
-      TXC.initialize(canvasRef.current);
+      if(TXC.initialize(canvasRef.current) === -1) {
+        throw new Error("Texture controller failed to initialize");
+      }
 
       // Immediatelly resize to fill the available space
       TXC.handleResize();
@@ -110,6 +119,15 @@ const Canvas = (props) => {
       max: 5,
       step: 0.00001,
       constrain: true
+    },
+    {
+      label: "Warp iterations",
+      state: [warpIterations, setWarpIterations],
+      min: 0,
+      max: 4,
+      step: 1,
+      constrain: true,
+      marks: [1, 2, 3, 4],
     },
   ];
 
