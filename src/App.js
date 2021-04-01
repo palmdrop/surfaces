@@ -1,15 +1,6 @@
-import React, { useState } from 'react'
-
-/////////////
-// STYLING //
-/////////////
-import './styling/App.css';
-
-////////////////
-// COMPONENTS //
-////////////////
-import Canvas from './components/Canvas'
-
+import React from 'react'
+import './App.css';
+import Canvas from './components/render/Canvas'
 
 const App = () => {
   return (

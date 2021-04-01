@@ -1,6 +1,8 @@
 import React, { useRef, useEffect, useLayoutEffect, useState } from 'react'
-import { Slider, Grid } from '@material-ui/core'
-import TXC from '../GL/TextureController';
+import InputSlider from '../input/InputSlider'
+import TXC from '../../GL/TextureController'
+
+import './Canvas.css'
 
 ///////////////
 // COMPONENT //
@@ -41,7 +43,7 @@ const Canvas = (props) => {
       TXC.initialize(canvasRef.current);
 
       // Immediatelly resize to fill the available space
-      //TXC.handleResize();
+      TXC.handleResize();
 
       // Set initial time values
       time.current = 0.0;
@@ -77,67 +79,59 @@ const Canvas = (props) => {
   }, [animationSpeed]);
 
   // Create a hook for handling resize events
-  /*const handleResize = () => TXC.handleResize();
+  const handleResize = () => TXC.handleResize();
   useLayoutEffect(() => {
     window.addEventListener('resize', handleResize);
     handleResize();
-    
-    return () => {
-      window.removeEventListener('resize', handleResize);
-    }
-  });*/
+    return () => window.removeEventListener('resize', handleResize);
+  });
+
+  const sliders = [
+    {
+      label: "Animation speed",
+      state: [animationSpeed, setAnimationSpeed],
+      min: 0.0,
+      max: 100,
+      step: 0.1,
+      constrain: true
+    },
+    {
+      label: "Warp amount",
+      state: [warpAmount, setWarpAmount],
+      min: 0.0,
+      max: 1000,
+      step: 1,
+      constrain: true
+    },
+    {
+      label: "Source frequeny",
+      state: [sourceFrequency, setSourceFrequency],
+      min: 0.0000001,
+      max: 5,
+      step: 0.00001,
+      constrain: true
+    },
+  ];
 
   return (
-      <Grid
-        container
-        spacing={2}
-        direction='row'
-        alignContent='center'
-        alignItems='center'
-      >
-        <Grid
-          item
-          container
-          spacing={2}
-          direction='column'
-          xs={3}
-        >
-          <Grid item xs={"auto"}>
-            <Slider 
-              value={animationSpeed}
-              onChange={ (e, a) => setAnimationSpeed(a) }
-              aria-labelledby="continuous-slider"
-              min={0.0}
-              max={100.0}
-            />
-          </Grid>
-          <Grid item xs={"auto"}>
-            <Slider 
-              value={warpAmount}
-              onChange={ (e, w) => setWarpAmount(w) }
-              aria-labelledby="continuous-slider"
-              min={0.0}
-              max={1000.0}
-            />
-          </Grid>
-          <Grid item xs={"auto"}>
-            <Slider 
-              value={sourceFrequency}
-              onChange={ (e, f) => setSourceFrequency(f) }
-              aria-labelledby="continuous-slider"
-              step={0.00001}
-              min={0.0000001}
-              max={5.0}
-            />
-          </Grid>
-        </Grid>
-        <Grid item xs={2}> 
-          <canvas 
-              ref={canvasRef}
-              //style={{width=}}
-          />
-        </Grid>
-      </Grid>
+      <div>
+        <div className="settings">
+          <div className="settings__container">
+            {sliders.map((s, i) => (
+              <InputSlider 
+                key={i}
+                label={s.label}
+                valueGetter={() => s.state[0]}
+                onChange={s.state[1]}
+                min={s.min}
+                max={s.max}
+                step={s.step}
+                constrain={s.constrain}
+              />))};
+          </div>
+        </div>
+        <canvas className="canvas" ref={canvasRef}/>
+      </div>
   )
 }
 

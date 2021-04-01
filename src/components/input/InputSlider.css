@@ -1,0 +1,55 @@
+/* General */
+.input-slider {
+
+    padding: 0rem
+}
+
+/* Label */
+.input-slider h2 {
+    font-size: 1.2rem;
+    padding: 0rem;
+    color: #cecece
+}
+
+/* All input */
+.input-slider__input {
+    padding: 0rem;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around;
+}
+
+.input-slider__input__slider {
+    flex-grow: 100;
+}
+
+.input-slider__input__field {
+    width: 20%;
+    flex-grow: 1;
+}
+
+/* Input field */
+.MuiInput-root {
+    color: #cecece;
+    background-color: #cecece;
+}
+
+
+/* Slider */
+.MuiSlider {
+}
+
+.MuiSlider-root {
+}
+
+.MuiSlider-rail {
+    color: #cecece
+}
+
+.MuiSlider-track {
+    color: #f0cece
+}
+
+.MuiSlider-thumb {
+    color: #cecece
+}
