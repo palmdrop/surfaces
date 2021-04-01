@@ -1,6 +1,10 @@
 class GLCommander {
     constructor() {
         this.initialized = false;
+
+        // Map for storing uniform locations
+        // {program, uniformName} => uniformLocation
+        this.uniformLocations = new Map();
     }
 
     // Initialize the canvas and webgl context variables
@@ -112,8 +116,15 @@ class GLCommander {
     // For example, if "value" is an integer, then "type" should be "1i"
     // If "value" is a float array with three elements, "type" should be "3fv", and so on
     setUniform(program, name, type, value) {
-        //TODO cache location ((program, name) => location map)to avoid doing name lookups every time
-        const location = this.gl.getUniformLocation(program, name);
+        // Store the locations in a map, to avoid having to unnecessary uniform location lookups
+        const key = { program, name };
+        var location = this.uniformLocations.get(key);
+        if(typeof location === 'undefined') {
+            location = this.gl.getUniformLocation(program, name);
+            this.uniformLocations.set(key, location);
+        }
+
+        // Set value
         this.gl["uniform" + type](location, value);
     }
 
