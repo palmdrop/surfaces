@@ -1,8 +1,8 @@
-import GLC from '../GL/GLC'
+import GLC from './GLC'
 
 // Noise-related imports, these functions and objects
 // are adapted to work well with GLSL structs in the warp shader
-import { noiseTypes, setNoiseSettings, createNoiseSettings } from '../GL/noise/NoiseSettings';
+import { noiseTypes, setNoiseSettings, createNoiseSettings } from '../tools/NoiseSettings';
 
 // Shaders imported using glslify
 import vertexShaderSource from '../GL/shaders/simple.vert'
@@ -17,18 +17,13 @@ class TextureController {
         this.warpIterations = 2;
         this.warpAmount = 100;
         this.sourceFrequency = 0.01;
+
+        this.animationSpeed = 1.0;
+        this.time = 0.0;
+        this.previousMillis = 0;
+        this.animationFrameId = -1;
     }
 
-    /*get initialized() {
-        return this.initialized;
-    }
-    get program() {
-        return this.program;
-    }
-
-    set warpAmount(warpAmount) {
-        this.warpAmount = warpAmount;
-    }*/
     isInitialized() {
         return this.initialized;
     }
@@ -124,6 +119,9 @@ class TextureController {
         this.initialized = true;
         this.offset = offset;
 
+        this.time = 0.0;
+        this.previousMillis = Date.now();
+
         return 0;
     };
 
@@ -142,17 +140,62 @@ class TextureController {
     // Render
     render(time) {
       // Update shader uniforms
+      GLC.setUniform(this.program, "time", "1f", time);
+
       //TODO only update variables that needs to be updated!?!?
       GLC.setUniform(this.program, "source.offset",        "3fv", [this.offset[0], this.offset[1], time * 1.0]);
       GLC.setUniform(this.program, "angleControl.offset",  "3fv", [this.offset[0], this.offset[1], time * 0.5]);
       GLC.setUniform(this.program, "amountControl.offset", "3fv", [this.offset[0], this.offset[1], time * 2]);
-      GLC.setUniform(this.program, "time", "1f", time);
       GLC.setUniform(this.program, "amount", "1f", this.warpAmount);
       GLC.setUniform(this.program, "source.frequency", "1f", this.sourceFrequency);
       GLC.setUniform(this.program, "iterations", "1i", this.warpIterations);
 
+      GLC.setUniform(this.program, "source.hasModifications", "1i", 1);
+      GLC.setUniform(this.program, "source.modifications.isRidged", "1i", 1);
+      GLC.setUniform(this.program, "source.modifications.ridgeThreshold", "1f", 0.5);
+
+      GLC.setUniform(this.program, "angleControl.hasModifications", "1i", 1);
+      GLC.setUniform(this.program, "angleControl.modifications.isRidged", "1i", 1);
+      GLC.setUniform(this.program, "angleControl.modifications.ridgeThreshold", "1f", 0.5);
+
+      GLC.setUniform(this.program, "amountControl.hasModifications", "1i", 1);
+      GLC.setUniform(this.program, "amountControl.modifications.isRidged", "1i", 1);
+      GLC.setUniform(this.program, "amountControl.modifications.ridgeThreshold", "1f", 0.5);
+
       // Render
       this.renderQuad();
+    }
+
+    // Simple render loop for animating the canvas
+    startRenderLoop() {
+        // First, stop the render loop (if it's already running)
+        this.stopRenderLoop();
+
+        // Define a function which will be used to request an animation frame
+        const renderFrame = () => {
+            // Calculate the time passed since last frame
+            let now = Date.now();
+            let deltaMillis = now - this.previousMillis;
+
+            // Increment the "time" based on the time passed since last frame 
+            this.time += this.animationSpeed * deltaMillis / 1000;
+
+            // Render (updates uniforms and renders a quad to the screen)
+            this.render(this.time);
+
+            // Update the time, will be used in the next frame
+            this.previousMillis = now;
+
+            // Finally, recursively request another animation frame
+            this.animationFrameId = requestAnimationFrame(renderFrame);
+        }
+
+        //  Call the function once to start the loop
+        renderFrame();
+    }
+
+    stopRenderLoop() {
+        cancelAnimationFrame(this.animationFrameId);
     }
 }
 

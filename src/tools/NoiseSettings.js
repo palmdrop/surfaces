@@ -1,4 +1,4 @@
-import GLC from "../GLC";
+import GLC from '../context/GLC'
 
 const noiseTypes = {
     PERLIN: 0,
@@ -31,7 +31,8 @@ const createNoiseSettings = (type, dimensions, frequency, offset, pow) => {
         dimensions: dimensions,
         frequency: frequency,
         offset: offset,
-        pow: pow
+        pow: pow,
+        modifications: null
     };
 }
 
@@ -43,15 +44,24 @@ const setNoiseSettings = (noiseSettings, program, uniformName) => {
     GLC.setUniform(program, uniformName + ".type", "1i", noiseSettings.type);
     GLC.setUniform(program, uniformName + ".dimensions", "1i", noiseSettings.dimensions);
     GLC.setUniform(program, uniformName + ".frequency", "1f", noiseSettings.frequency);
-    //GLC.setUniform(program, uniformName + ".offset", "3fv", noiseSettings.offset);
+
     var offset;
     if(noiseSettings.dimensions === 2) {
         offset = [noiseSettings.offset[0], noiseSettings.offset[1], 0.0];
     } else {
         offset = noiseSettings.offset;
     }
+
     GLC.setUniform(program, uniformName + ".offset", "3fv", offset);
     GLC.setUniform(program, uniformName + ".pow", "1f", noiseSettings.pow);
+
+    if(noiseSettings.modifications) {
+        GLC.setUniform(program, uniformName + ".hasModifications", "1i", 1);
+        //TODO pass to shader
+
+    } else {
+        GLC.setUniform(program, uniformName + ".hasModifications", "1i", 0);
+    }
 };
 
 export {

@@ -1,6 +1,6 @@
 import React, { useRef, useEffect, useLayoutEffect, useState } from 'react'
 import InputSlider from '../input/InputSlider'
-import TXC from '../../GL/TextureController'
+import TXC from '../../context/TextureController'
 
 import './Canvas.css'
 
@@ -10,17 +10,13 @@ import './Canvas.css'
 const Canvas = (props) => {
   const canvasRef = useRef();
 
-  //////////////////
-  // BASIC STATES //
-  //////////////////
-  // Store time in references to avoid triggering rerender on update
-  const previousMillis = useRef();
-  const time = useRef();
-
   ///////////////////
   // USER SETTINGS //
   ///////////////////
-  const [animationSpeed, setAnimationSpeed] = useState(20);
+  const [animationSpeed, setAnimationSpeed] = useState(0.2);
+  useEffect(() => {
+    TXC.animationSpeed = animationSpeed;
+  });
 
   // warpAmount: The base level domain warp amount
   const [warpAmount, setWarpAmount] = useState(100);
@@ -51,41 +47,19 @@ const Canvas = (props) => {
         throw new Error("Texture controller failed to initialize");
       }
 
-      // Immediatelly resize to fill the available space
+      // Immediately resize to fill the available space
       TXC.handleResize();
-
-      // Set initial time values
-      time.current = 0.0;
-      previousMillis.current = Date.now();
     }
 
-    // Request id is stored to enable cancling the animation
-    let requestId;
-
-    // Main render loop
-    const render = () => {
-      // Calculate time used by texture controller
-      let now = Date.now();
-      let deltaMillis = now - previousMillis.current;
-      time.current += animationSpeed * deltaMillis / 100000;
-
-      // Render
-      TXC.render(time.current);
-
-      previousMillis.current = now;
-      requestId = requestAnimationFrame(render);
-    }
-
-    // This call starts the render loop
-    render();
+    // Start the render loop
+    TXC.startRenderLoop();
 
     return () => {
-      // Ensure that the animation is cancelled if the effect is ran again,
-      // to prevent us from having multiple active animation frames
-      cancelAnimationFrame(requestId);
+      // Stop the render loop
+      TXC.stopRenderLoop();
     }
 
-  }, [animationSpeed]);
+  }, []);
 
   // Create a hook for handling resize events
   const handleResize = () => TXC.handleResize();
@@ -100,8 +74,8 @@ const Canvas = (props) => {
       label: "Animation speed",
       state: [animationSpeed, setAnimationSpeed],
       min: 0.0,
-      max: 100,
-      step: 0.1,
+      max: 2,
+      step: 0.005,
       constrain: true
     },
     {

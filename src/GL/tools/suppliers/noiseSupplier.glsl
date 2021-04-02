@@ -1,10 +1,11 @@
-#pragma glslify: NoiseSettings = require(./noiseSettings.glsl)
-
 #pragma glslify: perlin2d = require(glsl-noise/classic/2d);
 #pragma glslify: simplex2d = require(glsl-noise/simplex/2d);
 
 #pragma glslify: perlin3d = require(glsl-noise/classic/3d);
 #pragma glslify: simplex3d = require(glsl-noise/simplex/3d);
+
+#pragma glslify: NoiseSettings = require(../settings/noiseSettings.glsl)
+#pragma glslify: Modifications = require(../settings/modifications.glsl)
 
 int PERLIN = 0;
 int SIMPLEX = 1;
@@ -17,6 +18,19 @@ bool isnan( float val )
 bool isinf(float val) {
     return (val != 0.0 && val * 2.0 == val) ? true : false;
 }
+
+float applyModifications(float value, Modifications modifications) {
+    if(modifications.isRidged) {
+        float threshold = max(0.5, modifications.ridgeThreshold);
+        if(value > threshold) {
+            value = threshold - (value - threshold);
+        }
+        value /= threshold;
+    }
+
+    return value;
+}
+
 
 float noiseSupplier(NoiseSettings settings, vec3 position) {
     int type = settings.type;
@@ -61,6 +75,11 @@ float noiseSupplier(NoiseSettings settings, vec3 position) {
     if(isinf(result)) {
         result = 1.0;
     }
+
+    if(settings.hasModifications) {
+        result = applyModifications(result, settings.modifications);
+    }
+
 
     return result;
 }

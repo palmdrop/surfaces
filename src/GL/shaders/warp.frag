@@ -1,13 +1,13 @@
 precision mediump float;
 
-#pragma glslify: NoiseSettings = require(../tools/noiseSettings.glsl)
-#pragma glslify: noiseSupplier = require(../tools/noiseSupplier.glsl)
+#pragma glslify: NoiseSettings = require(../tools/settings/noiseSettings.glsl)
+#pragma glslify: FractalNoiseSettings = require(../tools/settings/fractalNoiseSettings.glsl)
+
+#pragma glslify: noiseSupplier = require(../tools/suppliers/noiseSupplier.glsl)
+#pragma glslify: fractalNoiseSupplier = require(../tools/suppliers/fractalNoiseSupplier.glsl)
 
 #pragma glslify: polarWarp = require(../tools/domainWarp.glsl)
-#pragma glslify: noiseSupplier = require(../tools/noiseSupplier.glsl)
-
-#pragma glslify: fractalNoiseSupplier = require(../tools/fractalNoiseSupplier.glsl)
-#pragma glslify: FractalNoiseSettings = require(../tools/fractalNoiseSettings.glsl)
+#pragma glslify: Modifications = require(../tools/settings/modifications.glsl)
 
 #define PI 3.1415926538
 
@@ -43,13 +43,11 @@ vec2 recursiveWarp(vec2 p) {
 bool isnan( float val )
 {
   return ( val < 0.0 || 0.0 < val || val == 0.0 ) ? false : true;
-  // important: some nVidias failed to cope with version below.
-  // Probably wrong optimization.
-  /*return ( val <= 0.0 || 0.0 <= val ) ? false : true;*/
 }
 
 void main()
 {
+
     FractalNoiseSettings fns = FractalNoiseSettings(
         source,
         5,
@@ -75,11 +73,7 @@ void main()
     );
 
     vec2 p = recursiveWarp(vec2(gl_FragCoord.x, gl_FragCoord.y));
-    //float n = noiseSupplier(source, vec3(p.x, p.y, time));
     float n = fractalNoiseSupplier(fns, vec3(p.x, p.y, time));
-
-    //float r = noiseSupplier(angleControl, vec3(p.x, p.y, 0));
-    //float g = noiseSupplier(amountControl, vec3(p.x, p.y, 0));
     float r = fractalNoiseSupplier(fns2, vec3(p.x, p.y, 0));
     float g = fractalNoiseSupplier(fns3, vec3(p.x, p.y, 0));
 

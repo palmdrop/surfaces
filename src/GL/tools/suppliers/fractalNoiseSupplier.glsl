@@ -1,6 +1,7 @@
-#pragma glslify: NoiseSettings = require(./noiseSettings.glsl);
+#pragma glslify: NoiseSettings = require(../settings/noiseSettings.glsl);
+#pragma glslify: FractalNoiseSettings = require(../settings/fractalNoiseSettings.glsl);
+
 #pragma glslify: noiseSupplier = require(./noiseSupplier.glsl);
-#pragma glslify: FractalNoiseSettings = require(./fractalNoiseSettings.glsl);
 
 float fractalNoiseSupplier(FractalNoiseSettings settings, vec3 position) {
     NoiseSettings ns = settings.noise;
@@ -24,7 +25,9 @@ float fractalNoiseSupplier(FractalNoiseSettings settings, vec3 position) {
                 ns.dimensions,
                 f,
                 ns.offset,
-                ns.pow
+                ns.pow,
+                ns.hasModifications,
+                ns.modifications
             );
 
             float a = 1.0 * pow(settings.persistence, float(i));
@@ -44,7 +47,9 @@ float fractalNoiseSupplier(FractalNoiseSettings settings, vec3 position) {
                 ns.dimensions,
                 f,
                 ns.offset,
-                ns.pow
+                ns.pow,
+                ns.hasModifications,
+                ns.modifications
             );
 
             float a = 1.0 * pow(settings.persistence, float(i));
@@ -64,7 +69,9 @@ float fractalNoiseSupplier(FractalNoiseSettings settings, vec3 position) {
                 ns.dimensions,
                 f,
                 ns.offset,
-                ns.pow
+                ns.pow,
+                ns.hasModifications,
+                ns.modifications
             );
 
             float a = 1.0 * pow(settings.persistence, float(i));

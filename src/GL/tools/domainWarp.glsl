@@ -1,5 +1,5 @@
-#pragma glslify: NoiseSettings = require(../tools/noiseSettings.glsl)
-#pragma glslify: noiseSupplier = require(../tools/noiseSupplier.glsl)
+#pragma glslify: NoiseSettings = require(../tools/settings/noiseSettings.glsl)
+#pragma glslify: noiseSupplier = require(../tools/suppliers/noiseSupplier.glsl)
 
 #define PI 3.1415926538
 
