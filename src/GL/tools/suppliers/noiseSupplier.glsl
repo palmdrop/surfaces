@@ -25,7 +25,8 @@ float applyModifications(float value, Modifications modifications) {
         if(value > threshold) {
             value = threshold - (value - threshold);
         }
-        value /= threshold;
+        //TODO fix magic number etc
+        value /= pow(threshold, 0.70);
     }
 
     return value;

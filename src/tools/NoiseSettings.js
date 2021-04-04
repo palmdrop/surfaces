@@ -5,7 +5,13 @@ const noiseTypes = {
     SIMPLEX: 1,
 }
 
-const createNoiseSettings = (type, dimensions, frequency, offset, pow) => {
+const createModifications = (ridgeThreshold) => {
+    return {
+        ridgeThreshold: ridgeThreshold
+    };
+}
+
+const createNoiseSettings = (type, dimensions, frequency, offset, pow, modifications = null) => {
     if(!Object.keys(noiseTypes).some(k => noiseTypes[k] === type)) {
         throw new Error("No such noise type");
     }
@@ -32,7 +38,7 @@ const createNoiseSettings = (type, dimensions, frequency, offset, pow) => {
         frequency: frequency,
         offset: offset,
         pow: pow,
-        modifications: null
+        modifications: modifications
     };
 }
 
@@ -57,6 +63,12 @@ const setNoiseSettings = (noiseSettings, program, uniformName) => {
 
     if(noiseSettings.modifications) {
         GLC.setUniform(program, uniformName + ".hasModifications", "1i", 1);
+        if(noiseSettings.modifications.ridgeThreshold) {
+            GLC.setUniform(program, uniformName + ".modifications.isRidged", "1i", 1);
+            GLC.setUniform(program, uniformName + ".modifications.ridgeThreshold", "1f", noiseSettings.modifications.ridgeThreshold);
+        } else {
+            GLC.setUniform(program, uniformName + ".modifications.isRidged", "1i", 0);
+        }
         //TODO pass to shader
 
     } else {
@@ -66,6 +78,7 @@ const setNoiseSettings = (noiseSettings, program, uniformName) => {
 
 export {
     createNoiseSettings, 
+    createModifications,
     setNoiseSettings,
     noiseTypes
 };

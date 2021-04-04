@@ -2,7 +2,7 @@ import GLC from './GLC'
 
 // Noise-related imports, these functions and objects
 // are adapted to work well with GLSL structs in the warp shader
-import { noiseTypes, setNoiseSettings, createNoiseSettings } from '../tools/NoiseSettings';
+import { noiseTypes, setNoiseSettings, createNoiseSettings, createModifications } from '../tools/NoiseSettings';
 
 // Shaders imported using glslify
 import vertexShaderSource from '../GL/shaders/simple.vert'
@@ -13,15 +13,102 @@ class TextureController {
         this.initialized = false;
         this.program = -1;
         this.offset = null;
+        this.canvas = null;
 
-        this.warpIterations = 2;
-        this.warpAmount = 100;
-        this.sourceFrequency = 0.01;
-
-        this.animationSpeed = 1.0;
         this.time = 0.0;
         this.previousMillis = 0;
         this.animationFrameId = -1;
+
+        this.attributes = {
+            animationSpeed: {
+                value: 1.0,
+                isUniform: false,
+            },
+            warpIterations: {
+                value: 2,
+                isUniform: true,
+                location: "iterations",
+                type: "1i"
+            },
+            warpAmount: {
+                value: 100,
+                isUniform: true,
+                location: "warpAmount",
+                type: "1f" 
+            },
+            sourceFrequency: {
+                value: 0.01,
+                isUniform: true,
+                location: "source.frequency",
+                type: "1f" 
+            },
+            angleFrequency: {
+                value: Math.random() * 0.01,
+                isUniform: true,
+                location: "angleControl.frequency",
+                type: "1f" 
+            },
+            amountFrequency: {
+                value: Math.random() * 0.01,
+                isUniform: true,
+                location: "amountControl.frequency",
+                type: "1f" 
+            },
+            ridgeThreshold: {
+                value: 1.0,
+                isUniform: true,
+                location: [
+                    "source.modifications.ridgeThreshold",
+                    "angleControl.modifications.ridgeThreshold",
+                    "amountControl.modifications.ridgeThreshold"
+                ],
+                type: "1f"
+            }            
+        };
+    }
+
+    // Set all the uniforms in the "value" object 
+    setUniforms() {
+        if(!this.initialized) return;
+        for (var name in this.attributes) {
+            if(Object.prototype.hasOwnProperty.call(this.attributes, name)) {
+                this.setUniform(this.attributes[name]);
+            }
+        }
+    }
+
+    // Set a specific uniform, if it exists
+    setUniform(attribute) {
+        // Return if the value has no corresponding uniform, or if the texture controller is not initialized
+        if(!attribute.isUniform || !this.initialized) return;
+
+        // Check if "location" is an array 
+        if(attribute.location.constructor === Array) {
+            // Iterate over all the locations in the array, and set the uniform
+            for(const l of attribute.location) {
+                GLC.setUniform(this.program, l, attribute.type, attribute.value);
+            }
+        } else {
+            // Otherwise, just set the one uniform
+            GLC.setUniform(this.program, attribute.location, attribute.type, attribute.value);
+        }
+    }
+
+    // Updates a value and it's corresponding uniform (if such exists)
+    updateValue(name, v) {
+        var attribute = this.attributes[name];
+        if(attribute.value === v) return;
+
+        attribute.value = v;
+        this.setUniform(attribute);
+    }
+
+    // Returns a value 
+    getValue(name) {
+        if(Object.prototype.hasOwnProperty.call(this.attributes, name)) {
+            return this.attributes[name].value;
+        }
+        return undefined;
     }
 
     isInitialized() {
@@ -39,6 +126,8 @@ class TextureController {
             console.log("The canvas is not initialized")
             return -1;
         }
+
+        this.canvas = canvas;
 
         // Get the webgl context
         let gl = canvas.getContext('webgl');
@@ -71,13 +160,13 @@ class TextureController {
         // Two triangles are created to form a quad which fills the entire screen
         const triangleVertices = 
         [
-            -1.0,  1.0,   //1.0, 1.0, 0.0,
-            -1.0, -1.0,   //0.0, 1.0, 1.0,
-             1.0, -1.0,   //1.0, 0.0, 1.0,
+            -1.0,  1.0,
+            -1.0, -1.0,
+             1.0, -1.0,
 
-            -1.0,  1.0,   //1.0, 1.0, 0.0,
-             1.0,  1.0,   //0.0, 0.0, 1.0,
-             1.0, -1.0,   //1.0, 0.0, 1.0
+            -1.0,  1.0,
+             1.0,  1.0,
+             1.0, -1.0,
         ];
 
         GLC.createBuffer(gl.ARRAY_BUFFER, triangleVertices, gl.STATIC_DRAW);
@@ -86,33 +175,25 @@ class TextureController {
             'vertPosition',
             2,
             gl.FLOAT,
-            //5 * Float32Array.BYTES_PER_ELEMENT,
             2 * Float32Array.BYTES_PER_ELEMENT,
             0
         );
 
-        /*GLC.setAttribLayout(
-        p,
-        'vertColor',
-        3,
-        gl.FLOAT,
-        5 * Float32Array.BYTES_PER_ELEMENT,
-        2 * Float32Array.BYTES_PER_ELEMENT
-        );*/
-
         // DEFINE VALUES
         // TODO move this to sliders and user input etc
+        const modifications = createModifications(this.attributes.ridgeThreshold.value);
+
         const offset = [Math.random() * 1000, Math.random() * 1000, 1.0];
-        const source = createNoiseSettings(noiseTypes.SIMPLEX, 3, this.sourceFrequency, offset, 1.0);
-        const angleControl = createNoiseSettings(noiseTypes.SIMPLEX, 3, Math.random() * 0.01, offset, 1.0);
-        const amountControl = createNoiseSettings(noiseTypes.SIMPLEX, 3, Math.random() * 0.01, offset, 1.0);
+        const source        = createNoiseSettings(noiseTypes.SIMPLEX, 3, this.attributes.sourceFrequency.value, offset, 1.0, modifications);
+        const angleControl  = createNoiseSettings(noiseTypes.SIMPLEX, 3, this.attributes.angleFrequency.value, offset, 1.0, modifications);
+        const amountControl = createNoiseSettings(noiseTypes.SIMPLEX, 3, this.attributes.amountFrequency.value, offset, 1.0, modifications);
 
         // SET SHADER UNIFORMS 
         GLC.setShaderProgram(this.program);
 
         // Set noise settings
-        setNoiseSettings(source, this.program, "source");
-        setNoiseSettings(angleControl, this.program, "angleControl");
+        setNoiseSettings(source,        this.program, "source");
+        setNoiseSettings(angleControl,  this.program, "angleControl");
         setNoiseSettings(amountControl, this.program, "amountControl");
 
         // Finally, set required states
@@ -122,12 +203,16 @@ class TextureController {
         this.time = 0.0;
         this.previousMillis = Date.now();
 
+        // Update uniform values
+        this.setUniforms();
+
         return 0;
     };
 
     handleResize() {
         if(!this.initialized) return;
         GLC.setViewport(window.innerWidth, window.innerHeight);
+        GLC.setUniform(this.program, "viewport", "2fv", [window.innerWidth, window.innerHeight]);
     }
 
     // Short function for rendering the quad to the entire screen
@@ -146,21 +231,6 @@ class TextureController {
       GLC.setUniform(this.program, "source.offset",        "3fv", [this.offset[0], this.offset[1], time * 1.0]);
       GLC.setUniform(this.program, "angleControl.offset",  "3fv", [this.offset[0], this.offset[1], time * 0.5]);
       GLC.setUniform(this.program, "amountControl.offset", "3fv", [this.offset[0], this.offset[1], time * 2]);
-      GLC.setUniform(this.program, "amount", "1f", this.warpAmount);
-      GLC.setUniform(this.program, "source.frequency", "1f", this.sourceFrequency);
-      GLC.setUniform(this.program, "iterations", "1i", this.warpIterations);
-
-      GLC.setUniform(this.program, "source.hasModifications", "1i", 1);
-      GLC.setUniform(this.program, "source.modifications.isRidged", "1i", 1);
-      GLC.setUniform(this.program, "source.modifications.ridgeThreshold", "1f", 0.5);
-
-      GLC.setUniform(this.program, "angleControl.hasModifications", "1i", 1);
-      GLC.setUniform(this.program, "angleControl.modifications.isRidged", "1i", 1);
-      GLC.setUniform(this.program, "angleControl.modifications.ridgeThreshold", "1f", 0.5);
-
-      GLC.setUniform(this.program, "amountControl.hasModifications", "1i", 1);
-      GLC.setUniform(this.program, "amountControl.modifications.isRidged", "1i", 1);
-      GLC.setUniform(this.program, "amountControl.modifications.ridgeThreshold", "1f", 0.5);
 
       // Render
       this.renderQuad();
@@ -178,7 +248,7 @@ class TextureController {
             let deltaMillis = now - this.previousMillis;
 
             // Increment the "time" based on the time passed since last frame 
-            this.time += this.animationSpeed * deltaMillis / 1000;
+            this.time += this.attributes.animationSpeed.value * deltaMillis / 1000;
 
             // Render (updates uniforms and renders a quad to the screen)
             this.render(this.time);

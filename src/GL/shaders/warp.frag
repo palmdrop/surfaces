@@ -12,29 +12,32 @@ precision mediump float;
 #define PI 3.1415926538
 
 varying vec3 fragColor;
+
+uniform vec2 viewport;
+
 uniform NoiseSettings source;
 uniform NoiseSettings angleControl;
 uniform NoiseSettings amountControl;
 
 uniform float time;
-uniform float amount;
+uniform float warpAmount;
 uniform int iterations;
 
 vec2 recursiveWarp(vec2 p) {
     if(iterations == 0) {
     } else if(iterations == 1) {
-        p = polarWarp(p, angleControl, amountControl, amount);
+        p = polarWarp(p, angleControl, amountControl, warpAmount);
     } else if(iterations == 2) {
         for(int i = 0; i < 2; i++) {
-            p = polarWarp(p, angleControl, amountControl, amount);
+            p = polarWarp(p, angleControl, amountControl, warpAmount);
         }
     } else if(iterations == 3) {
         for(int i = 0; i < 3; i++) {
-            p = polarWarp(p, angleControl, amountControl, amount);
+            p = polarWarp(p, angleControl, amountControl, warpAmount);
         }
     } else {
         for(int i = 0; i < 4; i++) {
-            p = polarWarp(p, angleControl, amountControl, amount);
+            p = polarWarp(p, angleControl, amountControl, warpAmount);
         }
     }
     return p;
@@ -78,4 +81,5 @@ void main()
     float g = fractalNoiseSupplier(fns3, vec3(p.x, p.y, 0));
 
     gl_FragColor = vec4(vec3(n, g, r) * n, 1.0);
+    //gl_FragColor = vec4(gl_FragCoord.x / viewport.x, gl_FragCoord.y / viewport.y, 0.0, 1.0);
 }

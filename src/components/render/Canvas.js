@@ -1,8 +1,9 @@
-import React, { useRef, useEffect, useLayoutEffect, useState } from 'react'
+import React, { useRef, useEffect, useLayoutEffect } from 'react'
 import InputSlider from '../input/InputSlider'
 import TXC from '../../context/TextureController'
 
 import './Canvas.css'
+import useTXCState from '../../hooks/TXCStateHook';
 
 ///////////////
 // COMPONENT //
@@ -13,29 +14,25 @@ const Canvas = (props) => {
   ///////////////////
   // USER SETTINGS //
   ///////////////////
-  const [animationSpeed, setAnimationSpeed] = useState(0.2);
-  useEffect(() => {
-    TXC.animationSpeed = animationSpeed;
-  });
+  const [animationSpeed, setAnimationSpeed] = useTXCState("animationSpeed", 0.2);
 
   // warpAmount: The base level domain warp amount
-  const [warpAmount, setWarpAmount] = useState(100);
-  useEffect(() => {
-    TXC.warpAmount = warpAmount;
-  }, [warpAmount]);
+  const [warpAmount, setWarpAmount] = useTXCState("warpAmount", 100);
 
   // sourceFrequency: The base noise frequency
-  const [sourceFrequency, setSourceFrequency] = useState(() => Math.random() * 0.04);
-  useEffect(() => {
-    TXC.sourceFrequency = sourceFrequency / 100;
-  }, [sourceFrequency]);
+  const [sourceFrequency, setSourceFrequency] = useTXCState("sourceFrequency", Math.random() * 0.002);
+
+  // angleFrequency: The noise frequency of the angle controller
+  const [angleFrequency, setAngleFrequency] = useTXCState("angleFrequency", Math.random() * 0.01);
+
+  // amountFrequency: The noise frequency of the amount controller
+  const [amountFrequency, setAmountFrequency] = useTXCState("amountFrequency", Math.random() * 0.01);
 
   // warpIterations: The number of warp iterations
-  const [warpIterations, setWarpIterations] = useState(2);
-  useEffect(() => {
-    TXC.warpIterations = warpIterations;
-  }, [warpIterations]);
+  const [warpIterations, setWarpIterations] = useTXCState("warpIterations", 2);
 
+  // warpIterations: The number of warp iterations
+  const [ridgeThreshold, setRidgeThreshold] = useTXCState("ridgeThreshold", 1.0);
 
   ///////////////////////
   // RENDER AND UPDATE //
@@ -90,8 +87,24 @@ const Canvas = (props) => {
       label: "Source frequeny",
       state: [sourceFrequency, setSourceFrequency],
       min: 0.0000001,
-      max: 5,
-      step: 0.00001,
+      max: 0.035,
+      step: 0.00000001,
+      constrain: true
+    },
+    {
+      label: "Angle frequeny",
+      state: [angleFrequency, setAngleFrequency],
+      min: 0.0000001,
+      max: 0.035,
+      step: 0.00000001,
+      constrain: true
+    },
+    {
+      label: "Amount frequeny",
+      state: [amountFrequency, setAmountFrequency],
+      min: 0.0000001,
+      max: 0.035,
+      step: 0.00000001,
       constrain: true
     },
     {
@@ -102,6 +115,14 @@ const Canvas = (props) => {
       step: 1,
       constrain: true,
       marks: [1, 2, 3, 4],
+    },
+    {
+      label: "Ridge threshold",
+      state: [ridgeThreshold, setRidgeThreshold],
+      min: 0.5,
+      max: 1.0,
+      step: 0.01,
+      constrain: true,
     },
   ];
 
