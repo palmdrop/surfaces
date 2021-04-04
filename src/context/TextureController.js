@@ -23,36 +23,54 @@ class TextureController {
             animationSpeed: {
                 value: 1.0,
                 isUniform: false,
+
+                min: 0.0,
+                max: 2,
             },
             warpIterations: {
                 value: 2,
                 isUniform: true,
                 location: "iterations",
-                type: "1i"
+                type: "1i",
+
+                min: 0,
+                max: 4,
             },
             warpAmount: {
                 value: 100,
                 isUniform: true,
                 location: "warpAmount",
-                type: "1f" 
+                type: "1f",
+
+                min: 0.0,
+                max: 1000
             },
             sourceFrequency: {
                 value: 0.01,
                 isUniform: true,
                 location: "source.frequency",
-                type: "1f" 
+                type: "1f" ,
+
+                min: 0.0000001,
+                max: 0.035
             },
             angleFrequency: {
                 value: Math.random() * 0.01,
                 isUniform: true,
                 location: "angleControl.frequency",
-                type: "1f" 
+                type: "1f",
+
+                min: 0.0000001,
+                max: 0.035
             },
             amountFrequency: {
                 value: Math.random() * 0.01,
                 isUniform: true,
                 location: "amountControl.frequency",
-                type: "1f" 
+                type: "1f",
+
+                min: 0.0000001,
+                max: 0.035
             },
             ridgeThreshold: {
                 value: 1.0,
@@ -62,13 +80,20 @@ class TextureController {
                     "angleControl.modifications.ridgeThreshold",
                     "amountControl.modifications.ridgeThreshold"
                 ],
-                type: "1f"
+                type: "1f",
+
+                min: 0.5,
+                max: 1.0
             },            
             octaves: {
                 value: 5,
                 isUniform: true,
                 location: "octaves",
-                type: "1i" 
+                type: "1i",
+
+                min: 1,
+                max: 8,
+                marks: [1, 3, 5, 8]
             },
         };
     }

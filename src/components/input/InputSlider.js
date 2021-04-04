@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Slider, Input } from '@material-ui/core';
 import './InputSlider.css';
 
@@ -17,10 +17,16 @@ const InputSlider = ({ label, valueGetter, onChange, min, max, step, constrain, 
         }
     };
 
+    // Internal state to keep track of the value
+    // This is required if the value getter method does not return a state, 
+    // but some other reference that might not trigger a use effect hook
+    const [state, setState] = useState(valueGetter());
+
     // Only update the value if it's actually different
     // This avoids unnecessary useEffect triggers in parent classes
     const handleChange = (v) => {
         if(v !== valueGetter()) {
+            setState(v);
             onChange(v);
         }
     };
@@ -30,15 +36,15 @@ const InputSlider = ({ label, valueGetter, onChange, min, max, step, constrain, 
             <h2>{label}</h2>
             <div className="input-slider__input">
                 <Slider className="input-slider__input__slider"
-                    value={valueGetter()}
+                    value={state}
                     onChange={(e, v) => handleChange(v)}
                     min={min}
                     max={max}
                     step={step}
                     marks={marks}
                 />
-                <Input className="input-slider__input_field"
-                    value={valueGetter()}
+                {<Input className="input-slider__input_field"
+                    value={state}
                     margin="dense"
                     inputProps={{
                         type: 'number',
@@ -47,7 +53,7 @@ const InputSlider = ({ label, valueGetter, onChange, min, max, step, constrain, 
                         step: `${step}`,
                     }}
                     onChange={handleInputChange}
-                />
+                />}
             </div>
         </div>
     )
