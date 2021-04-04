@@ -19,11 +19,13 @@ uniform NoiseSettings source;
 uniform NoiseSettings angleControl;
 uniform NoiseSettings amountControl;
 
+uniform int octaves;
+
 uniform float time;
 uniform float warpAmount;
 uniform int iterations;
 
-vec2 recursiveWarp(vec2 p) {
+vec2 recursiveWarp(vec2 p, FractalNoiseSettings angleControl, FractalNoiseSettings amountControl) {
     if(iterations == 0) {
     } else if(iterations == 1) {
         p = polarWarp(p, angleControl, amountControl, warpAmount);
@@ -51,34 +53,34 @@ bool isnan( float val )
 void main()
 {
 
-    FractalNoiseSettings fns = FractalNoiseSettings(
+    FractalNoiseSettings fractalSource = FractalNoiseSettings(
         source,
-        5,
+        octaves,
         2.1,
         0.5,
         true
     );
 
-    FractalNoiseSettings fns2 = FractalNoiseSettings(
+    FractalNoiseSettings fractalAngle = FractalNoiseSettings(
         angleControl,
-        5,
+        octaves,
         2.04,
         0.5,
         true
     );
 
-    FractalNoiseSettings fns3 = FractalNoiseSettings(
+    FractalNoiseSettings fractalAmount = FractalNoiseSettings(
         amountControl,
-        5,
+        octaves,
         2.3,
         0.7,
         true
     );
 
-    vec2 p = recursiveWarp(vec2(gl_FragCoord.x, gl_FragCoord.y));
-    float n = fractalNoiseSupplier(fns, vec3(p.x, p.y, time));
-    float r = fractalNoiseSupplier(fns2, vec3(p.x, p.y, 0));
-    float g = fractalNoiseSupplier(fns3, vec3(p.x, p.y, 0));
+    vec2 p = recursiveWarp(gl_FragCoord.xy, fractalAngle, fractalAmount);
+    float n = fractalNoiseSupplier(fractalSource, vec3(p.xy, time));
+    float r = fractalNoiseSupplier(fractalAngle, vec3(p.xy, 0));
+    float g = fractalNoiseSupplier(fractalAmount, vec3(p.xy, 0));
 
     gl_FragColor = vec4(vec3(n, g, r) * n, 1.0);
     //gl_FragColor = vec4(gl_FragCoord.x / viewport.x, gl_FragCoord.y / viewport.y, 0.0, 1.0);

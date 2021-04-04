@@ -34,6 +34,9 @@ const Canvas = (props) => {
   // warpIterations: The number of warp iterations
   const [ridgeThreshold, setRidgeThreshold] = useTXCState("ridgeThreshold", 1.0);
 
+  // octaves: The number of fractal noise octaves
+  const [octaves, setOctaves] = useTXCState("octaves", 5);
+
   ///////////////////////
   // RENDER AND UPDATE //
   ///////////////////////
@@ -123,6 +126,15 @@ const Canvas = (props) => {
       max: 1.0,
       step: 0.01,
       constrain: true,
+    },
+    {
+      label: "Octaves",
+      state: [octaves, setOctaves],
+      min: 1,
+      max: 8,
+      step: 2,
+      constrain: true,
+      marks: [1, 3, 5, 8],
     },
   ];
 

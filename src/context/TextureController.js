@@ -63,7 +63,13 @@ class TextureController {
                     "amountControl.modifications.ridgeThreshold"
                 ],
                 type: "1f"
-            }            
+            },            
+            octaves: {
+                value: 5,
+                isUniform: true,
+                location: "octaves",
+                type: "1i" 
+            },
         };
     }
 
@@ -195,6 +201,8 @@ class TextureController {
         setNoiseSettings(source,        this.program, "source");
         setNoiseSettings(angleControl,  this.program, "angleControl");
         setNoiseSettings(amountControl, this.program, "amountControl");
+
+        this.setUniform(this.attributes.octaves);
 
         // Finally, set required states
         this.initialized = true;

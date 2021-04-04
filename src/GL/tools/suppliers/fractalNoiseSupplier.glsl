@@ -12,8 +12,9 @@ float fractalNoiseSupplier(FractalNoiseSettings settings, vec3 position) {
 
     // 1 OCTAVE
     // This is the same as regular nosie
-    if(octaves == 1) {
-        result = max = noiseSupplier(ns, position);
+    if(octaves <= 2) {
+        result = noiseSupplier(ns, position);
+        max = 1.0;
     } else 
     
     // 3 OCTAVES
