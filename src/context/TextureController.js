@@ -21,7 +21,7 @@ class TextureController {
 
         this.attributes = {
             animationSpeed: {
-                value: 1.0,
+                value: 0.2,
                 isUniform: false,
 
                 min: 0.0,
@@ -92,9 +92,19 @@ class TextureController {
                 type: "1i",
 
                 min: 1,
-                max: 8,
-                marks: [1, 3, 5, 8]
+                max: 5,
+                step: 2,
+                marks: [1, 3, 5]
             },
+            multisampling: {
+                value: 0,
+                isUniform: true,
+                location: "multisampling",
+                type: "1i",
+
+                min: 0,
+                max: 1
+            }
         };
     }
 
@@ -148,9 +158,13 @@ class TextureController {
 
     // Initializes the openGL context and loads the GPU with vertex data
     initialize(canvas) {
-        if(this.initialized) return 0;
+        if(this.initialized) {
+            console.log("The texture controller is already initialized");
+            return 0;
+        }
 
         // INITIALIZE THE OPENGL CONTEXT
+        console.log("Initializing webgl context");
 
         // If the canvas is null, we cannot proceed. Abort.
         if(!canvas) {
@@ -176,9 +190,14 @@ class TextureController {
         }
 
         // INITIALIZE GLC (HELPER CLASS)
+        console.log("Initializing webgl controller (GLC)");
 
         // This class is used as a facade against the webgl context
         GLC.init(canvas, gl);
+
+
+        // COMPILE SHADERS
+        console.log("Compiling shaders");
 
         // Create the shader program using the imported shaders
         this.program = GLC.createShaderProgram(vertexShaderSource, fragmentShaderSource);
@@ -186,6 +205,9 @@ class TextureController {
         if(!this.program) {
             throw new Error("Shader not created");
         }
+
+        // INITIIALIZE VERTEX DATA
+        console.log("Initializing vertex data");
 
         // Create triangle data
         // Two triangles are created to form a quad which fills the entire screen
@@ -211,6 +233,8 @@ class TextureController {
         );
 
         // DEFINE VALUES
+        console.log("Setting uniforms");
+
         // TODO move this to sliders and user input etc
         const modifications = createModifications(this.attributes.ridgeThreshold.value);
 
@@ -239,13 +263,15 @@ class TextureController {
         // Update uniform values
         this.setUniforms();
 
+        console.log("Done initializing texture controller");
+
         return 0;
     };
 
     handleResize() {
         if(!this.initialized) return;
         GLC.setViewport(window.innerWidth, window.innerHeight);
-        GLC.setUniform(this.program, "viewport", "2fv", [window.innerWidth, window.innerHeight]);
+        //GLC.setUniform(this.program, "viewport", "2fv", [window.innerWidth, window.innerHeight]);
     }
 
     // Short function for rendering the quad to the entire screen

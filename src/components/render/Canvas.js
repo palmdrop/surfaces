@@ -5,15 +5,9 @@ import { camelToTitle } from '../../tools/Utils'
 
 import './Canvas.css'
 
-///////////////
-// COMPONENT //
-///////////////
 const Canvas = (props) => {
   const canvasRef = useRef();
 
-  ///////////////////////
-  // RENDER AND UPDATE //
-  ///////////////////////
   useEffect(() => {
     if(!TXC.isInitialized()) {
       // Initialize the texture controller 
@@ -35,7 +29,7 @@ const Canvas = (props) => {
 
   }, []);
 
-  // Create a hook for handling resize events
+  // Handle resize events
   const handleResize = () => TXC.handleResize();
   useLayoutEffect(() => {
     window.addEventListener('resize', handleResize);
@@ -48,15 +42,22 @@ const Canvas = (props) => {
         <div className="settings">
           <div className="settings__container">
             {
-              Object.entries(TXC.attributes).map(([name, attribute]) => (
+              Object.entries(TXC.attributes).map(([name, attribute], index) => (
                 <InputSlider
-                  key={name}
+                  key={index}
                   label={camelToTitle(name)}
                   valueGetter={() => TXC.getValue(name)}
                   onChange={(v) => TXC.updateValue(name, v)}
                   min={attribute.min}
                   max={attribute.max}
-                  step={attribute.type === "1i" ? 1 : (attribute.max - attribute.min) / 1000}
+                  step={
+                    // If the attribute has a step property, use that
+                    attribute.hasOwnProperty("step") ? attribute.step :
+                    // Otherwise, check if the attribute is of integer type
+                    // If yes, set step to "1", otherwise calculate a small step based on 
+                    // the min and max values
+                    (attribute.type === "1i" ? 1 : (attribute.max - attribute.min) / 1000)
+                  }
                   marks={attribute.marks}
                   constrain={true}
                 />

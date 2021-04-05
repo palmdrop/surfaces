@@ -28,7 +28,7 @@ class GLCommander {
     setViewport(width, height) {
         this.canvas.width = width;
         this.canvas.height = height;
-        this.gl.viewport(0, 0, width, height);
+        this.gl.viewport(0, 0, 2*width, 2*height);
     }
 
     // Creates a shader program, loads with shader source, compiles, links, and verifies

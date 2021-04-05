@@ -32,7 +32,9 @@ const InputSlider = ({ label, valueGetter, onChange, min, max, step, constrain, 
     };
 
     return (
-        <div className="input-slider"> 
+        <div 
+            className="input-slider"
+        > 
             <h2>{label}</h2>
             <div className="input-slider__input">
                 <Slider className="input-slider__input__slider"
