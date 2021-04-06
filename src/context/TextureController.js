@@ -142,6 +142,7 @@ class TextureController {
         console.log("uniform sat")
 
         if(typeof attribute.value === "object") {
+            //TODO this will not work if there's multiple locations
             for(var name in attribute.value) {
                 if(Object.prototype.hasOwnProperty.call(attribute.value, name)) {
                     this.setUniform(attribute.value[name], loc + attribute.location);
@@ -167,7 +168,7 @@ class TextureController {
         var v = this.getAttribute(name);
         if(typeof v === "undefined") return -1;
         v.value = v;
-        this.setUniform(this.attributes[name.split(".")[0]]);
+        //this.setUniform(this.attributes[name.split(".")[0]]);
         /*var attribute = this.attributes[name];
         if(attribute.value === v) return;
 
