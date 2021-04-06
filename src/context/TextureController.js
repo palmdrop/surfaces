@@ -77,6 +77,14 @@ class TextureController {
                         min: 0.0000001,
                         max: 0.035
                     },
+                    pow: {
+                        value: 1.0,
+                        isUniform: true,
+                        location: "pow",
+                        type: "1f",
+                        min: 0.0,
+                        max: 20
+                    },
                     modifications: {
                         value: {
                             ridgeThreshold: {

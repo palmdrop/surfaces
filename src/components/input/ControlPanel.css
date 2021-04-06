@@ -8,3 +8,11 @@
     margin: 0rem;
     color: #cecece
 }
+
+.control-panel legend {
+    font-weight: bold;
+    font-size: 0.8rem;
+    padding: 0.1rem;
+    margin: 0rem;
+    color: #cecece
+}

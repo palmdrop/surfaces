@@ -4,8 +4,9 @@
 }
 
 /* Label */
-.input-slider h2 {
+.input-slider__label {
     font-size: 0.8rem;
+    font-weight: normal;
     padding: 0rem;
     margin: 0rem;
     color: #cecece

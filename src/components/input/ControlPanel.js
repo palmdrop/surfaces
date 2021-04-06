@@ -4,7 +4,7 @@ import { camelToTitle } from '../../tools/Utils'
 
 import './ControlPanel.css'
 
-const ControlPanel = ({ attributes, getter, setter, separator }) => {
+const ControlPanel = ({ attributes, getter, setter, separator, precision }) => {
     const createSlider = (attribute, name, fullName, index) => {
         return (<InputSlider
             key={index}
@@ -23,6 +23,7 @@ const ControlPanel = ({ attributes, getter, setter, separator }) => {
             }
             marks={attribute.marks}
             constrain={true}
+            precision={precision}
         />)
     };
 
@@ -34,7 +35,7 @@ const ControlPanel = ({ attributes, getter, setter, separator }) => {
             // Iterate over all properties
             return (
                 <fieldset>
-                    <h2>{camelToTitle(sectionName)}</h2>
+                    <legend>{camelToTitle(sectionName)}</legend>
                     {
                         Object.entries(attribute.value).map(([name, childAttribute], index) => (
                             createSliders(childAttribute, parentName + separator + name)
