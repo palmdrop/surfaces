@@ -45,7 +45,7 @@ class TextureController {
                 min: 0.0,
                 max: 1000
             },
-            sourceFrequency: {
+            /*sourceFrequency: {
                 value: 0.01,
                 isUniform: true,
                 location: "source.frequency",
@@ -53,6 +53,20 @@ class TextureController {
 
                 min: 0.0000001,
                 max: 0.035
+            },*/
+            source: {
+                value: {
+                    frequency: {
+                        value: 0.01,
+                        isUniform: true,
+                        location: "frequency",
+                        type: "1f",
+                        min: 0.0000001,
+                        max: 0.035
+                    }
+                },
+                isUniform: true,
+                location: "source",
             },
             angleFrequency: {
                 value: Math.random() * 0.01,
@@ -119,37 +133,72 @@ class TextureController {
     }
 
     // Set a specific uniform, if it exists
-    setUniform(attribute) {
+    setUniform(attribute, location=null) {
         // Return if the value has no corresponding uniform, or if the texture controller is not initialized
         if(!attribute.isUniform || !this.initialized) return;
+
+        var loc = location !== null? location + "." : "";
+
+        console.log("uniform sat")
+
+        if(typeof attribute.value === "object") {
+            for(var name in attribute.value) {
+                if(Object.prototype.hasOwnProperty.call(attribute.value, name)) {
+                    this.setUniform(attribute.value[name], loc + attribute.location);
+                }
+            }
+        }
 
         // Check if "location" is an array 
         if(attribute.location.constructor === Array) {
             // Iterate over all the locations in the array, and set the uniform
             for(const l of attribute.location) {
-                GLC.setUniform(this.program, l, attribute.type, attribute.value);
+                GLC.setUniform(this.program, loc + l, attribute.type, attribute.value);
             }
-        } else {
+        } 
+        else {
             // Otherwise, just set the one uniform
-            GLC.setUniform(this.program, attribute.location, attribute.type, attribute.value);
+            GLC.setUniform(this.program, loc + attribute.location, attribute.type, attribute.value);
         }
     }
 
     // Updates a value and it's corresponding uniform (if such exists)
     updateValue(name, v) {
-        var attribute = this.attributes[name];
+        var v = this.getAttribute(name);
+        if(typeof v === "undefined") return -1;
+        v.value = v;
+        this.setUniform(this.attributes[name.split(".")[0]]);
+        /*var attribute = this.attributes[name];
         if(attribute.value === v) return;
 
         attribute.value = v;
-        this.setUniform(attribute);
+        this.setUniform(attribute);*/
+    }
+
+
+    getAttribute(name) {
+        var locations = name.split(".");
+
+        if(!Object.prototype.hasOwnProperty.call(this.attributes, locations[0])) return undefined;
+
+        var v = this.attributes[locations[0]];
+
+        var i = 1;
+        while(typeof v.value === "object") {
+            if(!Object.prototype.hasOwnProperty.call(v.value, locations[i])) return undefined;
+            v = v.value[locations[i]];
+            i++;
+        }
+
+        //if(Object.prototype.hasOwnProperty.call(this.attributes, name)) {
+        return v;
     }
 
     // Returns a value 
     getValue(name) {
-        if(Object.prototype.hasOwnProperty.call(this.attributes, name)) {
-            return this.attributes[name].value;
-        }
-        return undefined;
+        var v = this.getAttribute(name);
+        if(typeof v === "undefined") return undefined;
+        return v.value;
     }
 
     isInitialized() {
@@ -239,9 +288,10 @@ class TextureController {
         const modifications = createModifications(this.attributes.ridgeThreshold.value);
 
         const offset = [Math.random() * 1000, Math.random() * 1000, 1.0];
-        const source        = createNoiseSettings(noiseTypes.SIMPLEX, 3, this.attributes.sourceFrequency.value, offset, 1.0, modifications);
-        const angleControl  = createNoiseSettings(noiseTypes.SIMPLEX, 3, this.attributes.angleFrequency.value, offset, 1.0, modifications);
-        const amountControl = createNoiseSettings(noiseTypes.SIMPLEX, 3, this.attributes.amountFrequency.value, offset, 1.0, modifications);
+
+        const source        = createNoiseSettings(noiseTypes.SIMPLEX, 3, this.getValue("source.frequency"), offset, 1.0, modifications);
+        const angleControl  = createNoiseSettings(noiseTypes.SIMPLEX, 3, this.getValue("angleFrequency"), offset, 1.0, modifications);
+        const amountControl = createNoiseSettings(noiseTypes.SIMPLEX, 3, this.getValue("amountFrequency"), offset, 1.0, modifications);
 
         // SET SHADER UNIFORMS 
         GLC.setShaderProgram(this.program);
