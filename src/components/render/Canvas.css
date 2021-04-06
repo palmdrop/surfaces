@@ -4,10 +4,6 @@
     position: absolute;
 }
 
-.settings__container {
-    padding: 1rem;
-}
-
 .canvas {
     width: 80%;
     height: 100vh;

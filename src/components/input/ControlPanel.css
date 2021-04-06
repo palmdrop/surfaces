@@ -1,0 +1,10 @@
+.control-panel {
+    padding: 0.2vh;
+}
+
+.control-panel h2 {
+    font-size: 0.8rem;
+    padding: 0rem;
+    margin: 0rem;
+    color: #cecece
+}

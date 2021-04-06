@@ -19,6 +19,8 @@ class TextureController {
         this.previousMillis = 0;
         this.animationFrameId = -1;
 
+
+        //TODO move this to JSON file?
         this.attributes = {
             animationSpeed: {
                 value: 0.2,
@@ -27,7 +29,7 @@ class TextureController {
                 min: 0.0,
                 max: 2,
             },
-            warpIterations: {
+            iterations: {
                 value: 2,
                 isUniform: true,
                 location: "iterations",
@@ -45,60 +47,6 @@ class TextureController {
                 min: 0.0,
                 max: 1000
             },
-            /*sourceFrequency: {
-                value: 0.01,
-                isUniform: true,
-                location: "source.frequency",
-                type: "1f" ,
-
-                min: 0.0000001,
-                max: 0.035
-            },*/
-            source: {
-                value: {
-                    frequency: {
-                        value: 0.01,
-                        isUniform: true,
-                        location: "frequency",
-                        type: "1f",
-                        min: 0.0000001,
-                        max: 0.035
-                    }
-                },
-                isUniform: true,
-                location: "source",
-            },
-            angleFrequency: {
-                value: Math.random() * 0.01,
-                isUniform: true,
-                location: "angleControl.frequency",
-                type: "1f",
-
-                min: 0.0000001,
-                max: 0.035
-            },
-            amountFrequency: {
-                value: Math.random() * 0.01,
-                isUniform: true,
-                location: "amountControl.frequency",
-                type: "1f",
-
-                min: 0.0000001,
-                max: 0.035
-            },
-            ridgeThreshold: {
-                value: 1.0,
-                isUniform: true,
-                location: [
-                    "source.modifications.ridgeThreshold",
-                    "angleControl.modifications.ridgeThreshold",
-                    "amountControl.modifications.ridgeThreshold"
-                ],
-                type: "1f",
-
-                min: 0.5,
-                max: 1.0
-            },            
             octaves: {
                 value: 5,
                 isUniform: true,
@@ -118,8 +66,147 @@ class TextureController {
 
                 min: 0,
                 max: 1
-            }
+            },
+            source: {
+                value: {
+                    frequency: {
+                        value: 0.01,
+                        isUniform: true,
+                        location: "frequency",
+                        type: "1f",
+                        min: 0.0000001,
+                        max: 0.035
+                    },
+                    modifications: {
+                        value: {
+                            ridgeThreshold: {
+                                value: 1.0,
+                                isUniform: true,
+                                location: "ridgeThreshold",
+                                type: "1f",
+                                min: 0.5,
+                                max: 1.0,
+                            }
+                        },
+                        isUniform: true,
+                        location: "modifications"
+                    }
+                },
+                isUniform: true,
+                location: "source",
+            },
+            angleControl: {
+                value: {
+                    frequency: {
+                        value: Math.random() * 0.01,
+                        isUniform: true,
+                        min: 0.0000001,
+                        max: 0.035,
+                        location: "frequency",
+                        type: "1f",
+                    },
+                    modifications: {
+                        value: {
+                            ridgeThreshold: {
+                                value: 1.0,
+                                isUniform: true,
+                                location: "ridgeThreshold",
+                                type: "1f",
+                                min: 0.5,
+                                max: 1.0,
+                            }
+                        },
+                        isUniform: true,
+                        location: "modifications"
+                    }
+                },
+                isUniform: true,
+                location: "angleControl"
+            },
+            amountControl: {
+                value: {
+                    frequency: {
+                        value: Math.random() * 0.01,
+                        isUniform: true,
+                        min: 0.0000001,
+                        max: 0.035,
+                        location: "frequency",
+                        type: "1f"
+                    },
+                    modifications: {
+                        value: {
+                            ridgeThreshold: {
+                                value: 1.0,
+                                isUniform: true,
+                                location: "ridgeThreshold",
+                                type: "1f",
+                                min: 0.5,
+                                max: 1.0,
+                            }
+                        },
+                        isUniform: true,
+                        location: "modifications"
+                    }
+                },
+                isUniform: true,
+                location: "amountControl",
+            },
         };
+    }
+
+    getAttribute(location) {
+        // Helper function for checking if an object contains a specific property
+        const hasProperty = (object, property) => {
+            return Object.prototype.hasOwnProperty.call(object, property);
+        }
+
+        var subLocations = location.split(".");
+
+        // Check if attribute exists in main attributes object
+        if(!hasProperty(this.attributes, subLocations[0])) return undefined;
+
+        // Get the current attribute
+        var currentAttribute = this.attributes[subLocations[0]];
+
+        // If there's more sub-locations in the query, iterate through them
+        // until the bottom level is found
+        for(var i = 1; i < subLocations.length; i++) {
+            // Verify that the new attribute is an object (if not, the query is invalid)
+            if(!(typeof currentAttribute === "object")) return undefined;
+
+            // Check if the attribute contains the requested attribute 
+            if(!hasProperty(currentAttribute.value, subLocations[i])) return undefined;
+
+            // Get the value property of the attribute, since this will contain the next iteration
+            currentAttribute = currentAttribute.value[subLocations[i]];
+        }
+
+        return [this.attributes[subLocations[0]].isUniform, currentAttribute];
+    }
+
+    // Returns a value 
+    getValue(name) {
+        const [_, v] = this.getAttribute(name);
+        if(typeof v === "undefined") return undefined;
+        return v.value;
+    }
+
+    // Updates a value and it's corresponding uniform (if such exists)
+    updateValue(name, v) {
+        // Find the requested attribute, or return if it does not exist
+        const [isUniform, attribute] = this.getAttribute(name);
+        if(typeof v === "undefined") return -1;
+
+        // Do nothing if the value is unchanged
+        if(attribute.value === v) return;
+
+        // Set the new value, and set the corresponding uniform
+        attribute.value = v;
+
+        //TODO assume an attribute is a uniform if the root level is
+        if(isUniform) {
+            GLC.setUniform(this.program, name, attribute.type, attribute.value);
+        }
     }
 
     // Set all the uniforms in the "value" object 
@@ -133,73 +220,25 @@ class TextureController {
     }
 
     // Set a specific uniform, if it exists
-    setUniform(attribute, location=null) {
+    setUniform(attribute) {
         // Return if the value has no corresponding uniform, or if the texture controller is not initialized
+        // Also, if the root level object is a uniform, assume all children are too
         if(!attribute.isUniform || !this.initialized) return;
 
-        var loc = location !== null? location + "." : "";
-
-        console.log("uniform sat")
-
-        if(typeof attribute.value === "object") {
-            //TODO this will not work if there's multiple locations
-            for(var name in attribute.value) {
-                if(Object.prototype.hasOwnProperty.call(attribute.value, name)) {
-                    this.setUniform(attribute.value[name], loc + attribute.location);
+        const setAll = (current, location) => {
+            if(typeof current.value === "object") {
+                for(var name in current.value) {
+                    if(Object.prototype.hasOwnProperty.call(current.value, name)) {
+                        setAll(current.value[name], location + "." + name);
+                    }
                 }
+            } else {
+                GLC.setUniform(this.program, location, current.type, current.value);
             }
-        }
+        };
 
-        // Check if "location" is an array 
-        if(attribute.location.constructor === Array) {
-            // Iterate over all the locations in the array, and set the uniform
-            for(const l of attribute.location) {
-                GLC.setUniform(this.program, loc + l, attribute.type, attribute.value);
-            }
-        } 
-        else {
-            // Otherwise, just set the one uniform
-            GLC.setUniform(this.program, loc + attribute.location, attribute.type, attribute.value);
-        }
-    }
-
-    // Updates a value and it's corresponding uniform (if such exists)
-    updateValue(name, v) {
-        var v = this.getAttribute(name);
-        if(typeof v === "undefined") return -1;
-        v.value = v;
-        //this.setUniform(this.attributes[name.split(".")[0]]);
-        /*var attribute = this.attributes[name];
-        if(attribute.value === v) return;
-
-        attribute.value = v;
-        this.setUniform(attribute);*/
-    }
-
-
-    getAttribute(name) {
-        var locations = name.split(".");
-
-        if(!Object.prototype.hasOwnProperty.call(this.attributes, locations[0])) return undefined;
-
-        var v = this.attributes[locations[0]];
-
-        var i = 1;
-        while(typeof v.value === "object") {
-            if(!Object.prototype.hasOwnProperty.call(v.value, locations[i])) return undefined;
-            v = v.value[locations[i]];
-            i++;
-        }
-
-        //if(Object.prototype.hasOwnProperty.call(this.attributes, name)) {
-        return v;
-    }
-
-    // Returns a value 
-    getValue(name) {
-        var v = this.getAttribute(name);
-        if(typeof v === "undefined") return undefined;
-        return v.value;
+        // TODO either remove need for "location" or convert to just using it
+        setAll(attribute, attribute.location);
     }
 
     isInitialized() {
@@ -286,13 +325,15 @@ class TextureController {
         console.log("Setting uniforms");
 
         // TODO move this to sliders and user input etc
-        const modifications = createModifications(this.attributes.ridgeThreshold.value);
+        const modifications = createModifications(this.getValue("source.modifications.ridgeThreshold"));
+            //this.attributes.ridgeThreshold.value);
 
         const offset = [Math.random() * 1000, Math.random() * 1000, 1.0];
 
+        //TODO add controllers for all fields in noise settings!
         const source        = createNoiseSettings(noiseTypes.SIMPLEX, 3, this.getValue("source.frequency"), offset, 1.0, modifications);
-        const angleControl  = createNoiseSettings(noiseTypes.SIMPLEX, 3, this.getValue("angleFrequency"), offset, 1.0, modifications);
-        const amountControl = createNoiseSettings(noiseTypes.SIMPLEX, 3, this.getValue("amountFrequency"), offset, 1.0, modifications);
+        const angleControl  = createNoiseSettings(noiseTypes.SIMPLEX, 3, this.getValue("angleControl.frequency"), offset, 1.0, modifications);
+        const amountControl = createNoiseSettings(noiseTypes.SIMPLEX, 3, this.getValue("amountControl.frequency"), offset, 1.0, modifications);
 
         // SET SHADER UNIFORMS 
         GLC.setShaderProgram(this.program);
@@ -337,7 +378,7 @@ class TextureController {
       // Update shader uniforms
       GLC.setUniform(this.program, "time", "1f", time);
 
-      //TODO only update variables that needs to be updated!?!?
+      //TODO add control for separate time increments
       GLC.setUniform(this.program, "source.offset",        "3fv", [this.offset[0], this.offset[1], time * 1.0]);
       GLC.setUniform(this.program, "angleControl.offset",  "3fv", [this.offset[0], this.offset[1], time * 0.5]);
       GLC.setUniform(this.program, "amountControl.offset", "3fv", [this.offset[0], this.offset[1], time * 2]);

@@ -35,28 +35,31 @@ const InputSlider = ({ label, valueGetter, onChange, min, max, step, constrain, 
         <div 
             className="input-slider"
         > 
-            <h2>{label}</h2>
-            <div className="input-slider__input">
-                <Slider className="input-slider__input__slider"
-                    value={state}
-                    onChange={(e, v) => handleChange(v)}
-                    min={min}
-                    max={max}
-                    step={step}
-                    marks={marks}
-                />
-                {<Input className="input-slider__input_field"
-                    value={state}
-                    margin="dense"
-                    inputProps={{
-                        type: 'number',
-                        min: `${min}`,
-                        max: `${max}`,
-                        step: `${step}`,
-                    }}
-                    onChange={handleInputChange}
-                />}
-            </div>
+            <fieldset>
+                {/*<legend>{label}</legend>*/}
+                <h2>{label + " (" + state + ")" }</h2>
+                <div className="input-slider__input">
+                    <Slider className="input-slider__input__slider"
+                        value={state}
+                        onChange={(e, v) => handleChange(v)}
+                        min={min}
+                        max={max}
+                        step={step}
+                        marks={marks}
+                    />
+                    {/*<Input className="input-slider__input_field"
+                        value={state}
+                        margin="dense"
+                        inputProps={{
+                            type: 'number',
+                            min: `${min}`,
+                            max: `${max}`,
+                            step: `${step}`,
+                        }}
+                        onChange={handleInputChange}
+                    />*/}
+                </div>
+            </fieldset>
         </div>
     )
 }

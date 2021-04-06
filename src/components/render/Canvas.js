@@ -1,13 +1,17 @@
-import React, { useRef, useEffect, useLayoutEffect } from 'react'
-import InputSlider from '../input/InputSlider'
+import React, { useRef, useState, useEffect, useLayoutEffect } from 'react'
+
+import ControlPanel from '../input/ControlPanel'
+
 import TXC from '../../context/TextureController'
-import { camelToTitle } from '../../tools/Utils'
+
 
 import './Canvas.css'
 
 const Canvas = (props) => {
   const canvasRef = useRef();
 
+  // Initialize texture controller in use effect hook to ensure that
+  // the canvas element has been initialized first
   useEffect(() => {
     if(!TXC.isInitialized()) {
       // Initialize the texture controller 
@@ -39,31 +43,13 @@ const Canvas = (props) => {
 
   return (
       <div>
-        <div className="settings">
-          <div className="settings__container">
-            {
-              Object.entries(TXC.attributes).map(([name, attribute], index) => (
-                <InputSlider
-                  key={index}
-                  label={camelToTitle(name)}
-                  valueGetter={() => TXC.getValue(name)}
-                  onChange={(v) => TXC.updateValue(name, v)}
-                  min={attribute.min}
-                  max={attribute.max}
-                  step={
-                    // If the attribute has a step property, use that
-                    attribute.hasOwnProperty("step") ? attribute.step :
-                    // Otherwise, check if the attribute is of integer type
-                    // If yes, set step to "1", otherwise calculate a small step based on 
-                    // the min and max values
-                    (attribute.type === "1i" ? 1 : (attribute.max - attribute.min) / 1000)
-                  }
-                  marks={attribute.marks}
-                  constrain={true}
-                />
-              ))
-            }
-          </div>
+        <div className="settings"> 
+          <ControlPanel 
+            attributes={TXC.attributes}
+            getter={(name) => TXC.getValue(name)}
+            setter={(name, value) => TXC.updateValue(name, value)}
+            separator={"."}
+          />
         </div>
         <canvas className="canvas" ref={canvasRef}/>
       </div>
