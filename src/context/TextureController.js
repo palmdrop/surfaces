@@ -32,7 +32,6 @@ class TextureController {
             iterations: {
                 value: 2,
                 isUniform: true,
-                location: "iterations",
                 type: "1i",
 
                 min: 0,
@@ -41,7 +40,6 @@ class TextureController {
             warpAmount: {
                 value: 100,
                 isUniform: true,
-                location: "warpAmount",
                 type: "1f",
 
                 min: 0.0,
@@ -50,7 +48,6 @@ class TextureController {
             octaves: {
                 value: 5,
                 isUniform: true,
-                location: "octaves",
                 type: "1i",
 
                 min: 1,
@@ -61,7 +58,6 @@ class TextureController {
             multisampling: {
                 value: 0,
                 isUniform: true,
-                location: "multisampling",
                 type: "1i",
 
                 min: 0,
@@ -71,93 +67,70 @@ class TextureController {
                 value: {
                     frequency: {
                         value: 0.01,
-                        isUniform: true,
-                        location: "frequency",
                         type: "1f",
                         min: 0.0000001,
                         max: 0.035
                     },
                     pow: {
                         value: 1.0,
-                        isUniform: true,
-                        location: "pow",
                         type: "1f",
                         min: 0.0,
-                        max: 20
+                        max: 5
                     },
                     modifications: {
                         value: {
                             ridgeThreshold: {
                                 value: 1.0,
-                                isUniform: true,
-                                location: "ridgeThreshold",
                                 type: "1f",
                                 min: 0.5,
                                 max: 1.0,
                             }
                         },
-                        isUniform: true,
-                        location: "modifications"
                     }
                 },
                 isUniform: true,
-                location: "source",
             },
             angleControl: {
                 value: {
                     frequency: {
                         value: Math.random() * 0.01,
-                        isUniform: true,
                         min: 0.0000001,
                         max: 0.035,
-                        location: "frequency",
                         type: "1f",
                     },
                     modifications: {
                         value: {
                             ridgeThreshold: {
                                 value: 1.0,
-                                isUniform: true,
-                                location: "ridgeThreshold",
                                 type: "1f",
                                 min: 0.5,
                                 max: 1.0,
                             }
                         },
-                        isUniform: true,
-                        location: "modifications"
                     }
                 },
                 isUniform: true,
-                location: "angleControl"
             },
             amountControl: {
                 value: {
                     frequency: {
                         value: Math.random() * 0.01,
-                        isUniform: true,
                         min: 0.0000001,
                         max: 0.035,
-                        location: "frequency",
                         type: "1f"
                     },
                     modifications: {
                         value: {
                             ridgeThreshold: {
                                 value: 1.0,
-                                isUniform: true,
-                                location: "ridgeThreshold",
                                 type: "1f",
                                 min: 0.5,
                                 max: 1.0,
                             }
                         },
-                        isUniform: true,
-                        location: "modifications"
                     }
                 },
                 isUniform: true,
-                location: "amountControl",
             },
         };
     }
@@ -222,13 +195,13 @@ class TextureController {
         if(!this.initialized) return;
         for (var name in this.attributes) {
             if(Object.prototype.hasOwnProperty.call(this.attributes, name)) {
-                this.setUniform(this.attributes[name]);
+                this.setUniform(this.attributes[name], name);
             }
         }
     }
 
     // Set a specific uniform, if it exists
-    setUniform(attribute) {
+    setUniform(attribute, name) {
         // Return if the value has no corresponding uniform, or if the texture controller is not initialized
         // Also, if the root level object is a uniform, assume all children are too
         if(!attribute.isUniform || !this.initialized) return;
@@ -245,8 +218,7 @@ class TextureController {
             }
         };
 
-        // TODO either remove need for "location" or convert to just using it
-        setAll(attribute, attribute.location);
+        setAll(attribute, name);
     }
 
     isInitialized() {
