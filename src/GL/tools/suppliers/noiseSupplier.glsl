@@ -20,7 +20,8 @@ bool isinf(float val) {
 }
 
 float applyModifications(float value, Modifications modifications) {
-    if(modifications.isRidged) {
+    // Ridged //
+    if(modifications.ridgeThreshold < 1.0) {
         float threshold = max(0.5, modifications.ridgeThreshold);
         if(value > threshold) {
             value = threshold - (value - threshold);

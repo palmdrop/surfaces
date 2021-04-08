@@ -5,13 +5,20 @@ const noiseTypes = {
     SIMPLEX: 1,
 }
 
-const createModifications = (ridgeThreshold) => {
+const createModifications = (ridgeThreshold, pow) => {
+    if(isNaN(ridgeThreshold)) {
+        throw new Error("Ridge threshold is not a number");
+    }
+    if(isNaN(pow)) {
+        throw new Error("Pow is not a number");
+    }
     return {
-        ridgeThreshold: ridgeThreshold
+        ridgeThreshold: ridgeThreshold,
+        pow: pow
     };
 }
 
-const createNoiseSettings = (type, dimensions, frequency, offset, pow, modifications = null) => {
+const createNoiseSettings = (type, dimensions, frequency, offset, modifications = null) => {
     if(!Object.keys(noiseTypes).some(k => noiseTypes[k] === type)) {
         throw new Error("No such noise type");
     }
@@ -28,16 +35,12 @@ const createNoiseSettings = (type, dimensions, frequency, offset, pow, modificat
     ) {                   
         throw new Error("Offset is not a " + dimensions + "-dimensional vector");
     }
-    if(isNaN(pow)) {
-        throw new Error("Pow is not a number");
-    }
 
     return {
         type: type,
         dimensions: dimensions,
         frequency: frequency,
         offset: offset,
-        pow: pow,
         modifications: modifications
     };
 }
@@ -63,14 +66,8 @@ const setNoiseSettings = (noiseSettings, program, uniformName) => {
 
     if(noiseSettings.modifications) {
         GLC.setUniform(program, uniformName + ".hasModifications", "1i", 1);
-        if(noiseSettings.modifications.ridgeThreshold) {
-            GLC.setUniform(program, uniformName + ".modifications.isRidged", "1i", 1);
-            GLC.setUniform(program, uniformName + ".modifications.ridgeThreshold", "1f", noiseSettings.modifications.ridgeThreshold);
-        } else {
-            GLC.setUniform(program, uniformName + ".modifications.isRidged", "1i", 0);
-        }
-        //TODO pass to shader
-
+        GLC.setUniform(program, uniformName + ".modifications.ridgeThreshold", "1f", noiseSettings.modifications.ridgeThreshold || 0.0);
+        GLC.setUniform(program, uniformName + ".modifications.pow", "1f", noiseSettings.modifications.pow || 0.0);
     } else {
         GLC.setUniform(program, uniformName + ".hasModifications", "1i", 0);
     }

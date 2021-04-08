@@ -70,12 +70,6 @@ class TextureController {
                         min: 0.0000001,
                         max: 0.035
                     },
-                    pow: {
-                        value: 1.0,
-                        type: "1f",
-                        min: 0.0,
-                        max: 5
-                    },
                     modifications: {
                         value: {
                             ridgeThreshold: {
@@ -83,6 +77,12 @@ class TextureController {
                                 type: "1f",
                                 min: 0.5,
                                 max: 1.0,
+                            },
+                            pow: {
+                                value: 1.0,
+                                type: "1f",
+                                min: 0.0,
+                                max: 5
                             }
                         },
                     }
@@ -97,12 +97,6 @@ class TextureController {
                         max: 0.035,
                         type: "1f",
                     },
-                    pow: {
-                        value: 1.0,
-                        type: "1f",
-                        min: 0.0,
-                        max: 5
-                    },
                     modifications: {
                         value: {
                             ridgeThreshold: {
@@ -110,6 +104,12 @@ class TextureController {
                                 type: "1f",
                                 min: 0.5,
                                 max: 1.0,
+                            },
+                            pow: {
+                                value: 1.0,
+                                type: "1f",
+                                min: 0.0,
+                                max: 5
                             }
                         },
                     }
@@ -124,12 +124,6 @@ class TextureController {
                         max: 0.035,
                         type: "1f"
                     },
-                    pow: {
-                        value: 1.0,
-                        type: "1f",
-                        min: 0.0,
-                        max: 5
-                    },
                     modifications: {
                         value: {
                             ridgeThreshold: {
@@ -137,7 +131,13 @@ class TextureController {
                                 type: "1f",
                                 min: 0.5,
                                 max: 1.0,
-                            }
+                            },
+                            pow: {
+                                value: 1.0,
+                                type: "1f",
+                                min: 0.0,
+                                max: 5
+                            },
                         },
                     }
                 },
@@ -316,15 +316,15 @@ class TextureController {
         console.log("Setting uniforms");
 
         // TODO move this to sliders and user input etc
-        const modifications = createModifications(this.getValue("source.modifications.ridgeThreshold"));
+        const modifications = createModifications(this.getValue("source.modifications.ridgeThreshold"), 1.0);
             //this.attributes.ridgeThreshold.value);
 
         const offset = [Math.random() * 1000, Math.random() * 1000, 1.0];
 
         //TODO add controllers for all fields in noise settings!
-        const source        = createNoiseSettings(noiseTypes.SIMPLEX, 3, this.getValue("source.frequency"), offset, 1.0, modifications);
-        const angleControl  = createNoiseSettings(noiseTypes.SIMPLEX, 3, this.getValue("angleControl.frequency"), offset, 1.0, modifications);
-        const amountControl = createNoiseSettings(noiseTypes.SIMPLEX, 3, this.getValue("amountControl.frequency"), offset, 1.0, modifications);
+        const source        = createNoiseSettings(noiseTypes.SIMPLEX, 3, this.getValue("source.frequency"), offset, modifications);
+        const angleControl  = createNoiseSettings(noiseTypes.SIMPLEX, 3, this.getValue("angleControl.frequency"), offset, modifications);
+        const amountControl = createNoiseSettings(noiseTypes.SIMPLEX, 3, this.getValue("amountControl.frequency"), offset, modifications);
 
         // SET SHADER UNIFORMS 
         GLC.setShaderProgram(this.program);

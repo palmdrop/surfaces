@@ -16,13 +16,16 @@ bool isinf(float val) {
 }
 
 float applyModifications(float value, Modifications modifications) {
-    if(modifications.isRidged) {
+    if(modifications.ridgeThreshold < 1.0) {
         float threshold = max(0.5, modifications.ridgeThreshold);
         if(value > threshold) {
             value = threshold - (value - threshold);
         }
         //TODO fix magic number etc
         value /= pow(threshold, 0.70);
+    }
+    if(modifications.pow != 1.0) {
+        value = pow(value, modifications.pow);
     }
 
     return value;
@@ -38,17 +41,18 @@ float noiseSupplier(NoiseSettings settings, vec3 position) {
     float result = 0.0;
 
     result = simplex3d(sample);
-    result = pow((0.5 + result / 2.0), settings.pow);
+    result = 0.5 + result / 2.0;
+    //pow((0.5 + result / 2.0), settings.pow);
+
+    if(settings.hasModifications) {
+        result = applyModifications(result, settings.modifications);
+    }
 
     if(isnan(result)) {
         result = 0.0;
     }
     if(isinf(result)) {
         result = 1.0;
-    }
-
-    if(settings.hasModifications) {
-        result = applyModifications(result, settings.modifications);
     }
 
     return result;

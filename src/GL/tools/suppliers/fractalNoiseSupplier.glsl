@@ -27,7 +27,6 @@ float fractalNoiseSupplier(FractalNoiseSettings settings, vec3 position) {
                 ns.dimensions,
                 f,
                 ns.offset,
-                ns.pow,
                 ns.hasModifications,
                 ns.modifications
             );
@@ -49,7 +48,6 @@ float fractalNoiseSupplier(FractalNoiseSettings settings, vec3 position) {
                 ns.dimensions,
                 f,
                 ns.offset,
-                ns.pow,
                 ns.hasModifications,
                 ns.modifications
             );
@@ -71,7 +69,6 @@ float fractalNoiseSupplier(FractalNoiseSettings settings, vec3 position) {
                 ns.dimensions,
                 f,
                 ns.offset,
-                ns.pow,
                 ns.hasModifications,
                 ns.modifications
             );

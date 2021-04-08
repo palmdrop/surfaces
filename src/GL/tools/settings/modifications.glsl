@@ -1,6 +1,6 @@
 struct Modifications {
-    bool isRidged;
     float ridgeThreshold;
+    float pow;
 };
 
 #pragma glslify: export(Modifications)

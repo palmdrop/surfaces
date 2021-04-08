@@ -102,9 +102,9 @@ void main()
 
         vec2 pos = gl_FragCoord.xy;
         vec3 color = getColor(pos + vec2(-xOffset, -yOffset / 2.0), fractalSource, fractalAngle, fractalAmount);
-        color +=     getColor(pos + vec2(xOffset / 2.0, -yOffset), fractalSource, fractalAngle, fractalAmount);
-        color +=     getColor(pos + vec2(-xOffset / 2.0, yOffset), fractalSource, fractalAngle, fractalAmount);
-        color +=     getColor(pos + vec2(xOffset, yOffset / 2.0), fractalSource, fractalAngle, fractalAmount);
+        color +=     getColor(pos + vec2(xOffset / 2.0, -yOffset),  fractalSource, fractalAngle, fractalAmount);
+        color +=     getColor(pos + vec2(-xOffset / 2.0, yOffset),  fractalSource, fractalAngle, fractalAmount);
+        color +=     getColor(pos + vec2(xOffset, yOffset / 2.0),   fractalSource, fractalAngle, fractalAmount);
 
         gl_FragColor = vec4(color / 4.0, 1.0);
 
