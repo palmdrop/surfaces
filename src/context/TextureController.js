@@ -19,7 +19,6 @@ class TextureController {
         this.previousMillis = 0;
         this.animationFrameId = -1;
 
-
         //TODO move this to JSON file?
         this.attributes = {
             animationSpeed: {
@@ -98,6 +97,12 @@ class TextureController {
                         max: 0.035,
                         type: "1f",
                     },
+                    pow: {
+                        value: 1.0,
+                        type: "1f",
+                        min: 0.0,
+                        max: 5
+                    },
                     modifications: {
                         value: {
                             ridgeThreshold: {
@@ -118,6 +123,12 @@ class TextureController {
                         min: 0.0000001,
                         max: 0.035,
                         type: "1f"
+                    },
+                    pow: {
+                        value: 1.0,
+                        type: "1f",
+                        min: 0.0,
+                        max: 5
                     },
                     modifications: {
                         value: {

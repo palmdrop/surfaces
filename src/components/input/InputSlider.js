@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Slider, Input } from '@material-ui/core';
 import './InputSlider.css';
 
-const InputSlider = ({ label, valueGetter, onChange, min, max, step, constrain, marks, precision }) => {
+const InputSlider = ({ label, valueGetter, onChange, min, max, step, constrain, marks, precision, fullName }) => {
     // Handle input change from the input field
     const handleInputChange = (e) => {
         if(e.target.value !== '') {
@@ -42,6 +42,7 @@ const InputSlider = ({ label, valueGetter, onChange, min, max, step, constrain, 
             <h3 className="input-slider__label">{label + " (" + state + ")" }</h3>
             <div className="input-slider__input">
                 <Slider className="input-slider__input__slider"
+                    key={fullName}
                     value={state}
                     onChange={(e, v) => handleChange(v)}
                     min={min}

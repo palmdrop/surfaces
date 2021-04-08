@@ -57,6 +57,7 @@ vec3 getColor(vec2 coord, FractalNoiseSettings source, FractalNoiseSettings angl
     float r = fractalNoiseSupplier(angle, vec3(p.xy, time));
     float g = fractalNoiseSupplier(amount, vec3(p.xy, time));
     return vec3(n, g, r) * n;
+    //return vec3(1.0) * n;
 }
 
 

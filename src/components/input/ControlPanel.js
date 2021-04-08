@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react'
+import React from 'react'
 
 import InputSlider from '../input/InputSlider'
 import Collapsable from '../sections/Collapsable'
@@ -9,7 +9,7 @@ import './ControlPanel.css'
 
 const ControlPanel = ({ attributes, getter, setter, separator, precision }) => {
     // Sets up a single slider 
-    const createSlider = (attribute, name, fullName, index) => {
+    const createSlider = (attribute, name, fullName) => {
         return (<InputSlider
             key={fullName}
             label={camelToTitle(name)}
@@ -28,6 +28,7 @@ const ControlPanel = ({ attributes, getter, setter, separator, precision }) => {
             marks={attribute.marks}
             constrain={true}
             precision={precision}
+            fullName={fullName}
         />)
     };
 
@@ -53,7 +54,7 @@ const ControlPanel = ({ attributes, getter, setter, separator, precision }) => {
             );
         } else {
             // If the value is not an object, simply create a single slider
-            return createSlider(attribute, sectionName, parentName, 0);
+            return createSlider(attribute, sectionName, parentName);
         }
     };
 
