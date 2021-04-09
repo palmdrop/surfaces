@@ -15,7 +15,9 @@ uniform NoiseSettings amountControl;
 
 uniform int octaves;
 
+//TODO time is not used, remove?
 uniform float time;
+
 uniform float warpAmount;
 uniform int iterations;
 
@@ -40,16 +42,11 @@ vec2 recursiveWarp(vec2 p, NoiseSettings angleControl, NoiseSettings amountContr
     return p;
 }
 
-bool isnan( float val )
-{
-  return ( val < 0.0 || 0.0 < val || val == 0.0 ) ? false : true;
-}
-
 vec3 getColor(vec2 coord, NoiseSettings source, NoiseSettings angle, NoiseSettings amount) {
     vec2 p = recursiveWarp(coord, angle, amount);
-    float n = noiseSupplier(source, vec3(p.xy, time));
-    float r = noiseSupplier(angle, vec3(p.xy, time));
-    float g = noiseSupplier(amount, vec3(p.xy, time));
+    float n = noiseSupplier(source, vec3(p.xy, 0));
+    float r = noiseSupplier(angle, vec3(p.xy, 0));
+    float g = noiseSupplier(amount, vec3(p.xy, 0));
     return vec3(n, g, r) * n;
 }
 

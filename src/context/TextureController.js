@@ -16,17 +16,41 @@ class TextureController {
         this.canvas = null;
 
         this.time = 0.0;
+        this.sourceTime = 0.0;
+        this.angleControlTime = 0.0;
+        this.amountControlTime = 0.0;
+
         this.previousMillis = 0;
         this.animationFrameId = -1;
+
+        this.sourceTime = 0.0;
 
         //TODO move this to JSON file?
         this.attributes = {
             animationSpeed: {
-                value: 0.2,
+                value: {
+                    general: {
+                        value: 0.2,
+                        min: 0.0,
+                        max: 3,
+                    },
+                    source: {
+                        value: 1.0,
+                        min: 0.0,
+                        max: 5,
+                    },
+                    angleControl: {
+                        value: 1.0,
+                        min: 0.0,
+                        max: 5,
+                    },
+                    amountControl: {
+                        value: 1.0,
+                        min: 0.0,
+                        max: 5,
+                    },
+                },
                 isUniform: false,
-
-                min: 0.0,
-                max: 2,
             },
             iterations: {
                 value: 2,
@@ -416,9 +440,9 @@ class TextureController {
       GLC.setUniform(this.program, "time", "1f", time);
 
       //TODO add control for separate time increments
-      GLC.setUniform(this.program, "source.offset",        "3fv", [this.offset[0], this.offset[1], time * 1.0]);
-      GLC.setUniform(this.program, "angleControl.offset",  "3fv", [this.offset[0], this.offset[1], time * 0.5]);
-      GLC.setUniform(this.program, "amountControl.offset", "3fv", [this.offset[0], this.offset[1], time * 2]);
+      GLC.setUniform(this.program, "source.offset",        "3fv", [this.offset[0], this.offset[1], this.sourceTime]);
+      GLC.setUniform(this.program, "angleControl.offset",  "3fv", [this.offset[0], this.offset[1], this.angleControlTime]);
+      GLC.setUniform(this.program, "amountControl.offset", "3fv", [this.offset[0], this.offset[1], this.amountControlTime]);
 
       // Render
       this.renderQuad();
@@ -433,10 +457,13 @@ class TextureController {
         const renderFrame = () => {
             // Calculate the time passed since last frame
             let now = Date.now();
-            let deltaMillis = now - this.previousMillis;
+            let delta = (now - this.previousMillis) / 1000;
 
             // Increment the "time" based on the time passed since last frame 
-            this.time += this.attributes.animationSpeed.value * deltaMillis / 1000;
+            this.time              += this.getValue("animationSpeed.general") * delta;
+            this.sourceTime        += this.getValue("animationSpeed.general") * this.getValue("animationSpeed.source") * delta;
+            this.angleControlTime  += this.getValue("animationSpeed.general") * this.getValue("animationSpeed.angleControl") * delta;
+            this.amountControlTime += this.getValue("animationSpeed.general") * this.getValue("animationSpeed.amountControl") * delta;
 
             // Render (updates uniforms and renders a quad to the screen)
             this.render(this.time);
