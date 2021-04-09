@@ -2,11 +2,12 @@ import GLC from './GLC'
 
 // Noise-related imports, these functions and objects
 // are adapted to work well with GLSL structs in the warp shader
-import { noiseTypes, setNoiseSettings, createNoiseSettings, createModifications } from '../tools/NoiseSettings';
+import { noiseTypes, setNoiseSettings, createModifications, createDefaultNoiseSettings } from '../tools/NoiseSettings';
 
 // Shaders imported using glslify
 import vertexShaderSource from '../GL/shaders/simple.vert'
 import fragmentShaderSource from '../GL/shaders/warp.frag'
+import { attributes } from './ControllerAttributes';
 
 class TextureController {
     constructor() {
@@ -26,198 +27,7 @@ class TextureController {
         this.sourceTime = 0.0;
 
         //TODO move this to JSON file?
-        this.attributes = {
-            animationSpeed: {
-                value: {
-                    general: {
-                        value: 0.2,
-                        min: 0.0,
-                        max: 3,
-                    },
-                    source: {
-                        value: 1.0,
-                        min: 0.0,
-                        max: 5,
-                    },
-                    angleControl: {
-                        value: 1.0,
-                        min: 0.0,
-                        max: 5,
-                    },
-                    amountControl: {
-                        value: 1.0,
-                        min: 0.0,
-                        max: 5,
-                    },
-                },
-                isUniform: false,
-            },
-            iterations: {
-                value: 2,
-                isUniform: true,
-                type: "1i",
-
-                min: 0,
-                max: 4,
-            },
-            warpAmount: {
-                value: 100,
-                isUniform: true,
-                type: "1f",
-
-                min: 0.0,
-                max: 1000
-            },
-            multisampling: {
-                value: 0,
-                isUniform: true,
-                type: "1i",
-
-                min: 0,
-                max: 1
-            },
-            source: {
-                value: {
-                    frequency: {
-                        value: 0.01,
-                        type: "1f",
-                        min: 0.0000001,
-                        max: 0.035
-                    },
-                    octaves: {
-                        value: 3,
-                        type: "1i",
-                        min: 1,
-                        max: 5,
-                        step: 2,
-                        marks: [1, 3, 5]
-                    },
-                    lacunarity: {
-                        value: 2.0,
-                        type: "1f",
-                        min: 0.1,
-                        max: 5.0,
-                    },
-                    persistence: {
-                        value: 0.5,
-                        type: "1f",
-                        min: 0.1,
-                        max: 2.0,
-                    },
-                    modifications: {
-                        value: {
-                            ridgeThreshold: {
-                                value: 1.0,
-                                type: "1f",
-                                min: 0.5,
-                                max: 1.0,
-                            },
-                            pow: {
-                                value: 1.0,
-                                type: "1f",
-                                min: 0.0,
-                                max: 5
-                            }
-                        },
-                    }
-                },
-                isUniform: true,
-            },
-            angleControl: {
-                value: {
-                    frequency: {
-                        value: Math.random() * 0.01,
-                        min: 0.0000001,
-                        max: 0.035,
-                        type: "1f",
-                    },
-                    octaves: {
-                        value: 3,
-                        type: "1i",
-                        min: 1,
-                        max: 5,
-                        step: 2,
-                        marks: [1, 3, 5]
-                    },
-                    lacunarity: {
-                        value: 2.0,
-                        type: "1f",
-                        min: 0.1,
-                        max: 5.0,
-                    },
-                    persistence: {
-                        value: 0.5,
-                        type: "1f",
-                        min: 0.1,
-                        max: 2.0,
-                    },
-                    modifications: {
-                        value: {
-                            ridgeThreshold: {
-                                value: 1.0,
-                                type: "1f",
-                                min: 0.5,
-                                max: 1.0,
-                            },
-                            pow: {
-                                value: 1.0,
-                                type: "1f",
-                                min: 0.0,
-                                max: 5
-                            }
-                        },
-                    }
-                },
-                isUniform: true,
-            },
-            amountControl: {
-                value: {
-                    frequency: {
-                        value: Math.random() * 0.01,
-                        min: 0.0000001,
-                        max: 0.035,
-                        type: "1f"
-                    },
-                    octaves: {
-                        value: 3,
-                        type: "1i",
-                        min: 1,
-                        max: 5,
-                        step: 2,
-                        marks: [1, 3, 5]
-                    },
-                    lacunarity: {
-                        value: 2.0,
-                        type: "1f",
-                        min: 0.1,
-                        max: 5.0,
-                    },
-                    persistence: {
-                        value: 0.5,
-                        type: "1f",
-                        min: 0.1,
-                        max: 2.0,
-                    },
-                    modifications: {
-                        value: {
-                            ridgeThreshold: {
-                                value: 1.0,
-                                type: "1f",
-                                min: 0.5,
-                                max: 1.0,
-                            },
-                            pow: {
-                                value: 1.0,
-                                type: "1f",
-                                min: 0.0,
-                                max: 5
-                            },
-                        },
-                    }
-                },
-                isUniform: true,
-            },
-        };
+        this.attributes = attributes;
     }
 
     getAttribute(location) {
@@ -386,19 +196,14 @@ class TextureController {
             0
         );
 
-        // DEFINE VALUES
+        // SET SHADER UNIFORMS 
         console.log("Setting uniforms");
 
-        // TODO move this to sliders and user input etc
-        const modifications = createModifications(this.getValue("source.modifications.ridgeThreshold"), 1.0);
-        const offset = [Math.random() * 1000, Math.random() * 1000, 1.0];
+        this.offset = [Math.random() * 1000, Math.random() * 1000, 1.0];
+        const source        = createDefaultNoiseSettings(noiseTypes.SIMPLEX, 3);
+        const angleControl  = createDefaultNoiseSettings(noiseTypes.SIMPLEX, 3);
+        const amountControl = createDefaultNoiseSettings(noiseTypes.SIMPLEX, 3);
 
-        //TODO add controllers for all fields in noise settings!
-        const source        = createNoiseSettings(noiseTypes.SIMPLEX, 3, this.getValue("source.frequency"), offset, modifications);
-        const angleControl  = createNoiseSettings(noiseTypes.SIMPLEX, 3, this.getValue("angleControl.frequency"), offset, modifications);
-        const amountControl = createNoiseSettings(noiseTypes.SIMPLEX, 3, this.getValue("amountControl.frequency"), offset, modifications);
-
-        // SET SHADER UNIFORMS 
         GLC.setShaderProgram(this.program);
 
         // Set noise settings
@@ -406,15 +211,13 @@ class TextureController {
         setNoiseSettings(angleControl,  this.program, "angleControl");
         setNoiseSettings(amountControl, this.program, "amountControl");
 
-        // Finally, set required states
+        // Update uniform values
         this.initialized = true;
-        this.offset = offset;
+        this.setUniforms();
 
+        // Finally, set internal states
         this.time = 0.0;
         this.previousMillis = Date.now();
-
-        // Update uniform values
-        this.setUniforms();
 
         console.log("Done initializing texture controller");
 

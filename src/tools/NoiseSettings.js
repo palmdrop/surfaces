@@ -18,6 +18,10 @@ const createModifications = (ridgeThreshold, pow) => {
     };
 }
 
+const createDefaultNoiseSettings = (type, dimensions) => {
+    return createNoiseSettings(type, dimensions, 1.0, dimensions == 2 ? [0,0] : [0,0,0], createModifications(1.0, 1.0));
+}
+
 const createNoiseSettings = (type, dimensions, frequency, offset, modifications = null) => {
     if(!Object.keys(noiseTypes).some(k => noiseTypes[k] === type)) {
         throw new Error("No such noise type");
@@ -85,6 +89,7 @@ const setNoiseSettings = (noiseSettings, program, uniformName) => {
 
 export {
     createNoiseSettings, 
+    createDefaultNoiseSettings,
     createModifications,
     setNoiseSettings,
     noiseTypes
