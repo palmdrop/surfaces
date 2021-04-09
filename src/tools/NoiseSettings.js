@@ -41,6 +41,12 @@ const createNoiseSettings = (type, dimensions, frequency, offset, modifications 
         dimensions: dimensions,
         frequency: frequency,
         offset: offset,
+
+        octaves: 5,
+        lacunarity: 2.0,
+        persistence: 0.5,
+        normalize: true,
+
         modifications: modifications
     };
 }
@@ -62,7 +68,11 @@ const setNoiseSettings = (noiseSettings, program, uniformName) => {
     }
 
     GLC.setUniform(program, uniformName + ".offset", "3fv", offset);
-    GLC.setUniform(program, uniformName + ".pow", "1f", noiseSettings.pow);
+
+    GLC.setUniform(program, uniformName + ".octaves", "1i", noiseSettings.octaves);
+    GLC.setUniform(program, uniformName + ".lacunarity", "1f", noiseSettings.lacunarity);
+    GLC.setUniform(program, uniformName + ".persistence", "1f", noiseSettings.persistence);
+    GLC.setUniform(program, uniformName + ".normalize", "1f", noiseSettings.normalize);
 
     if(noiseSettings.modifications) {
         GLC.setUniform(program, uniformName + ".hasModifications", "1i", 1);

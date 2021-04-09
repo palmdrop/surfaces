@@ -31,21 +31,15 @@ float applyModifications(float value, Modifications modifications) {
     return value;
 }
 
-float noiseSupplier(NoiseSettings settings, vec3 position) {
-    int type = settings.type;
-    int dimensions = settings.dimensions;
-
-    if(dimensions < 2 || dimensions > 3) return 0.0;
-
-    vec3 sample = position * settings.frequency + settings.offset;
+float getNoise(vec3 position, float frequency, float amplitude, vec3 offset, bool hasModifications, Modifications modifications) {
+    vec3 sample = position * frequency + offset;
     float result = 0.0;
 
     result = simplex3d(sample);
     result = 0.5 + result / 2.0;
-    //pow((0.5 + result / 2.0), settings.pow);
 
-    if(settings.hasModifications) {
-        result = applyModifications(result, settings.modifications);
+    if(hasModifications) {
+        result = applyModifications(result, modifications);
     }
 
     if(isnan(result)) {
@@ -55,7 +49,41 @@ float noiseSupplier(NoiseSettings settings, vec3 position) {
         result = 1.0;
     }
 
-    return result;
+    return amplitude * result;
+}
+
+float noiseSupplier(NoiseSettings settings, vec3 position) {
+    int octaves = settings.octaves;
+    vec3 offset = settings.offset;
+    bool hasModifications = settings.hasModifications;
+    Modifications modifications = settings.modifications;
+
+    float result = 0.0;
+    float max = 0.0;
+    if(octaves == 1) {
+        result = getNoise(position, settings.frequency, 1.0, offset, hasModifications, modifications);
+        max = 1.0;
+    } else if(octaves == 3) {
+        for(int i = 0; i < 3; i++) {
+            float f = settings.frequency * pow(settings.lacunarity,  float(i));
+            float a = 1.0                * pow(settings.persistence, float(i));
+            result += getNoise(position, f, a, offset, hasModifications, modifications);
+            max += a;
+        }
+    } else if(octaves == 5) {
+        for(int i = 0; i < 5; i++) {
+            float f = settings.frequency * pow(settings.lacunarity,  float(i));
+            float a = 1.0                * pow(settings.persistence, float(i));
+            result += getNoise(position, f, a, offset, hasModifications, modifications);
+            max += a;
+        }
+    }
+
+    if(settings.normalize) {
+        return result / max;
+    } else {
+        return result;
+    }
 }
 
 #pragma glslify: export(noiseSupplier)

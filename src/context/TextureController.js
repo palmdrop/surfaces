@@ -44,16 +44,6 @@ class TextureController {
                 min: 0.0,
                 max: 1000
             },
-            octaves: {
-                value: 5,
-                isUniform: true,
-                type: "1i",
-
-                min: 1,
-                max: 5,
-                step: 2,
-                marks: [1, 3, 5]
-            },
             multisampling: {
                 value: 0,
                 isUniform: true,
@@ -69,6 +59,26 @@ class TextureController {
                         type: "1f",
                         min: 0.0000001,
                         max: 0.035
+                    },
+                    octaves: {
+                        value: 3,
+                        type: "1i",
+                        min: 1,
+                        max: 5,
+                        step: 2,
+                        marks: [1, 3, 5]
+                    },
+                    lacunarity: {
+                        value: 2.0,
+                        type: "1f",
+                        min: 0.1,
+                        max: 5.0,
+                    },
+                    persistence: {
+                        value: 0.5,
+                        type: "1f",
+                        min: 0.1,
+                        max: 2.0,
                     },
                     modifications: {
                         value: {
@@ -97,6 +107,26 @@ class TextureController {
                         max: 0.035,
                         type: "1f",
                     },
+                    octaves: {
+                        value: 3,
+                        type: "1i",
+                        min: 1,
+                        max: 5,
+                        step: 2,
+                        marks: [1, 3, 5]
+                    },
+                    lacunarity: {
+                        value: 2.0,
+                        type: "1f",
+                        min: 0.1,
+                        max: 5.0,
+                    },
+                    persistence: {
+                        value: 0.5,
+                        type: "1f",
+                        min: 0.1,
+                        max: 2.0,
+                    },
                     modifications: {
                         value: {
                             ridgeThreshold: {
@@ -123,6 +153,26 @@ class TextureController {
                         min: 0.0000001,
                         max: 0.035,
                         type: "1f"
+                    },
+                    octaves: {
+                        value: 3,
+                        type: "1i",
+                        min: 1,
+                        max: 5,
+                        step: 2,
+                        marks: [1, 3, 5]
+                    },
+                    lacunarity: {
+                        value: 2.0,
+                        type: "1f",
+                        min: 0.1,
+                        max: 5.0,
+                    },
+                    persistence: {
+                        value: 0.5,
+                        type: "1f",
+                        min: 0.1,
+                        max: 2.0,
                     },
                     modifications: {
                         value: {
@@ -317,8 +367,6 @@ class TextureController {
 
         // TODO move this to sliders and user input etc
         const modifications = createModifications(this.getValue("source.modifications.ridgeThreshold"), 1.0);
-            //this.attributes.ridgeThreshold.value);
-
         const offset = [Math.random() * 1000, Math.random() * 1000, 1.0];
 
         //TODO add controllers for all fields in noise settings!
@@ -333,8 +381,6 @@ class TextureController {
         setNoiseSettings(source,        this.program, "source");
         setNoiseSettings(angleControl,  this.program, "angleControl");
         setNoiseSettings(amountControl, this.program, "amountControl");
-
-        this.setUniform(this.attributes.octaves);
 
         // Finally, set required states
         this.initialized = true;

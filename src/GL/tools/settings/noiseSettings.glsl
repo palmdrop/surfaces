@@ -5,6 +5,11 @@ struct NoiseSettings {
     int dimensions;
     float frequency;
     vec3 offset;
+
+    int octaves;
+    float lacunarity;
+    float persistence;
+    bool normalize;
     
     bool hasModifications;
     Modifications modifications;
