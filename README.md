@@ -11,6 +11,8 @@ For an explanation of the underlying techniques, I suggest reading my blog post 
 
 The project was created using [create-react-app](https://github.com/facebook/create-react-app). 
 
+Under `img/example` you'll find a few example images generated with the help of this project.
+
 ## Usage
 At this stage, the application is not live on the web. However, you can clone the repository and run it using `npm`. You'll find a short installation tutorial in the following section.
 
