@@ -17,6 +17,7 @@ uniform int octaves;
 
 //TODO time is not used, remove?
 uniform float time;
+uniform float scale;
 
 uniform float warpAmount;
 uniform int iterations;
@@ -26,6 +27,7 @@ uniform bool multisampling;
 #define RECURSIVE_WARP(p, angle, amount, iterations) for(int i = 0; i < (iterations); i++) { p = polarWarp(p, (angle), (amount), warpAmount); }
 
 vec2 recursiveWarp(vec2 p, NoiseSettings angleControl, NoiseSettings amountControl) {
+    p = p * scale;
     if(iterations == 0) {
     } else if(iterations == 1) {
         RECURSIVE_WARP(p, angleControl, amountControl, 1);
@@ -33,12 +35,9 @@ vec2 recursiveWarp(vec2 p, NoiseSettings angleControl, NoiseSettings amountContr
         RECURSIVE_WARP(p, angleControl, amountControl, 2);
     } else if(iterations == 3) {
         RECURSIVE_WARP(p, angleControl, amountControl, 3);
-    } 
-    /*else {
-        for(int i = 0; i < 4; i++) {
-            p = polarWarp(p, angleControl, amountControl, warpAmount);
-        }
-    }*/
+    } else {
+        RECURSIVE_WARP(p, angleControl, amountControl, 4);
+    }
     return p;
 }
 

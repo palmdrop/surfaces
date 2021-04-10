@@ -24,6 +24,14 @@ const attributes = {
         },
         isUniform: false,
     },
+    scale: {
+        value: 1.0,
+        isUniform: true,
+        type: "1f",
+
+        min: 0.01,
+        max: 10
+    },
     iterations: {
         value: 2,
         isUniform: true,
