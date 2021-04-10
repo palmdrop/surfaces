@@ -28,6 +28,18 @@ class TextureController {
 
         //TODO move this to JSON file?
         this.attributes = attributes;
+
+
+        this.captureNext = false;
+        this.dataCallback = null;
+        //this.captureData = null;
+        //this.captured = false;
+    }
+
+    captureFrame(dataCallback) {
+        //this.captureNext = true;
+        this.captureNext = true;
+        this.dataCallback = dataCallback;
     }
 
     getAttribute(location) {
@@ -273,6 +285,13 @@ class TextureController {
 
             // Update the time, will be used in the next frame
             this.previousMillis = now;
+
+            // Capture the frame if requested
+            if(this.captureNext) {
+                this.captureNext = false;
+                var captureData = this.canvas.toDataURL("image/png");
+                this.dataCallback(captureData);
+            }
 
             // Finally, recursively request another animation frame
             this.animationFrameId = requestAnimationFrame(renderFrame);

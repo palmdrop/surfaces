@@ -19,7 +19,7 @@ const createModifications = (ridgeThreshold, pow) => {
 }
 
 const createDefaultNoiseSettings = (type, dimensions) => {
-    return createNoiseSettings(type, dimensions, 1.0, dimensions == 2 ? [0,0] : [0,0,0], createModifications(1.0, 1.0));
+    return createNoiseSettings(type, dimensions, 1.0, dimensions === 2 ? [0,0] : [0,0,0], createModifications(1.0, 1.0));
 }
 
 const createNoiseSettings = (type, dimensions, frequency, offset, modifications = null) => {

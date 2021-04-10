@@ -1,29 +1,4 @@
 const attributes = {
-    animationSpeed: {
-        value: {
-            general: {
-                value: 0.2,
-                min: 0.0,
-                max: 3,
-            },
-            source: {
-                value: 1.0,
-                min: 0.0,
-                max: 5,
-            },
-            angleControl: {
-                value: 1.0,
-                min: 0.0,
-                max: 5,
-            },
-            amountControl: {
-                value: 1.0,
-                min: 0.0,
-                max: 5,
-            },
-        },
-        isUniform: false,
-    },
     scale: {
         value: 1.0,
         isUniform: true,
@@ -55,6 +30,31 @@ const attributes = {
 
         min: 0,
         max: 1
+    },
+    animationSpeed: {
+        value: {
+            general: {
+                value: 0.2,
+                min: 0.0,
+                max: 3,
+            },
+            source: {
+                value: 1.0,
+                min: 0.0,
+                max: 5,
+            },
+            angleControl: {
+                value: 1.0,
+                min: 0.0,
+                max: 5,
+            },
+            amountControl: {
+                value: 1.0,
+                min: 0.0,
+                max: 5,
+            },
+        },
+        isUniform: false,
     },
     source: {
         value: {
