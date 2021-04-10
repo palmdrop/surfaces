@@ -3,9 +3,9 @@ This is an exploratory repository for learning WebGL, GLSL, and React. I'm devel
 
 Below are some screenshots that highlight the current state and capabilities of the project. 
 
-![Example 1](/img/screenshot1.png)
-![Example 2](/img/screenshot2.png)
-![Example 3](/img/screenshot3.png)
+![Example 1](/img/example/screenshot1.png)
+![Example 2](/img/example/screenshot2.png)
+![Example 3](/img/example/screenshot3.png)
 
 For an explanation of the underlying techniques, I suggest reading my blog post about [domain warping](https://palmdrop.github.io/post/domain-warping/), and possibly also [this post](https://palmdrop.github.io/post/alien-patterns/) which describes how domain warping can be done recursively, in combination with modified noise, to produce complex visual effects.
 
