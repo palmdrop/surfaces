@@ -2,7 +2,7 @@ import GLC from './GLC'
 
 // Noise-related imports, these functions and objects
 // are adapted to work well with GLSL structs in the warp shader
-import { noiseTypes, setNoiseSettings, createModifications, createDefaultNoiseSettings } from '../tools/NoiseSettings';
+import { noiseTypes, setNoiseSettings, createDefaultNoiseSettings } from '../tools/NoiseSettings';
 
 // Shaders imported using glslify
 import vertexShaderSource from '../GL/shaders/simple.vert'
@@ -26,20 +26,29 @@ class TextureController {
 
         this.sourceTime = 0.0;
 
-        //TODO move this to JSON file?
         this.attributes = attributes;
-
 
         this.captureNext = false;
         this.dataCallback = null;
-        //this.captureData = null;
-        //this.captured = false;
     }
 
     captureFrame(dataCallback) {
-        //this.captureNext = true;
         this.captureNext = true;
         this.dataCallback = dataCallback;
+    }
+
+    exportSettings() {
+        return JSON.stringify(this.attributes, null, 2);
+    }
+
+    importSettings(jsonString) {
+        var attributes = JSON.parse(jsonString);
+
+        //TODO verify structure, complete missing fields
+        //TODO possibly add a converter class that can convert between
+        //TODO older and newever versions of the settings file 
+        this.attributes = attributes;
+        this.setUniforms();
     }
 
     getAttribute(location) {
@@ -74,7 +83,7 @@ class TextureController {
 
     // Returns a value 
     getValue(name) {
-        const [_, v] = this.getAttribute(name);
+        const [, v] = this.getAttribute(name);
         if(typeof v === "undefined") return undefined;
         return v.value;
     }

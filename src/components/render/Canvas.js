@@ -1,26 +1,41 @@
-import React, { useRef, useState, useEffect, useLayoutEffect } from 'react'
+import React, { useRef, useState, useEffect, useLayoutEffect, useReducer } from 'react'
 import ControlPanel from '../input/ControlPanel'
 import TXC from '../../context/TextureController'
+
+import { downloadJSON, promptDownload } from '../../tools/Utils'
+import { useMousePosition } from '../../hooks/MousePositionHook'
 
 import './Canvas.css'
 
 const Canvas = (props) => {
   const canvasRef = useRef();
 
+  const settingsRef = useRef();
+
+  const fileInputRef = useRef();
+
+  const mousePosition = useMousePosition();
   const [panelVisible, setPanelVisible] = useState(true);
   const [autoHide, setAutoHide] = useState(false);
 
+  const [panelRefresh, refreshPanel] = useReducer(x => x + 1, 0);
+
+  // User input through keyboard shortcuts
   const handleKeyPress = (event) => {
     switch(event.key) {
-      case 'h':
+      case 'h': // Toggle settings panel
         setPanelVisible(!panelVisible);
+        setAutoHide(false);
       break;
-      case 'd':
-        handleDownload();
+      case 'd': // Download shortcut
+        handleCanvasDownload();
+      break;
+      default:
       break;
     }
   }
 
+  // Listen for keyboard events 
   useEffect(() => {
     document.addEventListener("keydown", handleKeyPress);
 
@@ -28,29 +43,6 @@ const Canvas = (props) => {
       document.removeEventListener("keydown", handleKeyPress);
     };
   });
-
-  // Initialize texture controller in use effect hook to ensure that
-  // the canvas element has been initialized first
-  useEffect(() => {
-    if(!TXC.isInitialized()) {
-      // Initialize the texture controller 
-      if(TXC.initialize(canvasRef.current) === -1) {
-        throw new Error("Texture controller failed to initialize");
-      }
-
-      // Immediately resize to fill the available space
-      TXC.handleResize();
-    }
-
-    // Start the render loop
-    TXC.startRenderLoop();
-
-    return () => {
-      // Stop the render loop
-      TXC.stopRenderLoop();
-    }
-
-  }, []);
 
   // Handle resize events
   const handleResize = () => TXC.handleResize();
@@ -60,39 +52,148 @@ const Canvas = (props) => {
     return () => window.removeEventListener('resize', handleResize);
   });
 
-
-
-  const handleDownload = () => {
+  // Handle canvas download 
+  const handleCanvasDownload = () => {
     TXC.captureFrame((dataURL) => {
-      var link=document.createElement('a');
-      link.href = dataURL;
-      link.download = "canvas.png";
-      link.click();
+      promptDownload(dataURL, "canvas.png");
     });
   };
 
+  // Handle settings download
+  const handleSettingsDownload = () => {
+    downloadJSON(TXC.exportSettings(), "settings.json");
+  };
+
+  // TODO move this to a custom hook
+  // State for handling user supplied settings file
+  const [settingsFile, setSettingsFile] = useState(null);
+
+  // Sets the current settings file from an input event
+  const handleInputChange = (event) => {
+    const file = event.target.files[0];
+    setSettingsFile(file);
+  };
+
+  // Function for prompting the user with a file chooser window
+  const handleSettingsImport = () => {
+    fileInputRef.current.click();
+  };
+
+  // Used to determine when the user has choosen a file
+  useEffect(() => {
+    if(settingsFile) {
+      // Read file, and import the contents to the texture controller
+      var reader = new FileReader();
+      reader.onload = (file) => {
+        TXC.importSettings(file.target.result);
+      };
+      reader.readAsText(settingsFile);
+
+      // Refresh the panel to set the correct slider values
+      refreshPanel();
+    }
+  }, [settingsFile]);
+
+  // Initialize texture controller in use effect hook to ensure that
+  // the canvas element has been initialized first
+  useEffect(() => {
+    if(!TXC.isInitialized()) {
+      // Initialize the texture controller 
+      if(TXC.initialize(canvasRef.current) === -1) {
+        throw new Error("Texture controller failed to initialize");
+      }
+      // Immediately resize to fill the available space
+      TXC.handleResize();
+    }
+    TXC.startRenderLoop();
+    return () => TXC.stopRenderLoop();
+  }, []);
+
+  // Effect for hiding the settings panel if 
+  // the mouse is not hovering over it
+  useEffect(() => {
+    // Check if the mouse is inside a rectangle
+    const insideRect = (position, rect) => {
+      var x = position.x;
+      var y = position.y;
+      return x >= rect.x && x < rect.x + rect.width && y >= rect.y  && y < rect.y + rect.height;
+    };
+
+    // If auto hide is enabled, check the mouse position against the settings panel
+    // Hide if outside, unhide if close to the border
+    if(autoHide) {
+      // Get the bounding rect of the settings panel
+      var rect = settingsRef.current.getBoundingClientRect();
+      // Create small offset and expand the rectangle using this offset
+      // This ensures that the panel can be unhidden by sliding the mouse close to its regular spot
+      var offset = rect.width / 10;
+      var expandedRect = { x: rect.x - offset, y: rect.y - offset, width: rect.width + 2 * offset, height: rect.height + 2 * offset};
+
+      // If the settings panel is currently visible and the mouse is outside its rectangle, hide
+      if(panelVisible && !insideRect(mousePosition, expandedRect)) {
+        setPanelVisible(false);
+      // If the settingsp anel is hidden and the mouse is inside its expanded rectangle (close to the window border), unhide
+      } else if(!panelVisible && insideRect(mousePosition, expandedRect)) {
+        setPanelVisible(true);
+      }
+    }
+  },[mousePosition, autoHide, panelVisible]);
+
   return (
       <div>
-        <div className={"settings" + (panelVisible ? "" : " settings-hidden")}> 
-          <div className="settings__download-button-container">
-            <button className="button settings__download-button-container__button" onClick={handleDownload}>Download</button>
+
+        { /* Settings panel */}
+        <div 
+          className={"settings" + (panelVisible ? "" : " settings-hidden")}
+          ref={settingsRef}
+        > 
+
+          { /* Download canvas button */}
+          <div className="button-container settings__capture-button-container">
+            <button className="button settings__capture-button-container__button" onClick={handleCanvasDownload}>Capture frame</button>
           </div>
+
+          { /* Container for export and import buttons */ }
+          <div className="settings__import-export-container">
+
+            { /* Export settings button */}
+            <div className="button-container settings__export-button-container">
+              <button className="button settings__export-button-container__button" onClick={handleSettingsDownload}>Export</button>
+            </div>
+
+            { /* Import settings button */}
+            <div className="button-container settings__import-button-container">
+              <button className="button settings__import-button-container__button" onClick={handleSettingsImport}>Import</button>
+              <input 
+                ref={fileInputRef} 
+                type="file" 
+                style={{ display: "none" }}
+                onChange={handleInputChange}
+                accept="application/JSON"
+              />
+            </div>
+          </div>
+
+          { /* General control panel */}
           <ControlPanel 
             attributes={TXC.attributes}
             getter={(name) => TXC.getValue(name)}
             setter={(name, value) => TXC.updateValue(name, value)}
             separator={"."}
+            key={panelRefresh}
           />
+
+          { /* Button for auto hinding settings panel */}
           <div className="settings__auto-hide-button-container">
             <button 
               className={"button settings__auto-hide-button-container__button" + (autoHide ? " active" : "")} 
               onClick={() => setAutoHide(!autoHide)}>
-                {
-                  !autoHide ? "Enable auto hide" : "Disable auto hide"
-                }
+                {!autoHide ? "Enable auto hide" : "Disable auto hide"}
             </button>
           </div>
         </div>
+
+        { /* Canvas for WebGL context */}
         <canvas className="canvas" ref={canvasRef}/>
       </div>
   )

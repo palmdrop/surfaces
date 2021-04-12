@@ -19,22 +19,6 @@
     transition: 0.5s ease !important;
 }
 
-.settings-hidden {
-    transform: translateX(-100%);
-}
-
-.settings__download-button-container {
-    padding: 0.2vh;
-}
-
-.settings__download-button-container__button {
-
-}
-
-.settings__auto-hide-button-container {
-    padding: 0.2vh;
-}
-
 .button {
     width: 100%;
     font-size: 1.0rem;
@@ -55,6 +39,45 @@
     background-color: #2CAFFF;
     border: 2px solid #2CAFFF;
 }
+.settings-hidden {
+    transform: translateX(-100%);
+}
+
+.button-container {
+    padding: 0.2vh;
+}
+
+.settings__capture-button-container {
+}
+
+.settings__capture-button-container__button {
+}
+
+.settings__import-export-container {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-evenly;
+}
+
+.settings__export-button-container {
+    width: 50%
+}
+
+.settings__import-button-container {
+    width: 50%
+
+}
+
+.settings__export-button-container__button {
+}
+
+.settings__import-button-container__button {
+}
+
+.settings__auto-hide-button-container {
+    padding: 0.2vh;
+}
+
 
 .canvas {
     width: 100%;
