@@ -9,9 +9,10 @@ import './ControlPanel.css'
 
 const ControlPanel = ({ attributes, getter, setter, separator, precision }) => {
     // Sets up a single slider 
-    const createSlider = (attribute, name, fullName) => {
+    const createSlider = (attribute, name, fullName, index) => {
         return (<InputSlider
-            key={fullName}
+            //key={fullName}
+            key={index}
             label={camelToTitle(name)}
             valueGetter={() => getter(fullName)}
             onChange={(v) => setter(fullName, v)}
@@ -33,7 +34,7 @@ const ControlPanel = ({ attributes, getter, setter, separator, precision }) => {
     };
 
     // Sets up all sliders
-    const createSliders = (attribute, parentName) => {
+    const createSliders = (attribute, parentName, index) => {
         // Finds the name of the current section 
         var sectionName = parentName.split(separator);
         sectionName = sectionName[sectionName.length - 1];
@@ -44,17 +45,17 @@ const ControlPanel = ({ attributes, getter, setter, separator, precision }) => {
             // Iterate over all sub attributes
             return (
                 // Create a collapsable component, to make sure the user can hide/unhide these sections
-                <Collapsable label={camelToTitle(sectionName)} cname="control-panel__section" key={parentName}>
+                <Collapsable label={camelToTitle(sectionName)} cname="control-panel__section" key={index}>
                 {
-                    Object.entries(attribute.value).map(([name, childAttribute], index) => (
-                        createSliders(childAttribute, parentName + separator + name)
+                    Object.entries(attribute.value).map(([name, childAttribute], subindex) => (
+                        createSliders(childAttribute, parentName + separator + name, index + "." + subindex)
                     ))
                 }
                 </Collapsable>
             );
         } else {
             // If the value is not an object, simply create a single slider
-            return createSlider(attribute, sectionName, parentName);
+            return createSlider(attribute, sectionName, parentName, index);
         }
     };
 
@@ -63,7 +64,7 @@ const ControlPanel = ({ attributes, getter, setter, separator, precision }) => {
         {
             //TODO find way to produce unique keys
             Object.entries(attributes).map(([name, attribute], index) => (
-                createSliders(attribute, name)
+                createSliders(attribute, name, index)
             ))
         }
         </div>
