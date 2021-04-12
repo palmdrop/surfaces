@@ -1,10 +1,10 @@
-import React, { useState } from 'react';
-import { Slider, Input } from '@material-ui/core';
+import React, { useEffect, useState } from 'react';
+import { Slider /*, Input */ } from '@material-ui/core';
 import './InputSlider.css';
 
 const InputSlider = ({ label, valueGetter, onChange, min, max, step, constrain, marks, precision, fullName }) => {
     // Handle input change from the input field
-    const handleInputChange = (e) => {
+    /*const handleInputChange = (e) => {
         if(e.target.value !== '') {
             var value = Number(e.target.value);
 
@@ -15,7 +15,7 @@ const InputSlider = ({ label, valueGetter, onChange, min, max, step, constrain, 
             
             handleChange(value);
         }
-    };
+    };*/
 
     const round = (value) => {
         return +value.toFixed(precision || 7);
@@ -25,6 +25,13 @@ const InputSlider = ({ label, valueGetter, onChange, min, max, step, constrain, 
     // This is required if the value getter method does not return a state, 
     // but some other reference that might not trigger a use effect hook
     const [state, setState] = useState(round(valueGetter()));
+
+    // Effect for updating the state of the slider on re-render
+    // This ensures that the slider will be updated if the value changes
+    // externally.
+    useEffect(() => {
+        setState(round(valueGetter()));
+    });
 
     // Only update the value if it's actually different
     // This avoids unnecessary useEffect triggers in parent classes
