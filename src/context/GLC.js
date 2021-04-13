@@ -19,9 +19,13 @@ class GLCommander {
     }
 
     // Clear the canvas (both color and depth information)
-    clear = (r, g, b, a) => {
+    clear(r, g, b, a) {
         this.gl.clearColor(r, g, b, a);
         this.gl.clear(this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT);
+    }
+
+    flush() {
+        this.gl.flush();
     }
 
     // Sets the viewport of the webgl context

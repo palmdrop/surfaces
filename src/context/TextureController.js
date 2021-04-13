@@ -42,12 +42,39 @@ class TextureController {
     }
 
     importSettings(jsonString) {
-        var attributes = JSON.parse(jsonString);
+        //TODO move to util?
+        //TODO allow control which object takes precedence, e.g if old does not have a field, do we exclude or include it?
 
-        //TODO verify structure, complete missing fields
+        // Merge the current settings object, which holds the correct format of the settings,
+        // with a saved, possibly older version. 
+        // The current object will take precedence: a property not existing in current, but existing in changes,
+        // will not be added to the updated object
+        const mergeSettings = (current, changes) => {
+            // Check if the current object is a single value or an array. In that case, update, if 
+            // an updated value exists
+            if(typeof current !== "object" || Array.isArray(current)) return changes || current;
+
+            // If the changes are null or undefined, use the current object
+            if(!changes) return current;
+
+            var updated = {};
+
+            // Iterate over all the properties in the current object, and merge each
+            // property with the corresponding property in the changes object
+            for(var prop in current) {
+                if(Object.prototype.hasOwnProperty.call(current, prop)) {
+                    updated[prop] = mergeSettings(current[prop], changes[prop]);
+                }
+            }
+
+            return updated;
+        }
+        
+        var imported = JSON.parse(jsonString);
+
         //TODO possibly add a converter class that can convert between
         //TODO older and newever versions of the settings file 
-        this.attributes = attributes;
+        this.attributes = mergeSettings(this.attributes, imported);
         this.setUniforms();
     }
 
@@ -187,6 +214,8 @@ class TextureController {
         // Create the shader program using the imported shaders
         this.program = GLC.createShaderProgram(vertexShaderSource, fragmentShaderSource);
 
+        GLC.flush();
+
         if(!this.program) {
             throw new Error("Shader not created");
         }
@@ -248,7 +277,7 @@ class TextureController {
     handleResize() {
         if(!this.initialized) return;
         GLC.setViewport(window.innerWidth, window.innerHeight);
-        //GLC.setUniform(this.program, "viewport", "2fv", [window.innerWidth, window.innerHeight]);
+        GLC.setUniform(this.program, "viewport", "2fv", [window.innerWidth, window.innerHeight]);
     }
 
     // Short function for rendering the quad to the entire screen

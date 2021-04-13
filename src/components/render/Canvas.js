@@ -72,6 +72,18 @@ const Canvas = (props) => {
   const handleInputChange = (event) => {
     const file = event.target.files[0];
     setSettingsFile(file);
+
+    /*if(file) {
+      // Read file, and import the contents to the texture controller
+      var reader = new FileReader();
+      reader.onload = (f) => {
+        TXC.importSettings(f.target.result);
+      };
+      reader.readAsText(file);
+
+      // Refresh the panel to set the correct slider values
+      refreshPanel();
+    }*/
   };
 
   // Function for prompting the user with a file chooser window
