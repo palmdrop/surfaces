@@ -18,6 +18,7 @@ uniform int octaves;
 //TODO time is not used, remove?
 uniform float time;
 uniform float scale;
+uniform vec2 viewport;
 
 uniform float warpAmount;
 uniform int iterations;
@@ -27,7 +28,6 @@ uniform bool multisampling;
 #define RECURSIVE_WARP(p, angle, amount, iterations) for(int i = 0; i < (iterations); i++) { p = polarWarp(p, (angle), (amount), warpAmount); }
 
 vec2 recursiveWarp(vec2 p, NoiseSettings angleControl, NoiseSettings amountControl) {
-    p = p * scale;
     if(iterations == 0) {
     } else if(iterations == 1) {
         RECURSIVE_WARP(p, angleControl, amountControl, 1);
@@ -52,8 +52,15 @@ vec3 getColor(vec2 coord, NoiseSettings source, NoiseSettings angle, NoiseSettin
 
 void main()
 {
+    vec2 o = vec2(viewport.x / 2.0, viewport.y / 2.0);
+
+    vec2 pos = gl_FragCoord.xy;
+    pos -= o;
+    pos *= scale;
+    pos += o;
+
     if(!multisampling) {
-        vec3 color = getColor(gl_FragCoord.xy, source, angleControl, amountControl);
+        vec3 color = getColor(pos, source, angleControl, amountControl);
         gl_FragColor = vec4(color, 1.0);
     } else {
         float xStep = 1.0;
@@ -62,7 +69,6 @@ void main()
         float xOffset = 3.0 * xStep / 8.0;
         float yOffset = 3.0 * yStep / 8.0;
 
-        vec2 pos = gl_FragCoord.xy;
         vec3 color = getColor(pos + vec2(-xOffset, -yOffset / 2.0), source, angleControl, amountControl);
         color +=     getColor(pos + vec2(xOffset / 2.0, -yOffset),  source, angleControl, amountControl);
         color +=     getColor(pos + vec2(-xOffset / 2.0, yOffset),  source, angleControl, amountControl);

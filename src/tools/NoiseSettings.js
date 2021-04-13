@@ -5,6 +5,10 @@ const noiseTypes = {
     SIMPLEX: 1,
 }
 
+const createDefaultModifications = () => {
+    return createModifications(1.0, 1.0);
+}
+
 const createModifications = (ridgeThreshold, pow) => {
     if(isNaN(ridgeThreshold)) {
         throw new Error("Ridge threshold is not a number");
@@ -19,10 +23,10 @@ const createModifications = (ridgeThreshold, pow) => {
 }
 
 const createDefaultNoiseSettings = (type, dimensions) => {
-    return createNoiseSettings(type, dimensions, 1.0, dimensions === 2 ? [0,0] : [0,0,0], createModifications(1.0, 1.0));
+    return createNoiseSettings(type, dimensions, 1.0, 1.0, dimensions === 2 ? [0,0] : [0,0,0], createDefaultModifications());
 }
 
-const createNoiseSettings = (type, dimensions, frequency, offset, modifications = null) => {
+const createNoiseSettings = (type, dimensions, frequency, amplitude, offset, modifications = null) => {
     if(!Object.keys(noiseTypes).some(k => noiseTypes[k] === type)) {
         throw new Error("No such noise type");
     }
@@ -37,21 +41,21 @@ const createNoiseSettings = (type, dimensions, frequency, offset, modifications 
     || !(offset.length !== 2 || (!isNaN(offset[0]) && !isNaN(offset[1]))) // If the first two elements are not numbers
     || !(offset.length !== 3 || !isNaN(offset[2]))                      // If the third element is not a number
     ) {                   
-        throw new Error("Offset is not a " + dimensions + "-dimensional vector");
+        throw new Error("Offset is not a valid " + dimensions + "-dimensional vector");
     }
 
     return {
         type: type,
         dimensions: dimensions,
         frequency: frequency,
+        amplitude: amplitude,
         offset: offset,
 
         octaves: 5,
         lacunarity: 2.0,
         persistence: 0.5,
-        normalize: true,
 
-        modifications: modifications
+        modifications: modifications || createDefaultModifications()
     };
 }
 
@@ -63,6 +67,7 @@ const setNoiseSettings = (noiseSettings, program, uniformName) => {
     GLC.setUniform(program, uniformName + ".type", "1i", noiseSettings.type);
     GLC.setUniform(program, uniformName + ".dimensions", "1i", noiseSettings.dimensions);
     GLC.setUniform(program, uniformName + ".frequency", "1f", noiseSettings.frequency);
+    GLC.setUniform(program, uniformName + ".amplitude", "1f", noiseSettings.amplitude);
 
     var offset;
     if(noiseSettings.dimensions === 2) {
@@ -76,15 +81,9 @@ const setNoiseSettings = (noiseSettings, program, uniformName) => {
     GLC.setUniform(program, uniformName + ".octaves", "1i", noiseSettings.octaves);
     GLC.setUniform(program, uniformName + ".lacunarity", "1f", noiseSettings.lacunarity);
     GLC.setUniform(program, uniformName + ".persistence", "1f", noiseSettings.persistence);
-    GLC.setUniform(program, uniformName + ".normalize", "1f", noiseSettings.normalize);
 
-    if(noiseSettings.modifications) {
-        GLC.setUniform(program, uniformName + ".hasModifications", "1i", 1);
-        GLC.setUniform(program, uniformName + ".modifications.ridgeThreshold", "1f", noiseSettings.modifications.ridgeThreshold || 0.0);
-        GLC.setUniform(program, uniformName + ".modifications.pow", "1f", noiseSettings.modifications.pow || 0.0);
-    } else {
-        GLC.setUniform(program, uniformName + ".hasModifications", "1i", 0);
-    }
+    GLC.setUniform(program, uniformName + ".modifications.ridgeThreshold", "1f", noiseSettings.modifications.ridgeThreshold || 0.0);
+    GLC.setUniform(program, uniformName + ".modifications.pow", "1f", noiseSettings.modifications.pow || 0.0);
 };
 
 export {
