@@ -9,7 +9,7 @@
     -ms-overflow-style: none;
     scrollbar-width: none;
     background-color: #04040488;
-    padding: 0.2vh;
+    padding: 0.0vh 0.2vh;
 
     transform: translateX(0);
 
@@ -85,4 +85,8 @@
     position: absolute;
     right: 0;
     z-index: -1;
+}
+
+.canvas-container {
+    overflow: hidden;
 }

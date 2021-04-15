@@ -18,7 +18,7 @@ const Canvas = (props) => {
   const [panelVisible, setPanelVisible] = useState(true);
   const [autoHide, setAutoHide] = useState(false);
 
-  const [panelRefresh, refreshPanel] = useReducer(x => x + 1, 0);
+  //const [panelRefresh, refreshPanel] = useReducer(x => x + 1, 0);
 
   // User input through keyboard shortcuts
   const handleKeyPress = (event) => {
@@ -39,10 +39,57 @@ const Canvas = (props) => {
   useEffect(() => {
     document.addEventListener("keydown", handleKeyPress);
 
+    canvasRef.current.addEventListener("wheel", handleScroll);
+    canvasRef.current.addEventListener("mousedown", handleMouseDown);
+    canvasRef.current.addEventListener("mouseup", handleMouseReleased);
+    canvasRef.current.addEventListener("mouseout", handleMouseReleased);
+
     return () => {
       document.removeEventListener("keydown", handleKeyPress);
+      canvasRef.current.removeEventListener("wheel", handleScroll);
+      canvasRef.current.removeEventListener("mousedown", handleMouseDown);
+      canvasRef.current.removeEventListener("mouseup", handleMouseReleased);
+      canvasRef.current.removeEventListener("mouseout", handleMouseReleased);
     };
   });
+
+  const handleScroll = (event) => {
+    var scale = TXC.getValue("scale");
+    const delta = Math.sign(event.deltaY) * scale * 0.1;
+    scale += delta;
+    TXC.updateValue("scale", scale);
+    //refreshPanel();
+  }
+
+  //TODO remove offset from TXC, not needed when I have pos?
+  const [mouseDown, setMouseDown] = useState(false);
+  const [anchor, setAnchor] = useState([0, 0]);
+  const [prevPosition, setPrevPosition] = useState([0, 0]);
+
+  const handleMouseDown = (event) => {
+    if(mouseDown) return;
+    setAnchor([mousePosition.x, mousePosition.y]);
+    setPrevPosition([TXC.position[0], TXC.position[1]]);
+    setMouseDown(true);
+  }
+  const handleMouseReleased = (event) => {
+    if(!mouseDown) return;
+    setMouseDown(false);
+  }
+
+  useEffect(() => {
+    if(!mouseDown) return;
+    var scale = TXC.getValue("scale");
+
+    const offset = [(anchor[0] - mousePosition.x) * scale, (anchor[1] - mousePosition.y) * scale];
+
+    TXC.setPosition([
+      prevPosition[0] + offset[0], 
+      prevPosition[1] - offset[1]
+    ]);
+
+    //TXC.setPosition([mousePosition.x, window.innerHeight - mousePosition.y]);
+  }, [mousePosition, mouseDown]);
 
   // Handle resize events
   const handleResize = () => TXC.handleResize();
@@ -64,47 +111,26 @@ const Canvas = (props) => {
     downloadJSON(TXC.exportSettings(), "settings.json");
   };
 
-  // TODO move this to a custom hook
-  // State for handling user supplied settings file
-  const [settingsFile, setSettingsFile] = useState(null);
-
   // Sets the current settings file from an input event
   const handleInputChange = (event) => {
     const file = event.target.files[0];
-    setSettingsFile(file);
 
-    /*if(file) {
+    if(file) {
       // Read file, and import the contents to the texture controller
       var reader = new FileReader();
       reader.onload = (f) => {
         TXC.importSettings(f.target.result);
+        // Refresh the panel to set the correct slider values
+        //refreshPanel();
       };
       reader.readAsText(file);
-
-      // Refresh the panel to set the correct slider values
-      refreshPanel();
-    }*/
+    }
   };
 
   // Function for prompting the user with a file chooser window
   const handleSettingsImport = () => {
     fileInputRef.current.click();
   };
-
-  // Used to determine when the user has choosen a file
-  useEffect(() => {
-    if(settingsFile) {
-      // Read file, and import the contents to the texture controller
-      var reader = new FileReader();
-      reader.onload = (file) => {
-        TXC.importSettings(file.target.result);
-      };
-      reader.readAsText(settingsFile);
-
-      // Refresh the panel to set the correct slider values
-      refreshPanel();
-    }
-  }, [settingsFile]);
 
   // Initialize texture controller in use effect hook to ensure that
   // the canvas element has been initialized first
@@ -152,7 +178,7 @@ const Canvas = (props) => {
   },[mousePosition, autoHide, panelVisible]);
 
   return (
-      <div>
+      <div className="canvas-container">
 
         { /* Settings panel */}
         <div 
@@ -192,7 +218,7 @@ const Canvas = (props) => {
             getter={(name) => TXC.getValue(name)}
             setter={(name, value) => TXC.updateValue(name, value)}
             separator={"."}
-            key={panelRefresh}
+            //key={panelRefresh}
           />
 
           { /* Button for auto hinding settings panel */}
@@ -206,7 +232,10 @@ const Canvas = (props) => {
         </div>
 
         { /* Canvas for WebGL context */}
-        <canvas className="canvas" ref={canvasRef}/>
+        <canvas 
+          className="canvas" 
+          ref={canvasRef}
+        />
       </div>
   )
 }

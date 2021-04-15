@@ -57,58 +57,60 @@ const noiseSettings = () => {
 const timeSettings = (value) => {
     return {
         value: value,
-        min: -1.0,
+        min: 0.0,
         max: 3,
     }
 };
 
 
-const attributes = {
-    scale: {
-        value: 1.0,
-        isUniform: true,
-        type: "1f",
+const getDefaultAttributes = () => {
+    return {
+        scale: {
+            value: 1.0,
+            isUniform: true,
+            type: "1f",
 
-        min: 0.01,
-        max: 10
-    },
-    iterations: {
-        value: 2,
-        isUniform: true,
-        type: "1i",
-
-        min: 0,
-        max: 4,
-    },
-    warpAmount: {
-        value: 100,
-        isUniform: true,
-        type: "1f",
-
-        min: 0.0,
-        max: 1000
-    },
-    multisampling: {
-        value: 0,
-        isUniform: true,
-        type: "1i",
-
-        min: 0,
-        max: 1
-    },
-    animationSpeed: {
-        value: {
-            general: timeSettings(0.2),
-            source: timeSettings(1.0),
-            angleControl: timeSettings(1.0),
-            amountControl: timeSettings(1.0)
+            min: 0.01,
+            max: 10
         },
-        isUniform: false,
-    },
+        iterations: {
+            value: 2,
+            isUniform: true,
+            type: "1i",
 
-    source: noiseSettings(),
-    angleControl: noiseSettings(),
-    amountControl: noiseSettings()
-};
+            min: 0,
+            max: 4,
+        },
+        warpAmount: {
+            value: 100,
+            isUniform: true,
+            type: "1f",
 
-export { attributes }
+            min: 0.0,
+            max: 1000
+        },
+        multisampling: {
+            value: 0,
+            isUniform: true,
+            type: "1i",
+
+            min: 0,
+            max: 1
+        },
+        animationSpeed: {
+            value: {
+                general: timeSettings(0.2),
+                source: timeSettings(1.0),
+                angleControl: timeSettings(1.0),
+                amountControl: timeSettings(1.0)
+            },
+            isUniform: false,
+        },
+
+        source: noiseSettings(),
+        angleControl: noiseSettings(),
+        amountControl: noiseSettings()
+    };
+}
+
+export { getDefaultAttributes }

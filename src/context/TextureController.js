@@ -7,7 +7,7 @@ import { noiseTypes, setNoiseSettings, createDefaultNoiseSettings } from '../too
 // Shaders imported using glslify
 import vertexShaderSource from '../GL/shaders/simple.vert'
 import fragmentShaderSource from '../GL/shaders/warp.frag'
-import { attributes } from './ControllerAttributes';
+import { getDefaultAttributes } from './ControllerAttributes';
 
 class TextureController {
     constructor() {
@@ -26,10 +26,12 @@ class TextureController {
 
         this.sourceTime = 0.0;
 
-        this.attributes = attributes;
+        this.attributes = getDefaultAttributes();
 
         this.captureNext = false;
         this.dataCallback = null;
+
+        this.position = [0, 0];
     }
 
     captureFrame(dataCallback) {
@@ -74,7 +76,11 @@ class TextureController {
 
         //TODO possibly add a converter class that can convert between
         //TODO older and newever versions of the settings file 
-        this.attributes = mergeSettings(this.attributes, imported);
+
+        // Use default settings when merging
+        this.attributes = mergeSettings(getDefaultAttributes(), imported);
+
+        // Update all uniforms with the new settings
         this.setUniforms();
     }
 
@@ -117,6 +123,8 @@ class TextureController {
 
     // Updates a value and it's corresponding uniform (if such exists)
     updateValue(name, v) {
+        //TODO create some form of callback to sliders that force them to re-read when a value is changed?!
+
         // Find the requested attribute, or return if it does not exist
         const [isUniform, attribute] = this.getAttribute(name);
         if(typeof v === "undefined") return -1;
@@ -162,6 +170,13 @@ class TextureController {
         };
 
         setAll(attribute, name);
+    }
+
+    setPosition(position) {
+        if(!this.initialized) return;
+        this.position[0] = position[0];
+        this.position[1] = position[1];
+        GLC.setUniform(this.program, "position", "2fv", position);
     }
 
     isInitialized() {

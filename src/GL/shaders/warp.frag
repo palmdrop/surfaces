@@ -20,6 +20,8 @@ uniform float time;
 uniform float scale;
 uniform vec2 viewport;
 
+uniform vec2 position;
+
 uniform float warpAmount;
 uniform int iterations;
 
@@ -52,19 +54,20 @@ vec3 getColor(vec2 coord, NoiseSettings source, NoiseSettings angle, NoiseSettin
 
 void main()
 {
-    vec2 o = vec2(viewport.x / 2.0, viewport.y / 2.0);
+    vec2 center = vec2(viewport.x / 2.0, viewport.y / 2.0);
 
     vec2 pos = gl_FragCoord.xy;
-    pos -= o;
+    pos -= center;
     pos *= scale;
-    pos += o;
+    pos += center;
+    pos += position;
 
     if(!multisampling) {
         vec3 color = getColor(pos, source, angleControl, amountControl);
         gl_FragColor = vec4(color, 1.0);
     } else {
-        float xStep = 1.0;
-        float yStep = 1.0;
+        float xStep = scale * 1.0;
+        float yStep = scale * 1.0;
 
         float xOffset = 3.0 * xStep / 8.0;
         float yOffset = 3.0 * yStep / 8.0;
