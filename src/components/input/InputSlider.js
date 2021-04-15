@@ -42,6 +42,12 @@ const InputSlider = ({ label, valueGetter, onChange, min, max, step, constrain, 
         }
     };
 
+    /*const handleScroll = (event) => {
+        console.log(label);
+        const delta = Math.sigh(event.deltaY) * step;
+        handleChange(state + delta);
+    };*/
+
     return (
         <div 
             className="input-slider"
@@ -56,6 +62,7 @@ const InputSlider = ({ label, valueGetter, onChange, min, max, step, constrain, 
                     max={max}
                     step={step}
                     marks={marks}
+                    //onScroll={handleScroll}
                 />
                 {/*<Input className="input-slider__input_field"
                     value={state}

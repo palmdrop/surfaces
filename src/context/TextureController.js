@@ -13,9 +13,13 @@ class TextureController {
     constructor() {
         this.initialized = false;
         this.program = -1;
+
         this.offset = null;
         this.canvas = null;
+        this.position = [0, 0];
+        this.dimensions = [window.innerWidth, window.innerHeight];
 
+        this.paused = false;
         this.time = 0.0;
         this.sourceTime = 0.0;
         this.angleControlTime = 0.0;
@@ -24,14 +28,11 @@ class TextureController {
         this.previousMillis = 0;
         this.animationFrameId = -1;
 
-        this.sourceTime = 0.0;
-
         this.attributes = getDefaultAttributes();
 
         this.captureNext = false;
         this.dataCallback = null;
 
-        this.position = [0, 0];
     }
 
     captureFrame(dataCallback) {
@@ -179,6 +180,10 @@ class TextureController {
         GLC.setUniform(this.program, "position", "2fv", position);
     }
 
+    setPaused(paused) {
+        this.paused = paused;
+    }
+
     isInitialized() {
         return this.initialized;
     }
@@ -291,8 +296,25 @@ class TextureController {
 
     handleResize() {
         if(!this.initialized) return;
-        GLC.setViewport(window.innerWidth, window.innerHeight);
-        GLC.setUniform(this.program, "viewport", "2fv", [window.innerWidth, window.innerHeight]);
+        //TODO ability to be set to other sizes than innerWidth/innerHeight? use size of canvas?
+
+        const oldWidth = this.dimensions[0];
+        const oldHeight = this.dimensions[1];
+
+        // Set the dimensions to that of the inner window size, since the canvas covers everything
+        const newWidth = window.innerWidth;
+        const newHeight = window.innerHeight;
+        const newDimensions = [newWidth, newHeight];
+
+        // Offset the position to ensure that the center of the view remains the same
+        const xOffset = (newWidth - oldWidth) / 2.0;
+        const yOffset = (newHeight - oldHeight) / 2.0;
+        this.setPosition([this.position[0] - xOffset, this.position[1] - yOffset]);
+
+        // Update values
+        GLC.setViewport(newWidth, newHeight);
+        GLC.setUniform(this.program, "viewport", "2fv", newDimensions);
+        this.dimensions = newDimensions;
     }
 
     // Short function for rendering the quad to the entire screen
@@ -327,11 +349,14 @@ class TextureController {
             let now = Date.now();
             let delta = (now - this.previousMillis) / 1000;
 
-            // Increment the "time" based on the time passed since last frame 
-            this.time              += this.getValue("animationSpeed.general") * delta;
-            this.sourceTime        += this.getValue("animationSpeed.general") * this.getValue("animationSpeed.source") * delta;
-            this.angleControlTime  += this.getValue("animationSpeed.general") * this.getValue("animationSpeed.angleControl") * delta;
-            this.amountControlTime += this.getValue("animationSpeed.general") * this.getValue("animationSpeed.amountControl") * delta;
+            // Do not increment time if the animation is paused
+            if(!this.paused) {
+                // Increment the "time" based on the time passed since last frame 
+                this.time              += this.getValue("animationSpeed.general") * delta;
+                this.sourceTime        += this.getValue("animationSpeed.general") * this.getValue("animationSpeed.source") * delta;
+                this.angleControlTime  += this.getValue("animationSpeed.general") * this.getValue("animationSpeed.angleControl") * delta;
+                this.amountControlTime += this.getValue("animationSpeed.general") * this.getValue("animationSpeed.amountControl") * delta;
+            }
 
             // Render (updates uniforms and renders a quad to the screen)
             this.render(this.time);

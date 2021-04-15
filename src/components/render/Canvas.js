@@ -9,16 +9,16 @@ import './Canvas.css'
 
 const Canvas = (props) => {
   const canvasRef = useRef();
-
   const settingsRef = useRef();
-
   const fileInputRef = useRef();
+
+  const [paused, setPaused] = useState(false);
 
   const mousePosition = useMousePosition();
   const [panelVisible, setPanelVisible] = useState(true);
   const [autoHide, setAutoHide] = useState(false);
 
-  //const [panelRefresh, refreshPanel] = useReducer(x => x + 1, 0);
+  const [, refreshPanel] = useReducer(x => x + 1, 0);
 
   // User input through keyboard shortcuts
   const handleKeyPress = (event) => {
@@ -29,6 +29,10 @@ const Canvas = (props) => {
       break;
       case 'd': // Download shortcut
         handleCanvasDownload();
+      break;
+      case ' ':
+        event.preventDefault();
+        togglePause();
       break;
       default:
       break;
@@ -53,12 +57,17 @@ const Canvas = (props) => {
     };
   });
 
+  const togglePause = () => {
+    TXC.setPaused(!paused);
+    setPaused(!paused);
+  };
+
   const handleScroll = (event) => {
     var scale = TXC.getValue("scale");
     const delta = Math.sign(event.deltaY) * scale * 0.1;
     scale += delta;
     TXC.updateValue("scale", scale);
-    //refreshPanel();
+    refreshPanel();
   }
 
   //TODO remove offset from TXC, not needed when I have pos?
@@ -87,8 +96,6 @@ const Canvas = (props) => {
       prevPosition[0] + offset[0], 
       prevPosition[1] - offset[1]
     ]);
-
-    //TXC.setPosition([mousePosition.x, window.innerHeight - mousePosition.y]);
   }, [mousePosition, mouseDown]);
 
   // Handle resize events
@@ -121,7 +128,7 @@ const Canvas = (props) => {
       reader.onload = (f) => {
         TXC.importSettings(f.target.result);
         // Refresh the panel to set the correct slider values
-        //refreshPanel();
+        refreshPanel();
       };
       reader.readAsText(file);
     }
@@ -210,6 +217,13 @@ const Canvas = (props) => {
                 accept="application/JSON"
               />
             </div>
+          </div>
+
+          { /* Pause button */}
+          <div className="button-container settings__pause-button-container">
+            <button 
+              className={"button settings__pause-button-container__button" + (paused ? " active " : "")}
+              onClick={togglePause}>{paused ? "Unpause" : "Pause" }</button>
           </div>
 
           { /* General control panel */}
