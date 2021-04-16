@@ -50,21 +50,44 @@ const Canvas = (props) => {
   // User input through keyboard shortcuts
   // TODO abstract all user input to a separate object, containing descriptions etc 
   // TODO then use these description for tooltip
+  const shortcuts = new Map([
+    [
+      'h', // Hiding and unhiding the settings panel
+      {    
+        action: (e) => {
+          if(autoHide) {
+            setAutoHide(false);
+            setPanelVisible(true);
+          } else {
+            setAutoHide(true);
+          }
+        },
+        description: "Hide or unhide the settings panel"
+      }
+    ],
+    [
+      'd', // Downloading the render
+      {    
+        action: (e) => {
+          handleCanvasDownload();
+        },
+        description: "Download the current frame as a PNG image"
+      }
+    ],
+    [
+      ' ', // Toggle pause
+      {    
+        action: (e) => {
+          e.preventDefault();
+          togglePause();
+        }
+      }
+    ],
+  ]);
+
   const handleKeyPress = (event) => {
-    switch(event.key) {
-      case 'h': // Toggle settings panel
-        setPanelVisible(!panelVisible);
-        setAutoHide(false);
-      break;
-      case 'd': // Download shortcut
-        handleCanvasDownload();
-      break;
-      case ' ':
-        event.preventDefault();
-        togglePause();
-      break;
-      default:
-      break;
+    if(shortcuts.has(event.key)) {
+      shortcuts.get(event.key).action(event); 
     }
   }
 
@@ -106,19 +129,22 @@ const Canvas = (props) => {
   // IMPORT/EXPORT
 
   // Handle canvas download 
-  const handleCanvasDownload = () => {
+  const handleCanvasDownload = (event) => {
     // Capture the next frame and prompt a download using a callback function
     // This is required since the canvas has to be captured after the render
     // Otherwise, the resulting image will be blank
     TXC.captureFrame((dataURL) => {
       promptDownload(dataURL, "canvas.png");
+      event.currentTarget.blur();
     });
   };
 
   // Handle settings download
-  const handleSettingsDownload = () => {
+  const handleSettingsDownload = (event) => {
     // Downloads the current settings of the texture controller
     downloadJSON(TXC.exportSettings(), "settings.json");
+
+    event.currentTarget.blur();
   };
 
   // Function for prompting the user with a file chooser window
@@ -146,6 +172,12 @@ const Canvas = (props) => {
 
       reader.readAsText(file);
     }
+  };
+
+  // Changes the auto hide state
+  const handleAutoHide = (event) => {
+    setAutoHide(!autoHide);
+    event.currentTarget.blur();
   };
 
   //////////////////
@@ -324,7 +356,7 @@ const Canvas = (props) => {
           <div className="settings__auto-hide-button-container">
             <button 
               className={"button settings__auto-hide-button-container__button" + (autoHide ? " active" : "")} 
-              onClick={() => setAutoHide(!autoHide)}>
+              onClick={handleAutoHide}>
                 {!autoHide ? "Enable auto hide" : "Disable auto hide"}
             </button>
           </div>
