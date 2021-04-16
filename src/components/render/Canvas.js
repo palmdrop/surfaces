@@ -8,19 +8,48 @@ import { useMousePosition } from '../../hooks/MousePositionHook'
 import './Canvas.css'
 
 const Canvas = (props) => {
-  const canvasRef = useRef();
-  const settingsRef = useRef();
-  const fileInputRef = useRef();
+  ////////////////
+  // REFERENCES //
+  ////////////////
+  const canvasRef    = useRef(); // The canvas object who holds the WebGL context
+  const settingsRef  = useRef(); // The settings panel
+  const fileInputRef = useRef(); // The file input tag that is used to handle user file choosing
 
-  const [paused, setPaused] = useState(false);
+  ////////////
+  // STATES //
+  ////////////
+  const mousePosition = useMousePosition(); // Custom state/hook which tracks the current mouse position
+  const [paused, setPaused] = useState(false); // Pauses/unpauses the animation
 
-  const mousePosition = useMousePosition();
-  const [panelVisible, setPanelVisible] = useState(true);
-  const [autoHide, setAutoHide] = useState(false);
+  const [panelVisible, setPanelVisible] = useState(true); // The visiblity state of the settings panel
+  const [autoHide, setAutoHide] = useState(false); // If true, the panel will hide automatically 
 
+  // States for handling view change using mouse
+  // The user can drag the canvas to move the view
+  const [mouseDown, setMouseDown] = useState(false); // True if the primary mouse button is held
+  const [anchor, setAnchor] = useState([0, 0]); // The "anchor" is the position where the mouse was first pressed
+  const [prevPosition, setPrevPosition] = useState([0, 0]); // A copy of the previous view position
+
+  // A reducer used to force update the panel (required when the settings are changed outside the panel)
   const [, refreshPanel] = useReducer(x => x + 1, 0);
 
+  ////////////////////
+  // EVENT HANDLERS //
+  ////////////////////
+
+  // GENERAL
+
+  // Pauses the animation entirely (same effect as setting the general animation speed to 0.0)
+  const togglePause = () => {
+    TXC.setPaused(!paused);
+    setPaused(!paused);
+  };
+
+  // KEYBOARD INPUT
+
   // User input through keyboard shortcuts
+  // TODO abstract all user input to a separate object, containing descriptions etc 
+  // TODO then use these description for tooltip
   const handleKeyPress = (event) => {
     switch(event.key) {
       case 'h': // Toggle settings panel
@@ -39,75 +68,48 @@ const Canvas = (props) => {
     }
   }
 
-  // Listen for keyboard events 
-  useEffect(() => {
-    document.addEventListener("keydown", handleKeyPress);
+  // MOUSE INPUT
 
-    canvasRef.current.addEventListener("wheel", handleScroll);
-    canvasRef.current.addEventListener("mousedown", handleMouseDown);
-    canvasRef.current.addEventListener("mouseup", handleMouseReleased);
-    canvasRef.current.addEventListener("mouseout", handleMouseReleased);
-
-    return () => {
-      document.removeEventListener("keydown", handleKeyPress);
-      canvasRef.current.removeEventListener("wheel", handleScroll);
-      canvasRef.current.removeEventListener("mousedown", handleMouseDown);
-      canvasRef.current.removeEventListener("mouseup", handleMouseReleased);
-      canvasRef.current.removeEventListener("mouseout", handleMouseReleased);
-    };
-  });
-
-  const togglePause = () => {
-    TXC.setPaused(!paused);
-    setPaused(!paused);
-  };
-
+  // Zoom the view on user scroll (same effect as in changing the "scale" slider)
   const handleScroll = (event) => {
+    // Get the current scale value
     var scale = TXC.getValue("scale");
-    const delta = Math.sign(event.deltaY) * scale * 0.1;
+
+    // Calculate a new scale value based on the previous one
+    const delta = Math.sign(event.deltaY) * scale * 0.1; 
     scale += delta;
+
+    // Update the value in the texture controller
     TXC.updateValue("scale", scale);
+
+    // Refresh the panel to ensure that the slider value reflects the change
     refreshPanel();
   }
 
-  //TODO remove offset from TXC, not needed when I have pos?
-  const [mouseDown, setMouseDown] = useState(false);
-  const [anchor, setAnchor] = useState([0, 0]);
-  const [prevPosition, setPrevPosition] = useState([0, 0]);
-
+  // Sets the anchor point and stores the previous offset
+  // These values will then be used to calculate the new position of the view
   const handleMouseDown = (event) => {
     if(mouseDown) return;
     setAnchor([mousePosition.x, mousePosition.y]);
     setPrevPosition([TXC.position[0], TXC.position[1]]);
     setMouseDown(true);
   }
+
+  // Register when the mouse is released
+  // This will be triggered if the mouse button is let go, or if the
+  // mouse leaves the canvas area
   const handleMouseReleased = (event) => {
     if(!mouseDown) return;
     setMouseDown(false);
   }
 
-  useEffect(() => {
-    if(!mouseDown) return;
-    var scale = TXC.getValue("scale");
-
-    const offset = [(anchor[0] - mousePosition.x) * scale, (anchor[1] - mousePosition.y) * scale];
-
-    TXC.setPosition([
-      prevPosition[0] + offset[0], 
-      prevPosition[1] - offset[1]
-    ]);
-  }, [mousePosition, mouseDown]);
-
-  // Handle resize events
-  const handleResize = () => TXC.handleResize();
-  useLayoutEffect(() => {
-    window.addEventListener('resize', handleResize);
-    handleResize();
-    return () => window.removeEventListener('resize', handleResize);
-  });
+  // IMPORT/EXPORT
 
   // Handle canvas download 
   const handleCanvasDownload = () => {
+    // Capture the next frame and prompt a download using a callback function
+    // This is required since the canvas has to be captured after the render
+    // Otherwise, the resulting image will be blank
     TXC.captureFrame((dataURL) => {
       promptDownload(dataURL, "canvas.png");
     });
@@ -115,13 +117,24 @@ const Canvas = (props) => {
 
   // Handle settings download
   const handleSettingsDownload = () => {
+    // Downloads the current settings of the texture controller
     downloadJSON(TXC.exportSettings(), "settings.json");
   };
 
+  // Function for prompting the user with a file chooser window
+  const handleSettingsImport = (event) => {
+    fileInputRef.current.click();
+    event.currentTarget.blur();
+  };
+
   // Sets the current settings file from an input event
+  // Is called when the user chooses a file in the dialog prompted by 
+  // the handleSettingsImport function
   const handleInputChange = (event) => {
+    // The selected file
     const file = event.target.files[0];
 
+    // If non-null...
     if(file) {
       // Read file, and import the contents to the texture controller
       var reader = new FileReader();
@@ -130,29 +143,96 @@ const Canvas = (props) => {
         // Refresh the panel to set the correct slider values
         refreshPanel();
       };
+
       reader.readAsText(file);
     }
   };
 
-  // Function for prompting the user with a file chooser window
-  const handleSettingsImport = () => {
-    fileInputRef.current.click();
-  };
+  //////////////////
+  // EFFECT HOOKS //
+  //////////////////
 
-  // Initialize texture controller in use effect hook to ensure that
-  // the canvas element has been initialized first
+  // INITIALIZATION
+
+  // Initialize texture controller
+  // A hook is used to ensure that the canvas element has been initialized first
   useEffect(() => {
+    // If the texture controller hasn't been initialized yet, initialize
     if(!TXC.isInitialized()) {
-      // Initialize the texture controller 
       if(TXC.initialize(canvasRef.current) === -1) {
+        // TODO better error handling with suitable messages
         throw new Error("Texture controller failed to initialize");
       }
       // Immediately resize to fill the available space
       TXC.handleResize();
     }
+
+    // Start the render loop immediately
     TXC.startRenderLoop();
     return () => TXC.stopRenderLoop();
   }, []);
+
+  // WINDOW RESIZE
+
+  // Handle resize events
+  useLayoutEffect(() => {
+    // Let the texture controller handle the resize
+    const handleResize = () => TXC.handleResize();
+
+    window.addEventListener('resize', handleResize);
+    handleResize();
+
+    return () => window.removeEventListener('resize', handleResize);
+  });
+
+  // INPUT LISTENERS
+
+  // Register all global listeners
+  useEffect(() => {
+
+    // Handle keyboard shortcuts
+    document.addEventListener("keydown", handleKeyPress);
+
+    // Handle zoom 
+    canvasRef.current.addEventListener("wheel", handleScroll);
+
+    // For moving the view (both mouseup and mouseout acts as mouse released)
+    canvasRef.current.addEventListener("mousedown", handleMouseDown);
+    canvasRef.current.addEventListener("mouseup", handleMouseReleased);
+    canvasRef.current.addEventListener("mouseout", handleMouseReleased);
+
+    const canvasCopy = canvasRef.current;
+
+    // Remove all listeners on re-render
+    return () => {
+      document.removeEventListener("keydown", handleKeyPress);
+      canvasCopy.removeEventListener("wheel", handleScroll);
+      canvasCopy.removeEventListener("mousedown", handleMouseDown);
+      canvasCopy.removeEventListener("mouseup", handleMouseReleased);
+      canvasCopy.removeEventListener("mouseout", handleMouseReleased);
+    };
+  });
+
+  // MOUSE MOVEMENT
+
+  //  Effect for handling view movement using mouse drag
+  useEffect(() => {
+    // If the mouse is not held, do nothing
+    if(!mouseDown) return;
+
+    // Get the current scale. This is used to correctly translate the view
+    var scale = TXC.getValue("scale");
+
+    // The offset from the anchor point 
+    const offset = [(anchor[0] - mousePosition.x) * scale, (anchor[1] - mousePosition.y) * scale];
+
+    // The previous view position
+    // This previous position is set once the mouse button is first pressed
+    TXC.setPosition([
+      prevPosition[0] + offset[0], 
+      prevPosition[1] - offset[1]
+    ]);
+  }, [mousePosition, mouseDown, anchor, prevPosition]);
 
   // Effect for hiding the settings panel if 
   // the mouse is not hovering over it
@@ -184,7 +264,12 @@ const Canvas = (props) => {
     }
   },[mousePosition, autoHide, panelVisible]);
 
+
+  //////////
+  // BODY //
+  //////////
   return (
+      /* Root container */
       <div className="canvas-container">
 
         { /* Settings panel */}
