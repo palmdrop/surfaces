@@ -7,7 +7,7 @@ import { camelToTitle } from '../../tools/Utils'
 
 import './ControlPanel.css'
 
-const ControlPanel = ({ attributes, getter, setter, separator, precision }) => {
+const ControlPanel = ({ attributes, getter, setter, defaults, separator, precision }) => {
     // Sets up a single slider 
     const createSlider = (attribute, name, fullName, index) => {
         return (<InputSlider
@@ -15,6 +15,7 @@ const ControlPanel = ({ attributes, getter, setter, separator, precision }) => {
             key={index}
             label={camelToTitle(name)}
             valueGetter={() => getter(fullName)}
+            defaultValue={defaults(fullName)}
             onChange={(v) => setter(fullName, v)}
             min={attribute.min}
             max={attribute.max}
@@ -24,10 +25,9 @@ const ControlPanel = ({ attributes, getter, setter, separator, precision }) => {
                 // Otherwise, check if the attribute is of integer type
                 // If yes, set step to "1", otherwise calculate a small step based on 
                 // the min and max values
-                (attribute.type === "1i" ? 1 : (attribute.max - attribute.min) / 1000)
+                (attribute.type === "1i" ? 1 : (attribute.max - attribute.min) / 100)
             }
             marks={attribute.marks}
-            constrain={true}
             precision={precision}
             fullName={fullName}
         />)

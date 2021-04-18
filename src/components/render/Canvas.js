@@ -45,15 +45,22 @@ const Canvas = (props) => {
     setPaused(!paused);
   };
 
+  const changeAnimationSpeed = (delta) => {
+    var speed = TXC.getValue("animationSpeed.general");
+    TXC.updateValue("animationSpeed.general", Math.max(speed + delta, 0.0));
+    refreshPanel();
+  };
+
   // KEYBOARD INPUT
 
   // User input through keyboard shortcuts
   // TODO abstract all user input to a separate object, containing descriptions etc 
   // TODO then use these description for tooltip
-  const shortcuts = new Map([
-    [
-      'h', // Hiding and unhiding the settings panel
-      {    
+
+  // TODO create better interface for changing values using functions
+  // TODO ability to change values using keyboard and having it reflect in panel automatically
+  const shortcuts = new Map()
+    .set('h', {
         action: (e) => {
           if(autoHide) {
             setAutoHide(false);
@@ -63,27 +70,35 @@ const Canvas = (props) => {
           }
         },
         description: "Hide or unhide the settings panel"
-      }
-    ],
-    [
-      'd', // Downloading the render
-      {    
-        action: (e) => {
-          handleCanvasDownload();
-        },
-        description: "Download the current frame as a PNG image"
-      }
-    ],
-    [
-      ' ', // Toggle pause
-      {    
-        action: (e) => {
-          e.preventDefault();
-          togglePause();
-        }
-      }
-    ],
-  ]);
+    })
+    .set('d', {
+      action: (e) => {
+        handleCanvasDownload(e);
+      },
+      description: "Download the current frame as a PNG image"
+    })
+    .set(' ', {
+      action: (e) => {
+        e.preventDefault();
+        togglePause();
+      },
+      description: "Toggle pause of the animation"
+    })
+    .set('-', {
+      action: (e) => {
+        changeAnimationSpeed(-0.01);
+      },
+      description: "Slow down animation speed"
+    })
+    .set('+', {
+      action: (e) => {
+        changeAnimationSpeed(0.01);
+      },
+      description: "Speed up animation speed"
+    })
+    
+    ;
+  
 
   const handleKeyPress = (event) => {
     if(shortcuts.has(event.key)) {
@@ -135,7 +150,7 @@ const Canvas = (props) => {
     // Otherwise, the resulting image will be blank
     TXC.captureFrame((dataURL) => {
       promptDownload(dataURL, "canvas.png");
-      event.currentTarget.blur();
+      //event.currentTarget.blur();
     });
   };
 
@@ -348,6 +363,7 @@ const Canvas = (props) => {
             attributes={TXC.attributes}
             getter={(name) => TXC.getValue(name)}
             setter={(name, value) => TXC.updateValue(name, value)}
+            defaults={(name) => TXC.getDefault(name)}
             separator={"."}
             //key={panelRefresh}
           />

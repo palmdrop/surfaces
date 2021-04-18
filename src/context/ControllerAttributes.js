@@ -44,9 +44,21 @@ const noiseSettings = () => {
                     pow: {
                         value: 1.0,
                         type: "1f",
-                        min: 0.0,
+                        min: -1.0,
                         max: 5
-                    }
+                    },
+                    xStretch: {
+                        value: 1.0,
+                        type: "1f",
+                        min: 0.001,
+                        max: 10
+                    },
+                    yStretch: {
+                        value: 1.0,
+                        type: "1f",
+                        min: 0.001,
+                        max: 10
+                    },
                 },
             }
         },
@@ -70,8 +82,8 @@ const getDefaultAttributes = () => {
             isUniform: true,
             type: "1f",
 
-            min: 0.01,
-            max: 10
+            min: 0.001,
+            max: 3
         },
         iterations: {
             value: 2,

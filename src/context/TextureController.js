@@ -54,6 +54,7 @@ class TextureController {
         // These are the general settings of the shader, and most of them directly correspond
         // to shader uniforms. 
         this.attributes = getDefaultAttributes();
+        this.defaultAttributes = getDefaultAttributes();
 
         // The animation frame ID of the current frame
         // Used to cancel the animation if necessary
@@ -150,16 +151,19 @@ class TextureController {
         // SET SHADER UNIFORMS 
         console.log("Setting uniforms");
 
-        const source        = createDefaultNoiseSettings(noiseTypes.SIMPLEX, 3);
+        //TODO stop using noise settings helper class, just set all manually?!
+        /*const source        = createDefaultNoiseSettings(noiseTypes.SIMPLEX, 3);
         const angleControl  = createDefaultNoiseSettings(noiseTypes.SIMPLEX, 3);
         const amountControl = createDefaultNoiseSettings(noiseTypes.SIMPLEX, 3);
+        */
 
         GLC.setShaderProgram(this.program);
 
         // Set noise settings
-        setNoiseSettings(source,        this.program, "source");
+        /*setNoiseSettings(source,        this.program, "source");
         setNoiseSettings(angleControl,  this.program, "angleControl");
         setNoiseSettings(amountControl, this.program, "amountControl");
+        */
 
         // Update uniform values
         this.initialized = true;
@@ -239,7 +243,7 @@ class TextureController {
     // Used to fetch the attribute data of a specific location
     // Should probably only be used internally
     // TODO make PRIVATE?
-    getAttribute(location) {
+    getAttribute(attributes, location) {
         // Helper function for checking if an object contains a specific property
         const hasProperty = (object, property) => {
             return Object.prototype.hasOwnProperty.call(object, property);
@@ -248,10 +252,10 @@ class TextureController {
         var subLocations = location.split(".");
 
         // Check if attribute exists in main attributes object
-        if(!hasProperty(this.attributes, subLocations[0])) return undefined;
+        if(!hasProperty(attributes, subLocations[0])) return undefined;
 
         // Get the current attribute
-        var currentAttribute = this.attributes[subLocations[0]];
+        var currentAttribute = attributes[subLocations[0]];
 
         // If there's more sub-locations in the query, iterate through them
         // until the bottom level is found
@@ -268,7 +272,7 @@ class TextureController {
 
         // Returns an array where the first element specifies if the attribute has a corresponding
         // shader uniform, and the second element is the data itself
-        return [this.attributes[subLocations[0]].isUniform, currentAttribute];
+        return [attributes[subLocations[0]].isUniform, currentAttribute];
     }
 
     // Set all the uniforms from the attributes object
@@ -318,7 +322,14 @@ class TextureController {
     // Returns a value from the attribute object
     // Used to query the internal state of the texture controller
     getValue(name) {
-        const [, v] = this.getAttribute(name);
+        const [, v] = this.getAttribute(this.attributes, name);
+        if(typeof v === "undefined") return undefined;
+        return v.value;
+    }
+
+    // Returns the default (initial) value
+    getDefault(name) {
+        const [, v] = this.getAttribute(this.defaultAttributes, name);
         if(typeof v === "undefined") return undefined;
         return v.value;
     }
@@ -328,7 +339,7 @@ class TextureController {
         //TODO create some form of callback to sliders that force them to re-read when a value is changed?!
 
         // Find the requested attribute, or return if it does not exist
-        const [isUniform, attribute] = this.getAttribute(name);
+        const [isUniform, attribute] = this.getAttribute(this.attributes, name);
         if(typeof v === "undefined") return -1;
 
         // Do nothing if the value is unchanged

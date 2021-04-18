@@ -1,21 +1,9 @@
-import React, { useEffect, useState } from 'react';
+import React, { useRef, useEffect, useState } from 'react';
 import { Slider /*, Input */ } from '@material-ui/core';
 import './InputSlider.css';
 
-const InputSlider = ({ label, valueGetter, onChange, min, max, step, constrain, marks, precision, fullName }) => {
-    // Handle input change from the input field
-    /*const handleInputChange = (e) => {
-        if(e.target.value !== '') {
-            var value = Number(e.target.value);
-
-            // If set to constrain the value, make sure the value stays within the min and the max
-            if(constrain) {
-                value = Math.min(Math.max(Number(e.target.value), min), max);
-            }
-            
-            handleChange(value);
-        }
-    };*/
+const InputSlider = ({ label, valueGetter, defaultValue, onChange, min, max, step, marks, precision, fullName }) => {
+    const ref = useRef();
 
     const round = (value) => {
         return +value.toFixed(precision || 7);
@@ -42,11 +30,45 @@ const InputSlider = ({ label, valueGetter, onChange, min, max, step, constrain, 
         }
     };
 
-    /*const handleScroll = (event) => {
-        console.log(label);
-        const delta = Math.sigh(event.deltaY) * step;
-        handleChange(state + delta);
-    };*/
+    // Updates the value of the slider on user scroll
+    const handleScroll = (event) => {
+        // Prevent the page from scrolling
+        event.preventDefault();
+
+        // Calculate the value change
+        const delta = Math.sign(event.deltaY) * step;
+        var v = valueGetter() + delta;
+
+        // Constrain the value 
+        v = Math.min(Math.max(v, min), max);
+
+        // And make sure the value lands on possible marks
+        if(marks) {
+            v = marks.reduce((a, b) => {
+                return Math.abs(b - v) < Math.abs(a - v) ? b : a;
+            });
+        }
+
+        handleChange(v);
+    };
+
+    // Resets the slider value to the default
+    const handleDoubleClick = (event) => {
+        handleChange(defaultValue);
+    };
+
+    // Registers listener for scroll events
+    useEffect(() => {
+        const refCopy = ref.current;
+
+        refCopy.addEventListener("wheel", handleScroll);
+        refCopy.addEventListener("dblclick", handleDoubleClick);
+
+        return () => {
+            refCopy.removeEventListener("wheel", handleScroll);
+            refCopy.removeEventListener("dblclick", handleDoubleClick);
+        };
+    },[]);
 
     return (
         <div 
@@ -62,19 +84,8 @@ const InputSlider = ({ label, valueGetter, onChange, min, max, step, constrain, 
                     max={max}
                     step={step}
                     marks={marks}
-                    //onScroll={handleScroll}
+                    ref={ref}
                 />
-                {/*<Input className="input-slider__input_field"
-                    value={state}
-                    margin="dense"
-                    inputProps={{
-                        type: 'number',
-                        min: `${min}`,
-                        max: `${max}`,
-                        step: `${step}`,
-                    }}
-                    onChange={handleInputChange}
-                />*/}
             </div>
         </div>
     )
