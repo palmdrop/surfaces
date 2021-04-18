@@ -32,14 +32,26 @@ float applyModifications(float value, Modifications modifications) {
 }
 
 float getNoise(vec3 position, float frequency, float amplitude, vec3 offset, Modifications modifications) {
-    vec3 sample = position * frequency + offset;
+    vec3 sample = position * vec3(modifications.xStretch, modifications.yStretch, 1.0) * frequency + offset;
     float result = 0.0;
 
     result = simplex3d(sample);
     result = 0.5 + result / 2.0;
 
-    result = applyModifications(result, modifications);
+    // Apply modiifcations
+    if(modifications.ridgeThreshold < 1.0) {
+        float threshold = max(0.5, modifications.ridgeThreshold);
+        if(result > threshold) {
+            result = threshold - (result - threshold);
+        }
+        //TODO fix magic number etc
+        result /= pow(threshold, 0.70);
+    }
+    if(modifications.pow != 1.0) {
+        result = pow(result, modifications.pow);
+    }
 
+    // Verify valid result
     if(isnan(result)) {
         result = 0.0;
     }
