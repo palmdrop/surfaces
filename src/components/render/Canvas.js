@@ -120,6 +120,10 @@ const Canvas = (props) => {
     // Update the value in the texture controller
     TXC.updateValue("scale", scale);
 
+    // Offset the center in the direction of the cursor
+    var offset = [(mousePosition.x - window.innerWidth/2) * delta, (mousePosition.y - window.innerHeight/2) * delta];
+    TXC.setPosition([TXC.position[0] - offset[0], TXC.position[1] + offset[1]]); 
+
     // Refresh the panel to ensure that the slider value reflects the change
     refreshPanel();
   }
@@ -217,7 +221,7 @@ const Canvas = (props) => {
     // Start the render loop immediately
     TXC.startRenderLoop();
     return () => TXC.stopRenderLoop();
-  }, []);
+  });
 
   // WINDOW RESIZE
 
