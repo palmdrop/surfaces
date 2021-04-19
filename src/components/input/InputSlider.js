@@ -19,7 +19,7 @@ const InputSlider = ({ label, valueGetter, defaultValue, onChange, min, max, ste
     // externally.
     useEffect(() => {
         setState(round(valueGetter()));
-    });
+    }, [round, valueGetter]);
 
     // Only update the value if it's actually different
     // This avoids unnecessary useEffect triggers in parent classes
@@ -36,7 +36,7 @@ const InputSlider = ({ label, valueGetter, defaultValue, onChange, min, max, ste
         event.preventDefault();
 
         // Calculate the value change
-        const delta = Math.sign(event.deltaY) * step;
+        const delta = -Math.sign(event.deltaY) * step;
         var v = valueGetter() + delta;
 
         // Constrain the value 

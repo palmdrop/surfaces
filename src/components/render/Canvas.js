@@ -96,7 +96,6 @@ const Canvas = (props) => {
       },
       description: "Speed up animation speed"
     })
-    
     ;
   
 

@@ -1,17 +1,85 @@
 class GLCommander {
     constructor() {
+        this.canvas = null;
+        this.gl = null;
         this.initialized = false;
 
         // Map for storing uniform locations
-        // {program, uniformName} => uniformLocation
         this.uniformLocations = new Map();
     }
 
     // Initialize the canvas and webgl context variables
-    init(canvas, gl) {
+    init(canvas) {
+        // INITIALIZE THE WEBGL CONTEXT
+        console.log("Initializing webgl context");
+
+        // If the canvas is null, we cannot proceed. Abort.
+        if(!canvas) {
+            console.log("The canvas is not initialized")
+            return false;
+        }
+
+        // Get the webgl context
+        let gl = canvas.getContext('webgl');
+
+        // If no context was retrieved, try experimental webgl
+        if(!gl) {
+            console.log('Webgl not supported, falling back on experimental-webgl');
+            gl = canvas.getContext('experimental-webgl');
+        }
+
+        // If there's still no context, abort
+        if(!gl) {
+            alert("Your browser does not support WebGL");
+            return false;
+        }
+
         this.canvas = canvas;
         this.gl = gl;
         this.initialized = true;
+
+        return true;
+    }
+
+    // Setup a two triangles that cover the entire screen
+    createFullScreenQuad(program, vertexLocation) {
+        const triangleVertices = 
+        [
+            // Triangle 1
+            -1.0,  1.0,
+            -1.0, -1.0,
+             1.0, -1.0,
+
+            // Triangle 2
+            -1.0,  1.0,
+             1.0,  1.0,
+             1.0, -1.0,
+        ];
+
+        // Array buffer for triangle vertices
+        this.quadBuffer = GLC.createBuffer(this.gl.ARRAY_BUFFER, triangleVertices, this.gl.STATIC_DRAW);
+
+        // Set and enable the corresponding attribute 
+        GLC.setAttribLayout(
+            program, 
+            vertexLocation,
+            2,
+            this.gl.FLOAT,
+            2 * Float32Array.BYTES_PER_ELEMENT,
+            0
+        );
+    }
+
+    // Render the default full screen quad
+    renderFullScreenQuad(program) {
+        this.setShaderProgram(program);
+
+        // Bind the data
+        this.bindBuffer(this.gl.ARRAY_BUFFER, this.quadBuffer);
+
+        // Clear and draw 
+        this.clear(0.0, 0.0, 0.0, 1.0);
+        this.draw(6);
     }
 
     isInitialized() {
@@ -32,7 +100,7 @@ class GLCommander {
     setViewport(width, height) {
         this.canvas.width = width;
         this.canvas.height = height;
-        this.gl.viewport(0, 0, 2*width, 2*height);
+        this.gl.viewport(0, 0, width, height);
     }
 
     // Creates a shader program, loads with shader source, compiles, links, and verifies

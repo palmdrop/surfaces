@@ -2,7 +2,8 @@ import GLC from './GLC'
 
 // Noise-related imports, these functions and objects
 // are adapted to work well with GLSL structs in the warp shader
-import { noiseTypes, setNoiseSettings, createDefaultNoiseSettings } from '../tools/NoiseSettings';
+/*import { noiseTypes, setNoiseSettings, createDefaultNoiseSettings } from '../tools/NoiseSettings';
+*/
 
 // Shaders imported using glslify
 import vertexShaderSource from '../GL/shaders/simple.vert'
@@ -13,7 +14,6 @@ class TextureController {
     ////////////////////
     // INITIALIZATION //
     ////////////////////
-
     constructor() {
         // Helper function for calculating a random offset
         // The random offset is used to ensure that the different noise
@@ -34,7 +34,7 @@ class TextureController {
 
         // Random offsets for each layer
         this.sourceOffset = randomOffset();
-        this.angleOffset = randomOffset();
+        this.angleOffset  = randomOffset();
         this.amountOffset = randomOffset();
 
         // The position of the internal view and the dimensions of the canvas
@@ -74,41 +74,18 @@ class TextureController {
     initialize(canvas) {
         if(this.initialized) {
             console.log("The texture controller is already initialized");
-            return 0;
-        }
-
-        // INITIALIZE THE WEBGL CONTEXT
-        console.log("Initializing webgl context");
-
-        // If the canvas is null, we cannot proceed. Abort.
-        if(!canvas) {
-            console.log("The canvas is not initialized")
-            return -1;
-        }
-
-        this.canvas = canvas;
-
-        // Get the webgl context
-        let gl = canvas.getContext('webgl');
-
-        // If no context was retrieved, try experimental webgl
-        if(!gl) {
-            console.log('Webgl not supported, falling back on experimental-webgl');
-            gl = canvas.getContext('experimental-webgl');
-        }
-
-        // If there's still no context, abort
-        if(!gl) {
-            alert("Your browser does not support WebGL");
-            return -1;
+            return true;
         }
 
         // INITIALIZE GLC (HELPER CLASS)
         console.log("Initializing webgl controller (GLC)");
 
         // This class is used as a facade against the webgl context
-        GLC.init(canvas, gl);
+        if(!GLC.init(canvas)) {
+            throw new Error("GLC failed to initialize");
+        }
 
+        this.canvas = canvas;
 
         // COMPILE SHADERS
         console.log("Compiling shaders");
@@ -122,52 +99,15 @@ class TextureController {
             throw new Error("Shader not created");
         }
 
-        // INITIIALIZE VERTEX DATA
+        // Setup full screen quad
         console.log("Initializing vertex data");
-
-        // Create triangle data
-        // Two triangles are created to form a quad which fills the entire screen
-        const triangleVertices = 
-        [
-            -1.0,  1.0,
-            -1.0, -1.0,
-             1.0, -1.0,
-
-            -1.0,  1.0,
-             1.0,  1.0,
-             1.0, -1.0,
-        ];
-
-        GLC.createBuffer(gl.ARRAY_BUFFER, triangleVertices, gl.STATIC_DRAW);
-        GLC.setAttribLayout(
-            this.program, 
-            'vertPosition',
-            2,
-            gl.FLOAT,
-            2 * Float32Array.BYTES_PER_ELEMENT,
-            0
-        );
+        GLC.createFullScreenQuad(this.program, "vertPosition");
 
         // SET SHADER UNIFORMS 
         console.log("Setting uniforms");
 
-        //TODO stop using noise settings helper class, just set all manually?!
-        /*const source        = createDefaultNoiseSettings(noiseTypes.SIMPLEX, 3);
-        const angleControl  = createDefaultNoiseSettings(noiseTypes.SIMPLEX, 3);
-        const amountControl = createDefaultNoiseSettings(noiseTypes.SIMPLEX, 3);
-        */
-
         GLC.setShaderProgram(this.program);
-
-        // Set noise settings
-        /*setNoiseSettings(source,        this.program, "source");
-        setNoiseSettings(angleControl,  this.program, "angleControl");
-        setNoiseSettings(amountControl, this.program, "amountControl");
-        */
-
-        // Update uniform values
-        this.initialized = true;
-        this.setUniforms();
+        this._setUniforms();
 
         // Finally, set internal states
         this.time = 0.0;
@@ -175,7 +115,9 @@ class TextureController {
 
         console.log("Done initializing texture controller");
 
-        return 0;
+        this.initialized = true;
+
+        return true;
     };
 
     ///////////////////
@@ -226,7 +168,7 @@ class TextureController {
         this.attributes = mergeSettings(getDefaultAttributes(), imported);
 
         // Update all uniforms with the new settings
-        this.setUniforms();
+        this._setUniforms();
     }
 
     // Used to capture the next frame of animation
@@ -243,7 +185,7 @@ class TextureController {
     // Used to fetch the attribute data of a specific location
     // Should probably only be used internally
     // TODO make PRIVATE?
-    getAttribute(attributes, location) {
+    _getAttribute(attributes, location) {
         // Helper function for checking if an object contains a specific property
         const hasProperty = (object, property) => {
             return Object.prototype.hasOwnProperty.call(object, property);
@@ -278,8 +220,8 @@ class TextureController {
     // Set all the uniforms from the attributes object
     // Should only be used internally
     // TODO make PRIVATE?
-    setUniforms() {
-        if(!this.initialized) return;
+    _setUniforms() {
+        //if(!this.initialized) return;
 
         // Helper function for setting a specific uniform, if it exists
         // Recursively sets all sub-attributes
@@ -322,14 +264,14 @@ class TextureController {
     // Returns a value from the attribute object
     // Used to query the internal state of the texture controller
     getValue(name) {
-        const [, v] = this.getAttribute(this.attributes, name);
+        const [, v] = this._getAttribute(this.attributes, name);
         if(typeof v === "undefined") return undefined;
         return v.value;
     }
 
     // Returns the default (initial) value
     getDefault(name) {
-        const [, v] = this.getAttribute(this.defaultAttributes, name);
+        const [, v] = this._getAttribute(this.defaultAttributes, name);
         if(typeof v === "undefined") return undefined;
         return v.value;
     }
@@ -339,7 +281,7 @@ class TextureController {
         //TODO create some form of callback to sliders that force them to re-read when a value is changed?!
 
         // Find the requested attribute, or return if it does not exist
-        const [isUniform, attribute] = this.getAttribute(this.attributes, name);
+        const [isUniform, attribute] = this._getAttribute(this.attributes, name);
         if(typeof v === "undefined") return -1;
 
         // Do nothing if the value is unchanged
@@ -383,8 +325,8 @@ class TextureController {
         const oldHeight = this.dimensions[1];
 
         // Set the dimensions to that of the inner window size, since the canvas covers everything
-        const newWidth = window.innerWidth;
-        const newHeight = window.innerHeight;
+        const newWidth = 2 * window.innerWidth;
+        const newHeight = 2 * window.innerHeight;
         const newDimensions = [newWidth, newHeight];
 
         // Offset the position to ensure that the center of the view remains the same
@@ -394,6 +336,8 @@ class TextureController {
 
         // Update values
         GLC.setViewport(newWidth, newHeight);
+        this.canvas.style.width = window.innerWidth;
+        this.canvas.style.height = window.innerHeight;
         GLC.setUniform(this.program, "viewport", "2fv", newDimensions);
         this.dimensions = newDimensions;
     }
@@ -403,7 +347,7 @@ class TextureController {
     ///////////////
 
     // Render to the canvas
-    render(time) {
+    _render(time) {
       // Update shader uniforms
       GLC.setUniform(this.program, "time", "1f", time);
 
@@ -413,9 +357,10 @@ class TextureController {
       GLC.setUniform(this.program, "amountControl.offset", "3fv", [this.amountOffset[0], this.amountOffset[1], this.amountControlTime]);
 
       // Render
-      GLC.setShaderProgram(this.program);
+      /*GLC.setShaderProgram(this.program);
       GLC.clear(0, 0.0, 0.0, 1);
-      GLC.draw(6);
+      GLC.draw(6);*/
+      GLC.renderFullScreenQuad(this.program);
     }
 
     // Simple render loop for animating the canvas
@@ -439,7 +384,7 @@ class TextureController {
             }
 
             // Render (updates uniforms and renders a quad to the screen)
-            this.render(this.time);
+            this._render(this.time);
 
             // Update the time, will be used in the next frame
             this.previousMillis = now;
@@ -456,7 +401,9 @@ class TextureController {
         }
 
         //  Call the function once to start the loop
+
         renderFrame();
+
     }
 
     stopRenderLoop() {
