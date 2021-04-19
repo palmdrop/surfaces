@@ -109,6 +109,14 @@ const getDefaultAttributes = () => {
             min: 0,
             max: 1
         },
+        resolution: {
+            value: 1.0,
+            isUniform: false,
+            type: "1f",
+
+            min: 0.1,
+            max: 3
+        },
         animationSpeed: {
             value: {
                 general: timeSettings(0.2),

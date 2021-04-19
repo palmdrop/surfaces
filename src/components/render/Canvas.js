@@ -118,10 +118,13 @@ const Canvas = (props) => {
 
     // Update the value in the texture controller
     TXC.updateValue("scale", scale);
+    
+    // Scale the offset using the resolution of the canvas
+    const resolution = TXC.getValue("resolution");
 
     // Offset the center in the direction of the cursor
     var offset = [(mousePosition.x - window.innerWidth/2) * delta, (mousePosition.y - window.innerHeight/2) * delta];
-    TXC.setPosition([TXC.position[0] - offset[0], TXC.position[1] + offset[1]]); 
+    TXC.setPosition([TXC.position[0] - offset[0] * resolution, TXC.position[1] + offset[1] * resolution]); 
 
     // Refresh the panel to ensure that the slider value reflects the change
     refreshPanel();
@@ -271,10 +274,12 @@ const Canvas = (props) => {
     if(!mouseDown) return;
 
     // Get the current scale. This is used to correctly translate the view
-    var scale = TXC.getValue("scale");
+    const scale = TXC.getValue("scale");
+    const resolution = TXC.getValue("resolution");
 
     // The offset from the anchor point 
-    const offset = [(anchor[0] - mousePosition.x) * scale, (anchor[1] - mousePosition.y) * scale];
+    const offset = [(anchor[0] - mousePosition.x) * scale * resolution, 
+                    (anchor[1] - mousePosition.y) * scale * resolution];
 
     // The previous view position
     // This previous position is set once the mouse button is first pressed

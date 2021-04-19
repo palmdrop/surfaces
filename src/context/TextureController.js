@@ -56,6 +56,8 @@ class TextureController {
         this.attributes = getDefaultAttributes();
         this.defaultAttributes = getDefaultAttributes();
 
+        this.previousResolution = 1.0;
+
         // The animation frame ID of the current frame
         // Used to cancel the animation if necessary
         this.animationFrameId = -1;
@@ -324,9 +326,17 @@ class TextureController {
         const oldWidth = this.dimensions[0];
         const oldHeight = this.dimensions[1];
 
+        // Set the width and height based on the choosen resolution
+        // If the resolution has changed, scale the result to preserve view 
+        const resolution = this.getValue("resolution");
+        const resolutionChange = resolution / this.previousResolution;
+
+        const scale = this.getValue("scale");
+        this.updateValue("scale", scale / resolutionChange);
+
         // Set the dimensions to that of the inner window size, since the canvas covers everything
-        const newWidth = 2 * window.innerWidth;
-        const newHeight = 2 * window.innerHeight;
+        const newWidth = resolution * window.innerWidth;
+        const newHeight = resolution * window.innerHeight;
         const newDimensions = [newWidth, newHeight];
 
         // Offset the position to ensure that the center of the view remains the same
@@ -338,8 +348,11 @@ class TextureController {
         GLC.setViewport(newWidth, newHeight);
         this.canvas.style.width = window.innerWidth;
         this.canvas.style.height = window.innerHeight;
+
         GLC.setUniform(this.program, "viewport", "2fv", newDimensions);
         this.dimensions = newDimensions;
+
+        this.previousResolution = resolution;
     }
 
     ///////////////
