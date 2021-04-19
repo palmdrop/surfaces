@@ -54,7 +54,6 @@ const Canvas = (props) => {
   // KEYBOARD INPUT
 
   // User input through keyboard shortcuts
-  // TODO abstract all user input to a separate object, containing descriptions etc 
   // TODO then use these description for tooltip
 
   // TODO create better interface for changing values using functions
@@ -96,7 +95,7 @@ const Canvas = (props) => {
       },
       description: "Speed up animation speed"
     })
-    ;
+  ;
   
 
   const handleKeyPress = (event) => {

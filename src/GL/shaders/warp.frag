@@ -15,8 +15,6 @@ uniform NoiseSettings amountControl;
 
 uniform int octaves;
 
-//TODO time is not used, remove?
-uniform float time;
 uniform float scale;
 uniform vec2 viewport;
 

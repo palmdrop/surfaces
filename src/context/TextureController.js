@@ -45,7 +45,6 @@ class TextureController {
         this.paused = false; // No time is updated if paused is set to true
         this.previousMillis = 0; // The global time in millisecond for when the the previous frame 
                                  // was rendered
-        this.time = 0.0; // Global time
         this.sourceTime = 0.0;
         this.angleControlTime = 0.0;
         this.amountControlTime = 0.0;
@@ -86,7 +85,6 @@ class TextureController {
         if(!GLC.init(canvas)) {
             throw new Error("GLC failed to initialize");
         }
-
         this.canvas = canvas;
 
         // COMPILE SHADERS
@@ -94,9 +92,7 @@ class TextureController {
 
         // Create the shader program using the imported shaders
         this.program = GLC.createShaderProgram(vertexShaderSource, fragmentShaderSource);
-
         GLC.flush();
-
         if(!this.program) {
             throw new Error("Shader not created");
         }
@@ -118,7 +114,6 @@ class TextureController {
         console.log("Done initializing texture controller");
 
         this.initialized = true;
-
         return true;
     };
 
@@ -133,9 +128,6 @@ class TextureController {
 
     // Import new attributes from a JSON string
     importSettings(jsonString) {
-        //TODO move to util?
-        //TODO allow control which object takes precedence, e.g if old does not have a field, do we exclude or include it?
-
         // Merge the current settings object, which holds the correct format of the settings,
         // with a saved, possibly older version. 
         // The current object will take precedence: a property not existing in current, but existing in changes,
@@ -163,9 +155,6 @@ class TextureController {
         
         var imported = JSON.parse(jsonString);
 
-        //TODO possibly add a converter class that can convert between
-        //TODO older and newever versions of the settings file 
-
         // Use default settings when merging
         this.attributes = mergeSettings(getDefaultAttributes(), imported);
 
@@ -186,7 +175,6 @@ class TextureController {
 
     // Used to fetch the attribute data of a specific location
     // Should probably only be used internally
-    // TODO make PRIVATE?
     _getAttribute(attributes, location) {
         // Helper function for checking if an object contains a specific property
         const hasProperty = (object, property) => {
@@ -221,10 +209,7 @@ class TextureController {
 
     // Set all the uniforms from the attributes object
     // Should only be used internally
-    // TODO make PRIVATE?
     _setUniforms() {
-        //if(!this.initialized) return;
-
         // Helper function for setting a specific uniform, if it exists
         // Recursively sets all sub-attributes
         const setUniform = (attribute, name) => {
@@ -360,11 +345,8 @@ class TextureController {
     ///////////////
 
     // Render to the canvas
-    _render(time) {
+    _render() {
       // Update shader uniforms
-      GLC.setUniform(this.program, "time", "1f", time);
-
-      //TODO add control for separate time increments
       GLC.setUniform(this.program, "source.offset",        "3fv", [this.sourceOffset[0], this.sourceOffset[1], this.sourceTime]);
       GLC.setUniform(this.program, "angleControl.offset",  "3fv", [this.angleOffset[0],  this.angleOffset[1], this.angleControlTime]);
       GLC.setUniform(this.program, "amountControl.offset", "3fv", [this.amountOffset[0], this.amountOffset[1], this.amountControlTime]);
@@ -390,14 +372,13 @@ class TextureController {
             // Do not increment time if the animation is paused
             if(!this.paused) {
                 // Increment the "time" based on the time passed since last frame 
-                this.time              += this.getValue("animationSpeed.general") * delta;
                 this.sourceTime        += this.getValue("animationSpeed.general") * this.getValue("animationSpeed.source") * delta;
                 this.angleControlTime  += this.getValue("animationSpeed.general") * this.getValue("animationSpeed.angleControl") * delta;
                 this.amountControlTime += this.getValue("animationSpeed.general") * this.getValue("animationSpeed.amountControl") * delta;
             }
 
             // Render (updates uniforms and renders a quad to the screen)
-            this._render(this.time);
+            this._render();
 
             // Update the time, will be used in the next frame
             this.previousMillis = now;
