@@ -1,10 +1,5 @@
 import GLC from './GLC'
 
-// Noise-related imports, these functions and objects
-// are adapted to work well with GLSL structs in the warp shader
-/*import { noiseTypes, setNoiseSettings, createDefaultNoiseSettings } from '../tools/NoiseSettings';
-*/
-
 // Shaders imported using glslify
 import vertexShaderSource from '../GL/shaders/simple.vert'
 import fragmentShaderSource from '../GL/shaders/warp.frag'
@@ -320,8 +315,8 @@ class TextureController {
         this.updateValue("scale", scale / resolutionChange);
 
         // Set the dimensions to that of the inner window size, since the canvas covers everything
-        const newWidth = resolution * window.innerWidth;
-        const newHeight = resolution * window.innerHeight;
+        const newWidth      = resolution * window.innerWidth;
+        const newHeight     = resolution * window.innerHeight;
         const newDimensions = [newWidth, newHeight];
 
         // Offset the position to ensure that the center of the view remains the same
@@ -352,9 +347,6 @@ class TextureController {
       GLC.setUniform(this.program, "amountControl.offset", "3fv", [this.amountOffset[0], this.amountOffset[1], this.amountControlTime]);
 
       // Render
-      /*GLC.setShaderProgram(this.program);
-      GLC.clear(0, 0.0, 0.0, 1);
-      GLC.draw(6);*/
       GLC.renderFullScreenQuad(this.program);
     }
 
@@ -395,9 +387,7 @@ class TextureController {
         }
 
         //  Call the function once to start the loop
-
         renderFrame();
-
     }
 
     stopRenderLoop() {
