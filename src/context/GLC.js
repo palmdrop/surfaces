@@ -1,4 +1,8 @@
 class GLCommander {
+    ////////////////////
+    // INITIALIZATION //
+    ////////////////////
+
     constructor() {
         this.canvas = null;
         this.gl = null;
@@ -41,6 +45,14 @@ class GLCommander {
         return true;
     }
 
+    isInitialized() {
+        return this.initialized;
+    }
+
+    ///////////////////////
+    // DATA/OBJECT SETUP //
+    ///////////////////////
+
     // Setup a two triangles that cover the entire screen
     createFullScreenQuad(program, vertexLocation) {
         const triangleVertices = 
@@ -68,39 +80,6 @@ class GLCommander {
             2 * Float32Array.BYTES_PER_ELEMENT,
             0
         );
-    }
-
-    // Render the default full screen quad
-    renderFullScreenQuad(program) {
-        this.setShaderProgram(program);
-
-        // Bind the data
-        this.bindBuffer(this.gl.ARRAY_BUFFER, this.quadBuffer);
-
-        // Clear and draw 
-        this.clear(0.0, 0.0, 0.0, 1.0);
-        this.draw(6);
-    }
-
-    isInitialized() {
-        return this.initialized;
-    }
-
-    // Clear the canvas (both color and depth information)
-    clear(r, g, b, a) {
-        this.gl.clearColor(r, g, b, a);
-        this.gl.clear(this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT);
-    }
-
-    flush() {
-        this.gl.flush();
-    }
-
-    // Sets the viewport of the webgl context
-    setViewport(width, height) {
-        this.canvas.width = width;
-        this.canvas.height = height;
-        this.gl.viewport(0, 0, width, height);
     }
 
     // Creates a shader program, loads with shader source, compiles, links, and verifies
@@ -154,10 +133,86 @@ class GLCommander {
         this.gl.bufferData(bufferType, new Float32Array(data), drawMode);
     }
 
-    // Binds a buffer
-    bindBuffer(bufferType, buffer) {
-        this.gl.bindBuffer(bufferType, buffer);
+    // Create frame buffer
+    createFramebuffer(colorTexture) {
+        const fb = this.gl.createFramebuffer();
+        this.gl.bindFramebuffer(this.gl.FRAMEBUFFER, fb);
+        this.gl.framebufferTexture2D(
+            this.gl.FRAMEBUFFER,
+            this.gl.COLOR_ATTACHMENT0,
+            this.gl.TEXTURE_2D,
+            colorTexture,
+            0
+        );
     }
+
+    // Create render texture
+    createTexture(width, height) {
+        // Create and bind a new texture buffer
+        const texture = this.gl.createTexture();
+        this.gl.bindTexture(this.gl.TEXTURE_2D, texture);
+
+        // Define default values and initialize texture
+        const level = 0;
+        const internalFormat = this.gl.RGBA;
+        const border = 0;
+        const format = this.gl.RGBA;
+        const type = this.gl.UNSIGNED_BYTE;
+        const data = null;
+        this.gl.texImage2D(this.gl.TEXTURE_2D,
+            level, internalFormat,
+            width, height, border,
+            format, type, data);
+
+        // Set linear filtering and clamping
+        this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_MIN_FILTER, this.gl.LINEAR);
+        this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_WRAP_S, this.gl.CLAMP_TO_EDGE);
+        this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_WRAP_T, this.gl.CLAMP_TO_EDGE);
+
+        return texture;
+    }
+
+    ////////////
+    // RENDER //
+    ////////////
+
+    bindFramebuffer(fbo) {
+        this.gl.bindFramebuffer(this.gl.FRAMEBUFFER, fbo);
+    }
+
+    // Render the default full screen quad
+    renderFullScreenQuad(program) {
+        this.setShaderProgram(program);
+
+        // Bind the data
+        this.bindBuffer(this.gl.ARRAY_BUFFER, this.quadBuffer);
+
+        // Clear and draw 
+        this.clear(0.0, 0.0, 0.0, 1.0);
+        this.draw(6);
+    }
+
+    // Clear the canvas (both color and depth information)
+    clear(r, g, b, a) {
+        this.gl.clearColor(r, g, b, a);
+        this.gl.clear(this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT);
+    }
+    
+    // Draws a specified number of vertices
+    draw(numberOfVertices) {
+        this.gl.drawArrays(this.gl.TRIANGLES,  0, numberOfVertices);
+    }
+
+    // Sets the viewport of the webgl context
+    setViewport(width, height) {
+        this.canvas.width = width;
+        this.canvas.height = height;
+        this.gl.viewport(0, 0, width, height);
+    }
+
+    /////////////
+    // SHADERS //
+    /////////////
 
     // Sets and enables a shader attribute
     setAttribLayout(program, name, numberOfElements, type, vertexSize, offset) {
@@ -200,9 +255,16 @@ class GLCommander {
         this.gl["uniform" + type](location, value);
     }
 
-    // Draws a specified number of vertices
-    draw(numberOfVertices) {
-        this.gl.drawArrays(this.gl.TRIANGLES,  0, numberOfVertices);
+    //////////
+    // UTIL //
+    //////////
+    flush() {
+        this.gl.flush();
+    }
+
+    // Binds a buffer
+    bindBuffer(bufferType, buffer) {
+        this.gl.bindBuffer(bufferType, buffer);
     }
 
     // Returns the webgl context

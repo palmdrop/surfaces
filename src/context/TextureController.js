@@ -109,6 +109,11 @@ class TextureController {
         console.log("Done initializing texture controller");
 
         this.initialized = true;
+
+        // TESTING
+        this.renderTexture = GLC.createTexture(canvas.width, canvas.height);
+        this.fbo = GLC.createFramebuffer(this.renderTexture);
+
         return true;
     };
 
@@ -341,13 +346,15 @@ class TextureController {
 
     // Render to the canvas
     _render() {
-      // Update shader uniforms
-      GLC.setUniform(this.program, "source.offset",        "3fv", [this.sourceOffset[0], this.sourceOffset[1], this.sourceTime]);
-      GLC.setUniform(this.program, "angleControl.offset",  "3fv", [this.angleOffset[0],  this.angleOffset[1], this.angleControlTime]);
-      GLC.setUniform(this.program, "amountControl.offset", "3fv", [this.amountOffset[0], this.amountOffset[1], this.amountControlTime]);
+        GLC.bindFramebuffer(null);
 
-      // Render
-      GLC.renderFullScreenQuad(this.program);
+        // Update shader uniforms
+        GLC.setUniform(this.program, "source.offset",        "3fv", [this.sourceOffset[0], this.sourceOffset[1], this.sourceTime]);
+        GLC.setUniform(this.program, "angleControl.offset",  "3fv", [this.angleOffset[0],  this.angleOffset[1], this.angleControlTime]);
+        GLC.setUniform(this.program, "amountControl.offset", "3fv", [this.amountOffset[0], this.amountOffset[1], this.amountControlTime]);
+
+        // Render
+        GLC.renderFullScreenQuad(this.program);
     }
 
     // Simple render loop for animating the canvas
