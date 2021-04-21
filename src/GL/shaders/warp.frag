@@ -23,8 +23,6 @@ uniform vec2 position;
 uniform float warpAmount;
 uniform int iterations;
 
-uniform bool multisampling;
-
 #define RECURSIVE_WARP(p, angle, amount, iterations) for(int i = 0; i < (iterations); i++) { p = polarWarp(p, (angle), (amount), warpAmount); }
 
 vec2 recursiveWarp(vec2 p, NoiseSettings angleControl, NoiseSettings amountControl) {
@@ -49,7 +47,6 @@ vec3 getColor(vec2 coord, NoiseSettings source, NoiseSettings angle, NoiseSettin
     return vec3(n, g, r) * n;
 }
 
-
 void main()
 {
     vec2 center = vec2(viewport.x / 2.0, viewport.y / 2.0);
@@ -60,21 +57,6 @@ void main()
     pos += center;
     pos += position;
 
-    if(!multisampling) {
-        vec3 color = getColor(pos, source, angleControl, amountControl);
-        gl_FragColor = vec4(color, 1.0);
-    } else {
-        float xStep = scale * 1.0;
-        float yStep = scale * 1.0;
-
-        float xOffset = 3.0 * xStep / 8.0;
-        float yOffset = 3.0 * yStep / 8.0;
-
-        vec3 color = getColor(pos + vec2(-xOffset, -yOffset / 2.0), source, angleControl, amountControl);
-        color +=     getColor(pos + vec2(xOffset / 2.0, -yOffset),  source, angleControl, amountControl);
-        color +=     getColor(pos + vec2(-xOffset / 2.0, yOffset),  source, angleControl, amountControl);
-        color +=     getColor(pos + vec2(xOffset, yOffset / 2.0),   source, angleControl, amountControl);
-
-        gl_FragColor = vec4(color / 4.0, 1.0);
-    }
+    vec3 color = getColor(pos, source, angleControl, amountControl);
+    gl_FragColor = vec4(color, 1.0);
 }

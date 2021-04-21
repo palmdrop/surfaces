@@ -3,6 +3,8 @@ import GLC from './GLC'
 // Shaders imported using glslify
 import vertexShaderSource from '../GL/shaders/simple.vert'
 import fragmentShaderSource from '../GL/shaders/warp.frag'
+import postPorcessShaderSource from '../GL/shaders/post.frag'
+
 import { getDefaultAttributes } from './ControllerAttributes';
 
 class TextureController {
@@ -92,9 +94,18 @@ class TextureController {
             throw new Error("Shader not created");
         }
 
+        this.postProcessingProgram = GLC.createShaderProgram(vertexShaderSource, postPorcessShaderSource);
+        GLC.flush();
+        if(!this.postProcessingProgram) {
+            throw new Error("Post processing shader not created");
+        }
+
         // Setup full screen quad
         console.log("Initializing vertex data");
-        GLC.createFullScreenQuad(this.program, "vertPosition");
+
+        GLC.createFullScreenQuad();
+        GLC.setQuadAttributeLayout(this.program, "vertPosition");
+        GLC.setQuadAttributeLayout(this.postProcessingProgram, "vertPosition", "inTexCoord");
 
         // SET SHADER UNIFORMS 
         console.log("Setting uniforms");
@@ -110,12 +121,21 @@ class TextureController {
 
         this.initialized = true;
 
-        // TESTING
-        this.renderTexture = GLC.createTexture(canvas.width, canvas.height);
-        this.fbo = GLC.createFramebuffer(this.renderTexture);
+        // Sets up frame buffer for multisampling
+        this._setupFramebuffer();
 
         return true;
     };
+
+    _setupFramebuffer() {
+        if(this.renderTexture) {
+            GLC.deleteTexture(this.renderTexture);
+            GLC.deleteFramebuffer(this.fbo);
+        }
+
+        this.renderTexture = GLC.createTexture(this.dimensions[0] * 2.0, this.dimensions[1] * 2.0);
+        this.fbo = GLC.createFramebuffer(this.renderTexture);
+    }
 
     ///////////////////
     // IMPORT/EXPORT //
@@ -280,6 +300,8 @@ class TextureController {
         //TODO assume an attribute is a uniform if the root level is
         if(isUniform) {
             GLC.setUniform(this.program, name, attribute.type, attribute.value);
+        } else {
+            this._handleUpdate();
         }
     }
 
@@ -292,6 +314,7 @@ class TextureController {
         this.position[1] = position[1];
         
         // And set the corresponding uniform
+        GLC.setShaderProgram(this.program);
         GLC.setUniform(this.program, "position", "2fv", position);
     }
 
@@ -300,14 +323,8 @@ class TextureController {
         this.paused = paused;
     }
 
-    //////////////
-    // RESIZING //
-    //////////////
-
-    handleResize() {
-        if(!this.initialized) return;
-        //TODO ability to be set to other sizes than innerWidth/innerHeight? use size of canvas?
-
+    _handleUpdate() {
+        //TODO add some kind of hook for only updating resolution/scale when necessary
         const oldWidth = this.dimensions[0];
         const oldHeight = this.dimensions[1];
 
@@ -316,12 +333,14 @@ class TextureController {
         const resolution = this.getValue("resolution");
         const resolutionChange = resolution / this.previousResolution;
 
-        const scale = this.getValue("scale");
-        this.updateValue("scale", scale / resolutionChange);
+        var scale = this.getValue("scale");
+        scale /= resolutionChange;
+        this.updateValue("scale", scale);
 
         // Set the dimensions to that of the inner window size, since the canvas covers everything
         const newWidth      = resolution * window.innerWidth;
         const newHeight     = resolution * window.innerHeight;
+
         const newDimensions = [newWidth, newHeight];
 
         // Offset the position to ensure that the center of the view remains the same
@@ -334,10 +353,29 @@ class TextureController {
         this.canvas.style.width = window.innerWidth;
         this.canvas.style.height = window.innerHeight;
 
-        GLC.setUniform(this.program, "viewport", "2fv", newDimensions);
-        this.dimensions = newDimensions;
+        this.canvas.width = newWidth;
+        this.canvas.height = newHeight;
 
+        GLC.setUniform(this.program, "viewport", "2fv", newDimensions);
+
+        // Re-create the framebuffer and render texture to fit the new size
+        if(oldWidth !== newWidth || oldHeight !== newHeight || this.resolution !== this.previousResolution) {
+            this._setupFramebuffer();
+        }
+
+        this.dimensions = newDimensions;
         this.previousResolution = resolution;
+
+    }
+
+    //////////////
+    // RESIZING //
+    //////////////
+
+    handleResize() {
+        if(!this.initialized) return;
+        //TODO ability to be set to other sizes than innerWidth/innerHeight? use size of canvas?
+        this._handleUpdate();
     }
 
     ///////////////
@@ -346,15 +384,63 @@ class TextureController {
 
     // Render to the canvas
     _render() {
-        GLC.bindFramebuffer(null);
+        GLC.setShaderProgram(this.program);
 
         // Update shader uniforms
         GLC.setUniform(this.program, "source.offset",        "3fv", [this.sourceOffset[0], this.sourceOffset[1], this.sourceTime]);
         GLC.setUniform(this.program, "angleControl.offset",  "3fv", [this.angleOffset[0],  this.angleOffset[1], this.angleControlTime]);
         GLC.setUniform(this.program, "amountControl.offset", "3fv", [this.amountOffset[0], this.amountOffset[1], this.amountControlTime]);
 
-        // Render
-        GLC.renderFullScreenQuad(this.program);
+        if(this.getValue("multisampling")) {
+            //TODO clean up multisampling code A LOT
+            const multisamplingDimensions = [this.dimensions[0] * 2.0, this.dimensions[1] * 2.0];
+
+            GLC.bindFramebuffer(this.fbo);
+            GLC.setViewport(multisamplingDimensions[0], multisamplingDimensions[1]); // TODO set to texture size
+            GLC.setUniform(this.program, "scale", "1f", this.getValue("scale") / 2.0);
+            GLC.setUniform(this.program, "viewport", "2fv", multisamplingDimensions);
+
+            const xOffset = this.dimensions[0] / 2.0;
+            const yOffset = this.dimensions[1] / 2.0;
+            GLC.setUniform(this.program, "position", "2fv", [this.position[0] - xOffset, this.position[1] - yOffset]);
+            //this.setPosition([this.position[0] - xOffset, this.position[1] - yOffset]);
+
+
+            //this.canvas.width = multisamplingDimensions[0];
+            //this.canvas.height = multisamplingDimensions[0];
+
+            //TODO do not automatically set canvas widht with viewport???????????
+            GLC.renderFullScreenQuad(this.program);
+
+            const gl = GLC.getGL();
+
+            GLC.bindFramebuffer(null);
+            GLC.setViewport(this.canvas.width, this.canvas.height); 
+
+            GLC.setShaderProgram(this.postProcessingProgram);
+
+            // Tell WebGL we want to affect texture unit 0
+            gl.activeTexture(gl.TEXTURE0);
+
+            // Bind the texture to texture unit 0
+            gl.bindTexture(gl.TEXTURE_2D, this.renderTexture);
+
+            // Tell the shader we bound the texture to texture unit 0
+            //gl.uniform1i(programInfo.uniformLocations.uSampler, 0);
+            GLC.setUniform(this.postProcessingProgram, "texture", "1i", 0);
+
+            GLC.renderFullScreenQuad(this.postProcessingProgram);
+        } else {
+            GLC.bindFramebuffer(null);
+            GLC.setViewport(this.canvas.width, this.canvas.height); 
+
+            GLC.setUniform(this.program, "scale", "1f", this.getValue("scale"));
+
+            // Render
+            GLC.renderFullScreenQuad(this.program);
+        }
+
+        GLC.setShaderProgram(this.program);
     }
 
     // Simple render loop for animating the canvas
