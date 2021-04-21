@@ -103,7 +103,7 @@ const getDefaultAttributes = () => {
         },
         multisampling: {
             value: 0,
-            isUniform: true,
+            isUniform: false,
             type: "1i",
 
             min: 0,

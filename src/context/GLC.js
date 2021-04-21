@@ -53,33 +53,52 @@ class GLCommander {
     // DATA/OBJECT SETUP //
     ///////////////////////
 
+    setQuadAttributeLayout(program, positionLocation, texCoordLocation = null) {
+        // Set and enable the corresponding position attribute 
+        GLC.setAttribLayout(
+            program, 
+            positionLocation,
+            2,
+            this.gl.FLOAT,
+            4 * Float32Array.BYTES_PER_ELEMENT,
+            0
+        );
+
+        // If supplied, also set the location for texture coords
+        if(texCoordLocation) {
+            GLC.setAttribLayout(
+                program, 
+                texCoordLocation,
+                2,
+                this.gl.FLOAT,
+                4 * Float32Array.BYTES_PER_ELEMENT,
+                2 * Float32Array.BYTES_PER_ELEMENT
+            );
+        }
+    }
+
     // Setup a two triangles that cover the entire screen
-    createFullScreenQuad(program, vertexLocation) {
+    createFullScreenQuad(program = null, positionLocation = null, texCoordLocation = null) {
         const triangleVertices = 
         [
             // Triangle 1
-            -1.0,  1.0,
-            -1.0, -1.0,
-             1.0, -1.0,
+            -1.0,  1.0,     0, 1,
+            -1.0, -1.0,     0, 0,
+             1.0, -1.0,     1, 0,
 
             // Triangle 2
-            -1.0,  1.0,
-             1.0,  1.0,
-             1.0, -1.0,
+            -1.0,  1.0,     0, 1, 
+             1.0,  1.0,     1, 1,
+             1.0, -1.0,     1, 0
         ];
 
         // Array buffer for triangle vertices
         this.quadBuffer = GLC.createBuffer(this.gl.ARRAY_BUFFER, triangleVertices, this.gl.STATIC_DRAW);
 
-        // Set and enable the corresponding attribute 
-        GLC.setAttribLayout(
-            program, 
-            vertexLocation,
-            2,
-            this.gl.FLOAT,
-            2 * Float32Array.BYTES_PER_ELEMENT,
-            0
-        );
+        // Set attribute layouts if supplied
+        if(program && positionLocation) {
+            this.setQuadAttributeLayout(program, positionLocation, texCoordLocation);
+        }
     }
 
     // Creates a shader program, loads with shader source, compiles, links, and verifies
@@ -144,6 +163,10 @@ class GLCommander {
             colorTexture,
             0
         );
+
+        //const status = gl.checkFramebufferStatus(gl.FRAMEBUFFER);
+
+        return fb;
     }
 
     // Create render texture
@@ -163,6 +186,12 @@ class GLCommander {
             level, internalFormat,
             width, height, border,
             format, type, data);
+        /*this.gl.texImage2D(this.gl.TEXTURE_2D,
+            0, this.gl.RGBA,
+            1, 1, 0,
+            this.gl.RGBA, this.gl.UNSIGNED_BYTE,
+            new Uint8Array([0, 0, 255, 255]) 
+            );*/
 
         // Set linear filtering and clamping
         this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_MIN_FILTER, this.gl.LINEAR);
@@ -205,8 +234,8 @@ class GLCommander {
 
     // Sets the viewport of the webgl context
     setViewport(width, height) {
-        this.canvas.width = width;
-        this.canvas.height = height;
+        //this.canvas.width = width;
+        //this.canvas.height = height;
         this.gl.viewport(0, 0, width, height);
     }
 
@@ -250,9 +279,25 @@ class GLCommander {
             location = this.gl.getUniformLocation(program, name);
             this.uniformLocations.set(key, location);
         }
+        //location = this.gl.getUniformLocation(program, name);
+
+        //console.log(name);
 
         // Set value
         this.gl["uniform" + type](location, value);
+    }
+
+
+    //////////////
+    // DELETING //
+    //////////////
+
+    deleteTexture(texture) {
+        this.gl.deleteTexture(texture);
+    }
+
+    deleteFramebuffer(fbo) {
+        this.gl.deleteFramebuffer(fbo);
     }
 
     //////////
