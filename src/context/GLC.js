@@ -287,6 +287,13 @@ class GLCommander {
         this.gl["uniform" + type](location, value);
     }
 
+    setTexture(texture, unit) {
+        // Tell WebGL we want to affect texture unit "unit"
+        this.gl.activeTexture(this.gl["TEXTURE" + unit]);
+
+        // Bind the texture 
+        this.gl.bindTexture(this.gl.TEXTURE_2D, texture);
+    }
 
     //////////////
     // DELETING //
