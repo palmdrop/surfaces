@@ -62,6 +62,14 @@ class TextureController {
         this.captureNext = false; // True if next frame should be captured
         this.dataCallback = null; // The callback function that should be used to return the contents 
                                   // of the render
+
+        // Values used for multisampling
+        // A framebuffer is used and a texture with double the size of the canvas is 
+        // bound as render texture. This texture is then downsampled using linear filtering
+        // to achieve a multisampling effect
+        this.multisamplingMultiplier = 2.0; 
+        this.multisamplingDimensions = [-1, -1];
+        this.fbo = -1;
     }
 
     isInitialized() {
@@ -127,13 +135,27 @@ class TextureController {
         return true;
     };
 
+    // Initialize a frame buffer using the current dimensions
+    // Used for multisampling
     _setupFramebuffer() {
+        // If initialzied, delete the existing texture and frame buffer
         if(this.renderTexture) {
             GLC.deleteTexture(this.renderTexture);
             GLC.deleteFramebuffer(this.fbo);
         }
 
-        this.renderTexture = GLC.createTexture(this.dimensions[0] * 2.0, this.dimensions[1] * 2.0);
+        // Calculate the dimensions of the multisample texture
+        this.multisamplingDimensions = [
+            this.dimensions[0] * this.multisamplingMultiplier,
+            this.dimensions[1] * this.multisamplingMultiplier
+        ];
+
+        //console.log(this.multisamplingDimensions[0] + " " + this.multisamplingDimensions[1]);
+
+        // Create the render texture
+        this.renderTexture = GLC.createTexture(this.multisamplingDimensions[0], this.multisamplingDimensions[1]);
+
+        // Create the frame buffer
         this.fbo = GLC.createFramebuffer(this.renderTexture);
     }
 
@@ -297,12 +319,9 @@ class TextureController {
         // Set the new value, and set the corresponding uniform
         attribute.value = v;
 
-        //TODO assume an attribute is a uniform if the root level is
         if(isUniform) {
             GLC.setUniform(this.program, name, attribute.type, attribute.value);
-        } else {
-            this._handleUpdate();
-        }
+        } 
     }
 
     // Set position of internal view
@@ -358,14 +377,13 @@ class TextureController {
 
         GLC.setUniform(this.program, "viewport", "2fv", newDimensions);
 
-        // Re-create the framebuffer and render texture to fit the new size
-        if(oldWidth !== newWidth || oldHeight !== newHeight || this.resolution !== this.previousResolution) {
-            this._setupFramebuffer();
-        }
-
         this.dimensions = newDimensions;
         this.previousResolution = resolution;
 
+        // Re-create the framebuffer and render texture to fit the new size
+        if(oldWidth !== newWidth || oldHeight !== newHeight || resolution !== this.previousResolution) {
+            this._setupFramebuffer();
+        }
     }
 
     //////////////
@@ -374,7 +392,6 @@ class TextureController {
 
     handleResize() {
         if(!this.initialized) return;
-        //TODO ability to be set to other sizes than innerWidth/innerHeight? use size of canvas?
         this._handleUpdate();
     }
 
@@ -392,38 +409,33 @@ class TextureController {
         GLC.setUniform(this.program, "amountControl.offset", "3fv", [this.amountOffset[0], this.amountOffset[1], this.amountControlTime]);
 
         if(this.getValue("multisampling")) {
-            //TODO clean up multisampling code A LOT
-            const multisamplingDimensions = [this.dimensions[0] * 2.0, this.dimensions[1] * 2.0];
-
+            // Bind the frame buffer dedicated to multisampling
+            // We'll now render to a separate texture
             GLC.bindFramebuffer(this.fbo);
-            GLC.setViewport(multisamplingDimensions[0], multisamplingDimensions[1]); // TODO set to texture size
-            GLC.setUniform(this.program, "scale", "1f", this.getValue("scale") / 2.0);
-            GLC.setUniform(this.program, "viewport", "2fv", multisamplingDimensions);
 
-            const xOffset = this.dimensions[0] / 2.0;
-            const yOffset = this.dimensions[1] / 2.0;
+            // Set the view port to the extended dimensions
+            GLC.setViewport(this.multisamplingDimensions[0], this.multisamplingDimensions[1]); 
+            GLC.setUniform(this.program, "viewport", "2fv", this.multisamplingDimensions);
+            // Alter the scale to make sure the view is unchanged
+            GLC.setUniform(this.program, "scale", "1f", this.getValue("scale") / this.multisamplingMultiplier);
+
+            // Also alter the position of the view to account for the new viewport
+            const xOffset = (this.multisamplingDimensions[0] - this.dimensions[0]) / 2.0;
+            const yOffset = (this.multisamplingDimensions[1] - this.dimensions[1]) / 2.0;
             GLC.setUniform(this.program, "position", "2fv", [this.position[0] - xOffset, this.position[1] - yOffset]);
-            //this.setPosition([this.position[0] - xOffset, this.position[1] - yOffset]);
 
-
-            //this.canvas.width = multisamplingDimensions[0];
-            //this.canvas.height = multisamplingDimensions[0];
-
-            //TODO do not automatically set canvas widht with viewport???????????
+            // Render to the frame buffer
             GLC.renderFullScreenQuad(this.program);
 
-            const gl = GLC.getGL();
-
+            // Bind the default frame buffer
             GLC.bindFramebuffer(null);
             GLC.setViewport(this.canvas.width, this.canvas.height); 
 
+            // Use the post processing program, which will sample the texture which we previously rendered to
             GLC.setShaderProgram(this.postProcessingProgram);
 
-            // Tell WebGL we want to affect texture unit 0
-            gl.activeTexture(gl.TEXTURE0);
-
-            // Bind the texture to texture unit 0
-            gl.bindTexture(gl.TEXTURE_2D, this.renderTexture);
+            // Bind and activate the texture
+            GLC.setTexture(this.renderTexture, 0);
 
             // Tell the shader we bound the texture to texture unit 0
             //gl.uniform1i(programInfo.uniformLocations.uSampler, 0);
@@ -433,6 +445,8 @@ class TextureController {
         } else {
             GLC.bindFramebuffer(null);
             GLC.setViewport(this.canvas.width, this.canvas.height); 
+            GLC.setUniform(this.program, "viewport", "2fv", this.dimensions);
+            GLC.setUniform(this.program, "position", "2fv", this.position);
 
             GLC.setUniform(this.program, "scale", "1f", this.getValue("scale"));
 
