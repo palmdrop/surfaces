@@ -6,6 +6,7 @@ import AM from './context/AnimationManager'
 
 import { downloadJSON, promptDownload } from './tools/Utils'
 import { useMousePosition } from './hooks/MousePositionHook'
+import { useKeyboardInput } from './hooks/KeyboardInputHook'
 
 import './App.css';
 //import './Canvas.css'
@@ -22,6 +23,8 @@ const App = (props) => {
   // STATES //
   ////////////
   const mousePosition = useMousePosition(); // Custom state/hook which tracks the current mouse position
+  const [, setOnPressed, setOnHeld, executeHeldActions] = useKeyboardInput();
+
   const [paused, setPaused] = useState(false); // Pauses/unpauses the animation
 
   const [panelVisible, setPanelVisible] = useState(true); // The visiblity state of the settings panel
@@ -52,7 +55,7 @@ const App = (props) => {
 
   const changeAnimationSpeed = (delta) => {
     var speed = TXC.getValue("animationSpeed.general");
-    TXC.updateValue("animationSpeed.general", Math.max(speed + delta, 0.0));
+    TXC.updateValue("animationSpeed.general", Math.max(speed * (1 + delta), 0.0));
     refreshPanel();
   };
 
@@ -63,6 +66,7 @@ const App = (props) => {
 
   // TODO create better interface for changing values using functions
   // TODO ability to change values using keyboard and having it reflect in panel automatically
+  //TODO use array instead since I now iterate over it all the time... will be faster and look better?
   const shortcuts = new Map()
     .set('h', {
         action: (e) => {
@@ -73,85 +77,108 @@ const App = (props) => {
             setAutoHide(true);
           }
         },
+        onHeld: false,
         description: "Hide or unhide the settings panel"
     })
-    .set('d', {
+    .set('c', {
       action: (e) => {
         handleCanvasDownload(e);
       },
+      onHeld: false,
       description: "Download the current frame as a PNG image"
     })
     .set(' ', {
       action: (e) => {
-        e.preventDefault();
         togglePause();
       },
+      onHeld: false,
       description: "Toggle pause of the animation"
     })
     .set('-', {
       action: (e) => {
-        changeAnimationSpeed(-0.01);
+        changeAnimationSpeed(-0.05);
       },
+      onHeld: true,
       description: "Slow down animation speed"
     })
     .set('+', {
       action: (e) => {
-        changeAnimationSpeed(0.01);
+        changeAnimationSpeed(0.05);
       },
+      onHeld: true,
       description: "Speed up animation speed"
     })
-
-    .set('ArrowLeft', {
+    .set('q', {
       action: (e) => {
-        e.preventDefault();
+        updateScale(0.02);
+      },
+      onHeld: true,
+      description: "Zoom out"
+    })
+    .set('e', {
+      action: (e) => {
+        updateScale(-0.02);
+      },
+      onHeld: true,
+      description: "Zoom in"
+    })
+    .set(['ArrowLeft', 'a'], {
+      action: () => {
         handleMovement([-10, 0]);
       },
+      onHeld: true,
       description: ""
     })
-    .set('ArrowRight', {
-      action: (e) => {
-        e.preventDefault();
+    .set(['ArrowRight', 'd'], {
+      action: () => {
         handleMovement([10, 0]);
       },
+      onHeld: true,
       description: ""
     })
-    .set('ArrowUp', {
-      action: (e) => {
-        e.preventDefault();
+    .set(['ArrowUp', 'w'], {
+      action: () => {
         handleMovement([0, 10]);
       },
+      onHeld: true,
       description: ""
     })
-    .set('ArrowDown', {
-      action: (e) => {
-        e.preventDefault();
+    .set(['ArrowDown', 's'], {
+      action: () => {
         handleMovement([0, -10]);
       },
+      onHeld: true,
       description: ""
     })
   ;
 
+
   const handleMovement = (offset) => {
     setMouseDown(false);
-    const position = TXC.getPosition(); //TODO use getter
-
+    const position = TXC.getPosition(); 
     const scale = TXC.getValue("resolution") * TXC.getValue("scale");
-
     TXC.setPosition([position[0] + offset[0] * scale, position[1] + offset[1] * scale]);
   }
 
+  const updateScale = (amount) => {
+    // Get the current scale value
+    var scale = TXC.getValue("scale");
 
-  const handleKeyPress = (event) => {
-    if(shortcuts.has(event.key)) {
-      shortcuts.get(event.key).action(event); 
-    }
+    // Calculate a new scale value based on the previous one
+    const delta = amount * scale; 
+    scale += delta;
+
+    // Update the value in the texture controller
+    TXC.updateValue("scale", scale);
+
+    return delta;
   }
 
   // MOUSE INPUT
 
   // Zoom the view on user scroll (same effect as in changing the "scale" slider)
   const handleScroll = (event) => {
-    // Get the current scale value
+    /*// Get the current scale value
     var scale = TXC.getValue("scale");
 
     // Calculate a new scale value based on the previous one
@@ -160,6 +187,8 @@ const App = (props) => {
 
     // Update the value in the texture controller
     TXC.updateValue("scale", scale);
+    */
+   const delta = updateScale(Math.sign(event.deltaY) * 0.1);
     
     // Scale the offset using the resolution of the canvas
     const resolution = TXC.getValue("resolution");
@@ -199,7 +228,6 @@ const App = (props) => {
     // Otherwise, the resulting image will be blank
     TXC.captureFrame((dataURL) => {
       promptDownload(dataURL, "canvas.png");
-      //event.currentTarget.blur();
     });
   };
 
@@ -207,7 +235,6 @@ const App = (props) => {
   const handleSettingsDownload = (event) => {
     // Downloads the current settings of the texture controller
     downloadJSON(TXC.exportSettings(), "settings.json");
-
     event.currentTarget.blur();
   };
 
@@ -267,6 +294,7 @@ const App = (props) => {
       AM.setCallback((delta) => {
         TXC.render(delta)
         setFrameRate(AM.getAverageFrameRate());
+        executeHeldActions();
       });
       AM.start();
     }
@@ -292,9 +320,14 @@ const App = (props) => {
 
   // Register all global listeners
   useEffect(() => {
-
     // Handle keyboard shortcuts
-    document.addEventListener("keydown", handleKeyPress);
+    shortcuts.forEach((keyInfo, keys) => {
+      if(!keyInfo.onHeld) {
+        setOnPressed(keys, keyInfo.action);
+      } else {
+        setOnHeld(keys, keyInfo.action);
+      }
+    });
 
     // Handle zoom 
     canvasRef.current.addEventListener("wheel", handleScroll);
@@ -308,7 +341,6 @@ const App = (props) => {
 
     // Remove all listeners on re-render
     return () => {
-      document.removeEventListener("keydown", handleKeyPress);
       canvasCopy.removeEventListener("wheel", handleScroll);
       canvasCopy.removeEventListener("mousedown", handleMouseDown);
       canvasCopy.removeEventListener("mouseup", handleMouseReleased);
@@ -368,7 +400,6 @@ const App = (props) => {
       }
     }
   },[mousePosition, autoHide, panelVisible]);
-
 
   //////////
   // BODY //
