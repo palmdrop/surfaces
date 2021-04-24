@@ -2,6 +2,7 @@
 import React, { useRef, useState, useEffect, useLayoutEffect, useReducer } from 'react'
 import ControlPanel from './components/input/ControlPanel'
 import TXC from './context/TextureController'
+import AM from './context/AnimationManager'
 
 import { downloadJSON, promptDownload } from './tools/Utils'
 import { useMousePosition } from './hooks/MousePositionHook'
@@ -34,6 +35,8 @@ const App = (props) => {
 
   // A reducer used to force update the panel (required when the settings are changed outside the panel)
   const [, refreshPanel] = useReducer(x => x + 1, 0);
+
+  const [frameRate, setFrameRate] = useState(0);
 
   ////////////////////
   // EVENT HANDLERS //
@@ -97,8 +100,46 @@ const App = (props) => {
       },
       description: "Speed up animation speed"
     })
+
+    .set('ArrowLeft', {
+      action: (e) => {
+        e.preventDefault();
+        handleMovement([-10, 0]);
+      },
+      description: ""
+    })
+    .set('ArrowRight', {
+      action: (e) => {
+        e.preventDefault();
+        handleMovement([10, 0]);
+      },
+      description: ""
+    })
+    .set('ArrowUp', {
+      action: (e) => {
+        e.preventDefault();
+        handleMovement([0, 10]);
+      },
+      description: ""
+    })
+    .set('ArrowDown', {
+      action: (e) => {
+        e.preventDefault();
+        handleMovement([0, -10]);
+      },
+      description: ""
+    })
   ;
-  
+
+  const handleMovement = (offset) => {
+    setMouseDown(false);
+    const position = TXC.getPosition(); //TODO use getter
+
+    const scale = TXC.getValue("resolution") * TXC.getValue("scale");
+
+    TXC.setPosition([position[0] + offset[0] * scale, position[1] + offset[1] * scale]);
+  }
+
 
   const handleKeyPress = (event) => {
     if(shortcuts.has(event.key)) {
@@ -125,7 +166,8 @@ const App = (props) => {
 
     // Offset the center in the direction of the cursor
     var offset = [(mousePosition.x - window.innerWidth/2) * delta, (mousePosition.y - window.innerHeight/2) * delta];
-    TXC.setPosition([TXC.position[0] - offset[0] * resolution, TXC.position[1] + offset[1] * resolution]); 
+    var position = TXC.getPosition();
+    TXC.setPosition([position[0] - offset[0] * resolution, position[1] + offset[1] * resolution]); 
 
     // Refresh the panel to ensure that the slider value reflects the change
     refreshPanel();
@@ -136,7 +178,7 @@ const App = (props) => {
   const handleMouseDown = (event) => {
     if(mouseDown) return;
     setAnchor([mousePosition.x, mousePosition.y]);
-    setPrevPosition([TXC.position[0], TXC.position[1]]);
+    setPrevPosition([TXC.getPosition()[0], TXC.getPosition()[1]]);
     setMouseDown(true);
   }
 
@@ -213,7 +255,7 @@ const App = (props) => {
   useEffect(() => {
     // If the texture controller hasn't been initialized yet, initialize
     if(!TXC.isInitialized()) {
-      if(TXC.initialize(canvasRef.current) === -1) {
+      if(!TXC.initialize(canvasRef.current)) {
         // TODO better error handling with suitable messages
         throw new Error("Texture controller failed to initialize");
       }
@@ -221,9 +263,16 @@ const App = (props) => {
       TXC.handleResize();
     }
 
-    // Start the render loop immediately
-    TXC.startRenderLoop();
-    return () => TXC.stopRenderLoop();
+    if(!AM.isRunning()) {
+      AM.setCallback((delta) => {
+        TXC.render(delta)
+        setFrameRate(AM.getAverageFrameRate());
+      });
+      AM.start();
+    }
+    //return () => AM.stop();
+
+    //TODO this hook runs too often... how to fix?
   });
 
   // WINDOW RESIZE
@@ -385,6 +434,17 @@ const App = (props) => {
                 {!autoHide ? "Enable auto hide" : "Disable auto hide"}
             </button>
           </div>
+
+          {/* FPS */}
+          <div>
+            <div>
+              {frameRate}
+            </div>
+            <div>
+              {TXC.getDimensions()[0] + " " + TXC.getDimensions()[1]}
+            </div>
+          </div>
+
         </div>
 
         { /* Canvas for WebGL context */}

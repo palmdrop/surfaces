@@ -40,8 +40,6 @@ class TextureController {
 
         // Time and pause state for animation
         this.paused = false; // No time is updated if paused is set to true
-        this.previousMillis = 0; // The global time in millisecond for when the the previous frame 
-                                 // was rendered
         this.sourceTime = 0.0;
         this.angleControlTime = 0.0;
         this.amountControlTime = 0.0;
@@ -53,10 +51,6 @@ class TextureController {
         this.defaultAttributes = getDefaultAttributes();
 
         this.previousResolution = 1.0;
-
-        // The animation frame ID of the current frame
-        // Used to cancel the animation if necessary
-        this.animationFrameId = -1;
 
         // Used for saving the canvas as an image
         this.captureNext = false; // True if next frame should be captured
@@ -122,9 +116,6 @@ class TextureController {
         this._setUniforms();
 
         // Finally, set internal states
-        this.time = 0.0;
-        this.previousMillis = Date.now();
-
         console.log("Done initializing texture controller");
 
         this.initialized = true;
@@ -305,6 +296,16 @@ class TextureController {
         return v.value;
     }
 
+    getDimensions() {
+        return this.dimensions;
+    }
+
+    getPosition() {
+        return this.position;
+    }
+
+    
+
     // Updates a value and it's corresponding uniform (if such exists)
     updateValue(name, v) {
         //TODO create some form of callback to sliders that force them to re-read when a value is changed?!
@@ -400,8 +401,17 @@ class TextureController {
     ///////////////
 
     // Render to the canvas
-    _render() {
+    render(delta) {
         GLC.setShaderProgram(this.program);
+
+        // Do not increment time if the animation is paused
+        if(!this.paused) {
+            // Increment the "time" based on the time passed since last frame 
+            const animationSpeed = this.getValue("animationSpeed.general");
+            this.sourceTime        += animationSpeed * this.getValue("animationSpeed.source") * delta;
+            this.angleControlTime  += animationSpeed * this.getValue("animationSpeed.angleControl") * delta;
+            this.amountControlTime += animationSpeed * this.getValue("animationSpeed.amountControl") * delta;
+        }
 
         // Update shader uniforms
         GLC.setUniform(this.program, "source.offset",        "3fv", [this.sourceOffset[0], this.sourceOffset[1], this.sourceTime]);
@@ -455,50 +465,13 @@ class TextureController {
         }
 
         GLC.setShaderProgram(this.program);
-    }
 
-    // Simple render loop for animating the canvas
-    startRenderLoop() {
-        // First, stop the render loop (if it's already running)
-        this.stopRenderLoop();
-
-        // Define a function which will be used to request an animation frame
-        const renderFrame = () => {
-            // Calculate the time passed since last frame
-            let now = Date.now();
-            let delta = (now - this.previousMillis) / 1000;
-
-            // Do not increment time if the animation is paused
-            if(!this.paused) {
-                // Increment the "time" based on the time passed since last frame 
-                this.sourceTime        += this.getValue("animationSpeed.general") * this.getValue("animationSpeed.source") * delta;
-                this.angleControlTime  += this.getValue("animationSpeed.general") * this.getValue("animationSpeed.angleControl") * delta;
-                this.amountControlTime += this.getValue("animationSpeed.general") * this.getValue("animationSpeed.amountControl") * delta;
-            }
-
-            // Render (updates uniforms and renders a quad to the screen)
-            this._render();
-
-            // Update the time, will be used in the next frame
-            this.previousMillis = now;
-
-            // Capture the frame if requested
-            if(this.captureNext) {
-                this.captureNext = false;
-                var captureData = this.canvas.toDataURL("image/png");
-                this.dataCallback(captureData);
-            }
-
-            // Finally, recursively request another animation frame
-            this.animationFrameId = requestAnimationFrame(renderFrame);
+        // Capture the frame if requested
+        if(this.captureNext) {
+            this.captureNext = false;
+            var captureData = this.canvas.toDataURL("image/png");
+            this.dataCallback(captureData);
         }
-
-        //  Call the function once to start the loop
-        renderFrame();
-    }
-
-    stopRenderLoop() {
-        cancelAnimationFrame(this.animationFrameId);
     }
 }
 
