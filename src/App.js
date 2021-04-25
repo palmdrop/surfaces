@@ -9,6 +9,7 @@ import { useMousePosition } from './hooks/MousePositionHook'
 import { useKeyboardInput } from './hooks/KeyboardInputHook'
 
 import './App.css';
+import DataViewer from './components/tooltip/DataViewer'
 //import './Canvas.css'
 
 const App = (props) => {
@@ -23,12 +24,13 @@ const App = (props) => {
   // STATES //
   ////////////
   const mousePosition = useMousePosition(); // Custom state/hook which tracks the current mouse position
-  const [, setOnPressed, setOnHeld, executeHeldActions] = useKeyboardInput();
+  const [, setOnPressed, setOnHeld, executeHeldActions] = useKeyboardInput(); // Custom hook for handling keyboard input
 
   const [paused, setPaused] = useState(false); // Pauses/unpauses the animation
 
   const [panelVisible, setPanelVisible] = useState(true); // The visiblity state of the settings panel
   const [autoHide, setAutoHide] = useState(false); // If true, the panel will hide automatically 
+  const [dataViewerVisible, setDataViewerVisible] = useState(true); // If true, a popup with render information will be displayed
 
   // States for handling view change using mouse
   // The user can drag the canvas to move the view
@@ -58,6 +60,23 @@ const App = (props) => {
     TXC.updateValue("animationSpeed.general", Math.max(speed * (1 + delta), 0.0));
     refreshPanel();
   };
+
+  const updateScale = (amount) => {
+    // Get the current scale value
+    var scale = TXC.getValue("scale");
+
+    // Calculate a new scale value based on the previous one
+    const delta = amount * scale; 
+    scale += delta;
+
+    // Update the value in the texture controller
+    TXC.updateValue("scale", scale);
+
+    refreshPanel();
+
+    return delta;
+  }
+
 
   // KEYBOARD INPUT
 
@@ -160,34 +179,10 @@ const App = (props) => {
     TXC.setPosition([position[0] + offset[0] * scale, position[1] + offset[1] * scale]);
   }
 
-  const updateScale = (amount) => {
-    // Get the current scale value
-    var scale = TXC.getValue("scale");
-
-    // Calculate a new scale value based on the previous one
-    const delta = amount * scale; 
-    scale += delta;
-
-    // Update the value in the texture controller
-    TXC.updateValue("scale", scale);
-
-    return delta;
-  }
-
   // MOUSE INPUT
 
   // Zoom the view on user scroll (same effect as in changing the "scale" slider)
   const handleScroll = (event) => {
-    /*// Get the current scale value
-    var scale = TXC.getValue("scale");
-
-    // Calculate a new scale value based on the previous one
-    const delta = Math.sign(event.deltaY) * scale * 0.1; 
-    scale += delta;
-
-    // Update the value in the texture controller
-    TXC.updateValue("scale", scale);
-    */
    const delta = updateScale(Math.sign(event.deltaY) * 0.1);
     
     // Scale the offset using the resolution of the canvas
@@ -271,6 +266,11 @@ const App = (props) => {
     event.currentTarget.blur();
   };
 
+  const handleDataViewerHide = (event) => {
+    setDataViewerVisible(!dataViewerVisible);
+    event.currentTarget.blur();
+  }
+
   //////////////////
   // EFFECT HOOKS //
   //////////////////
@@ -283,7 +283,6 @@ const App = (props) => {
     // If the texture controller hasn't been initialized yet, initialize
     if(!TXC.isInitialized()) {
       if(!TXC.initialize(canvasRef.current)) {
-        // TODO better error handling with suitable messages
         throw new Error("Texture controller failed to initialize");
       }
       // Immediately resize to fill the available space
@@ -458,25 +457,40 @@ const App = (props) => {
           />
 
           { /* Button for auto hinding settings panel */}
-          <div className="settings__auto-hide-button-container">
+          <div className="settings__auto-hide-button-container button-container">
             <button 
               className={"button settings__auto-hide-button-container__button" + (autoHide ? " active" : "")} 
               onClick={handleAutoHide}>
-                {!autoHide ? "Enable auto hide" : "Disable auto hide"}
+                {!autoHide ? "Hide panel" : "Disable panel hiding"}
             </button>
           </div>
 
-          {/* FPS */}
-          <div>
-            <div>
-              {frameRate}
-            </div>
-            <div>
-              {TXC.getDimensions()[0] + " " + TXC.getDimensions()[1]}
-            </div>
+          { /* Button for hiding data viewer */}
+          <div className="settings__hide-data-viewer-button-container button-container">
+            <button 
+              className={"button settings__hide-data-viewer-button-container__button" + (!dataViewerVisible ? " active" : "")} 
+              onClick={handleDataViewerHide}>
+                {dataViewerVisible ? "Hide data viewer" : "Unhide data viewer"}
+            </button>
           </div>
 
         </div>
+
+        { /* Data viewer */
+          dataViewerVisible ? (
+            <div className="data-tooltip">
+              <DataViewer 
+                frameRate={Math.round(frameRate)} 
+                dimensions={
+                    Math.round(TXC.getDimensions()[0]) 
+                  + "x" 
+                  + Math.round(TXC.getDimensions()[1]) 
+                  + " px"}
+                multisampling={TXC.getValue("multisampling") ? "Enabled" : "Disabled"}
+              />
+            </div>
+            ) : ""
+        }
 
         { /* Canvas for WebGL context */}
         <canvas 

@@ -19,6 +19,14 @@
     transition: 0.5s ease !important;
 }
 
+.data-tooltip {
+    position: absolute;
+    background-color: #04040488;
+    padding: 0.2h 0.2vh;
+
+    right: 0
+}
+
 .button {
     width: 100%;
     font-size: 1.0rem;
@@ -75,7 +83,6 @@
 }
 
 .settings__auto-hide-button-container {
-    padding: 0.2vh;
 }
 
 
