@@ -1,0 +1,21 @@
+/* General */
+.input-switch {
+    padding: 0rem 1rem;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+}
+
+/* Label */
+.input-switch__label {
+    font-size: 0.8rem;
+    font-weight: normal;
+    padding: 0rem;
+    margin: 0rem;
+    color: #cecece
+}
+
+/* Input switch */
+.input-switch__switch {
+    flex-grow: 0;
+}

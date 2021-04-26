@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useRef } from "react";
 
 export const useKeyboardInput = () => {
   // The states of each key
@@ -75,11 +75,11 @@ export const useKeyboardInput = () => {
       window.removeEventListener("keyup", onKeyAction);
 
       // Reset states
-      keyStates.current = {};
-      pressedActions.current = {};
-      heldActions.current = {};
+      //keyStates.current = {};
+      //pressedActions.current = {};
+      //heldActions.current = {};
     };
-  }, []);
+  });
 
   return [isHeld, setOnPress, setOnHeld, executeHeldActions];
 };

@@ -292,7 +292,7 @@ const App = (props) => {
     if(!AM.isRunning()) {
       AM.setCallback((delta) => {
         TXC.render(delta)
-        setFrameRate(AM.getAverageFrameRate());
+        setFrameRate(AM.getFrameRate());
         executeHeldActions();
       });
       AM.start();
@@ -481,6 +481,7 @@ const App = (props) => {
             <div className="data-tooltip">
               <DataViewer 
                 frameRate={Math.round(frameRate)} 
+                averageFrameRate={Math.round(AM.getAverageFrameRate())}
                 dimensions={
                     Math.round(TXC.getDimensions()[0]) 
                   + "x" 
@@ -490,6 +491,7 @@ const App = (props) => {
               />
             </div>
             ) : ""
+
         }
 
         { /* Canvas for WebGL context */}

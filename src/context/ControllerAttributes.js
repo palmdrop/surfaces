@@ -19,19 +19,19 @@ const noiseSettings = () => {
                 value: 2.0,
                 type: "1f",
                 min: 0.1,
-                max: 5.0,
+                max: 10.0,
             },
             persistence: {
                 value: 0.5,
                 type: "1f",
                 min: 0.1,
-                max: 2.0,
+                max: 5.0,
             },
             amplitude: {
                 value: 1.0,
                 type: "1f",
                 min: 0.1,
-                max: 5.0,
+                max: 10.0,
             },
             modifications: {
                 value: {
@@ -101,14 +101,6 @@ const getDefaultAttributes = () => {
             min: 0.0,
             max: 1000
         },
-        multisampling: {
-            value: 0,
-            isUniform: false,
-            type: "1i",
-
-            min: 0,
-            max: 1
-        },
         resolution: {
             value: 1.0,
             isUniform: false,
@@ -116,6 +108,14 @@ const getDefaultAttributes = () => {
 
             min: 0.1,
             max: 3
+        },
+        multisampling: {
+            value: 0,
+            isUniform: false,
+            type: "1i",
+
+            min: 0,
+            max: 1
         },
         animationSpeed: {
             value: {

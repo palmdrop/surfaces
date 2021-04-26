@@ -1,6 +1,7 @@
 import React from 'react'
 
 import InputSlider from '../input/InputSlider'
+import InputSwitch from '../input/InputSwitch'
 import Collapsable from '../sections/Collapsable'
 
 import { camelToTitle } from '../../tools/Utils'
@@ -33,8 +34,21 @@ const ControlPanel = ({ attributes, getter, setter, defaults, separator, precisi
         />)
     };
 
-    // Sets up all sliders
-    const createSliders = (attribute, parentName, index) => {
+    // Sets up a single switch
+    const createSwitch = (name, fullName, index) => {
+        return (
+            <InputSwitch 
+                key={index}
+                label={camelToTitle(name)} 
+                valueGetter={() => getter(fullName)}
+                onChange={(v) => setter(fullName, v)}
+                fullName={fullName}
+            />
+        )
+    };
+
+    // Sets up all input sliders/switches
+    const createInputs = (attribute, parentName, index) => {
         // Finds the name of the current section 
         var sectionName = parentName.split(separator);
         sectionName = sectionName[sectionName.length - 1];
@@ -48,14 +62,23 @@ const ControlPanel = ({ attributes, getter, setter, defaults, separator, precisi
                 <Collapsable label={camelToTitle(sectionName)} cname="control-panel__section" key={index}>
                 {
                     Object.entries(attribute.value).map(([name, childAttribute], subindex) => (
-                        createSliders(childAttribute, parentName + separator + name, index + "." + subindex)
+                        createInputs(childAttribute, parentName + separator + name, index + "." + subindex)
                     ))
                 }
                 </Collapsable>
             );
         } else {
-            // If the value is not an object, simply create a single slider
-            return createSlider(attribute, sectionName, parentName, index);
+            // If the value is not an object, create a slider or switch
+
+            // If the attribute is of integer type and only allows values of 0.0 or 1.0, 
+            // then create a simple switch for easy toggle
+            if(attribute.min === 0.0 && attribute.max === 1.0 && ((
+               attribute.step && attribute.step === 1.0) || attribute.type === "1i")) {
+                return createSwitch(sectionName, parentName, index);
+            // Otherwise, create a slider
+            } else {
+                return createSlider(attribute, sectionName, parentName, index);
+            }
         }
     };
 
@@ -64,7 +87,7 @@ const ControlPanel = ({ attributes, getter, setter, defaults, separator, precisi
         {
             //TODO find way to produce unique keys
             Object.entries(attributes).map(([name, attribute], index) => (
-                createSliders(attribute, name, index)
+                createInputs(attribute, name, index)
             ))
         }
         </div>

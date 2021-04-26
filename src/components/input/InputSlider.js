@@ -1,5 +1,5 @@
 import React, { useRef, useEffect, useState } from 'react';
-import { Slider /*, Input */ } from '@material-ui/core';
+import { Slider } from '@material-ui/core';
 import './InputSlider.css';
 
 const InputSlider = ({ label, valueGetter, defaultValue, onChange, min, max, step, marks, precision, fullName }) => {
@@ -19,7 +19,7 @@ const InputSlider = ({ label, valueGetter, defaultValue, onChange, min, max, ste
     // externally.
     useEffect(() => {
         setState(round(valueGetter()));
-    }, [round, valueGetter]);
+    });
 
     // Only update the value if it's actually different
     // This avoids unnecessary useEffect triggers in parent classes
@@ -68,25 +68,23 @@ const InputSlider = ({ label, valueGetter, defaultValue, onChange, min, max, ste
             refCopy.removeEventListener("wheel", handleScroll);
             refCopy.removeEventListener("dblclick", handleDoubleClick);
         };
-    },[]);
+    });
 
     return (
         <div 
             className="input-slider"
         > 
             <h3 className="input-slider__label">{label + " (" + state + ")" }</h3>
-            <div className="input-slider__input">
-                <Slider className="input-slider__input__slider"
-                    key={fullName}
-                    value={state}
-                    onChange={(e, v) => handleChange(v)}
-                    min={min}
-                    max={max}
-                    step={step}
-                    marks={marks}
-                    ref={ref}
-                />
-            </div>
+            <Slider className="input-slider__slider"
+                key={fullName}
+                value={state}
+                onChange={(e, v) => handleChange(v)}
+                min={min}
+                max={max}
+                step={step}
+                marks={marks}
+                ref={ref}
+            />
         </div>
     )
 }

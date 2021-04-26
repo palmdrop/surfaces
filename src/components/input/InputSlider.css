@@ -20,19 +20,8 @@
     justify-content: space-around;
 }
 
-.input-slider__input__slider {
+.input-slider__slider {
     flex-grow: 100;
-}
-
-.input-slider__input__field {
-    width: 20%;
-    flex-grow: 1;
-}
-
-/* Input field */
-.MuiInput-root {
-    color: #cecece;
-    background-color: #cecece;
 }
 
 
