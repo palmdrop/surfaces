@@ -4,7 +4,7 @@ const noiseSettings = () => {
             frequency: {
                 value: Math.random() * 0.01,
                 min: 0.0000001,
-                max: 0.035,
+                max: 0.00035,
                 type: "1f",
             },
             octaves: {
@@ -70,7 +70,7 @@ const timeSettings = (value) => {
     return {
         value: value,
         min: 0.0,
-        max: 3,
+        max: 1,
     }
 };
 
@@ -133,4 +133,43 @@ const getDefaultAttributes = () => {
     };
 }
 
-export { getDefaultAttributes }
+const getRandomAttributes = () => {
+    var attributes = getDefaultAttributes();
+
+    const random = (min, max) => {
+        return Math.random() * (Math.abs(max - min) + min);
+    };
+
+    const randomize = (current) => {
+        if(typeof current.value === "object") {
+            for(var name in current.value) {
+                if(Object.prototype.hasOwnProperty.call(current.value, name)) {
+                    current.value[name] = randomize(current.value[name]);
+                }
+            }
+        } else {
+            var result;
+            if(current.marks) {
+                result = current.marks[Math.floor(random(0, current.marks.length))];
+            } else if(current.type == "1i") {
+                result = Math.floor(random(current.min, current.max));
+            } else {
+                result = random(current.min, current.max);
+            }
+
+            current.value = result;
+        }
+
+        return current;
+    }
+
+    for(var name in attributes) {
+        if(Object.prototype.hasOwnProperty.call(attributes, name)) {
+            attributes[name] = randomize(attributes[name]);
+        }
+    }
+
+    return attributes;
+}
+
+export { getDefaultAttributes, getRandomAttributes }

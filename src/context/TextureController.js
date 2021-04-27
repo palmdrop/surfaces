@@ -3,9 +3,10 @@ import GLC from './GLC'
 // Shaders imported using glslify
 import vertexShaderSource from '../GL/shaders/simple.vert'
 import fragmentShaderSource from '../GL/shaders/warp.frag'
-import postPorcessShaderSource from '../GL/shaders/post.frag'
 
-import { getDefaultAttributes } from './ControllerAttributes';
+import postProcessShaderSource from '../GL/shaders/post.frag'
+
+import { getDefaultAttributes, getRandomAttributes } from './ControllerAttributes';
 
 class TextureController {
     ////////////////////
@@ -29,6 +30,11 @@ class TextureController {
         // The ID of the shader program
         this.program = -1;
 
+        this.programs = {
+            layerProgram: -1,
+            warpProgram: -1
+        };
+
         // Random offsets for each layer
         this.sourceOffset = randomOffset();
         this.angleOffset  = randomOffset();
@@ -47,7 +53,9 @@ class TextureController {
         // Current attributes of the texture controller
         // These are the general settings of the shader, and most of them directly correspond
         // to shader uniforms. 
-        this.attributes = getDefaultAttributes();
+        this.attributes = 
+            getRandomAttributes();
+            //getDefaultAttributes();
         this.defaultAttributes = getDefaultAttributes();
 
         this.previousResolution = 1.0;
@@ -70,6 +78,15 @@ class TextureController {
         return this.initialized;
     }
 
+    _createShader(vertexShaderSource, fragmentShaderSource) {
+        const program = GLC.createShaderProgram(vertexShaderSource, fragmentShaderSource);
+        GLC.flush();
+        if(!this.program) {
+            throw new Error("Shader not created");
+        }
+        return program;
+    }
+
     // Initializes the WebGL context and loads the GPU with vertex data
     initialize(canvas) {
         if(this.initialized) {
@@ -90,17 +107,8 @@ class TextureController {
         console.log("Compiling shaders");
 
         // Create the shader program using the imported shaders
-        this.program = GLC.createShaderProgram(vertexShaderSource, fragmentShaderSource);
-        GLC.flush();
-        if(!this.program) {
-            throw new Error("Shader not created");
-        }
-
-        this.postProcessingProgram = GLC.createShaderProgram(vertexShaderSource, postPorcessShaderSource);
-        GLC.flush();
-        if(!this.postProcessingProgram) {
-            throw new Error("Post processing shader not created");
-        }
+        this.program = this._createShader(vertexShaderSource, fragmentShaderSource);
+        this.postProcessingProgram = this._createShader(vertexShaderSource, postProcessShaderSource);
 
         // Setup full screen quad
         console.log("Initializing vertex data");
