@@ -2,9 +2,9 @@ const noiseSettings = () => {
     return {
         value: {
             frequency: {
-                value: Math.random() * 0.01,
+                value: Math.random() * 4 + 0.1,
                 min: 0.0000001,
-                max: 0.00035,
+                max: 1.0000,
                 type: "1f",
             },
             octaves: {
@@ -94,12 +94,12 @@ const getDefaultAttributes = () => {
             max: 4,
         },
         warpAmount: {
-            value: 100,
+            value: 1,
             isUniform: true,
             type: "1f",
 
             min: 0.0,
-            max: 1000
+            max: 5
         },
         resolution: {
             value: 1.0,
@@ -119,7 +119,7 @@ const getDefaultAttributes = () => {
         },
         animationSpeed: {
             value: {
-                general: timeSettings(0.2),
+                general: timeSettings(0.1),
                 source: timeSettings(1.0),
                 angleControl: timeSettings(1.0),
                 amountControl: timeSettings(1.0)

@@ -54,8 +54,8 @@ class TextureController {
         // These are the general settings of the shader, and most of them directly correspond
         // to shader uniforms. 
         this.attributes = 
-            getRandomAttributes();
-            //getDefaultAttributes();
+            //getRandomAttributes();
+            getDefaultAttributes();
         this.defaultAttributes = getDefaultAttributes();
 
         this.previousResolution = 1.0;
@@ -368,25 +368,22 @@ class TextureController {
         const oldWidth = this.dimensions[0];
         const oldHeight = this.dimensions[1];
 
-        // Set the width and height based on the choosen resolution
-        // If the resolution has changed, scale the result to preserve view 
         const resolution = this.getValue("resolution");
-        const resolutionChange = resolution / this.previousResolution;
-
-        var scale = this.getValue("scale");
-        scale /= resolutionChange;
-        this.updateValue("scale", scale);
 
         // Set the dimensions to that of the inner window size, since the canvas covers everything
         const newWidth      = resolution * window.innerWidth;
         const newHeight     = resolution * window.innerHeight;
-
         const newDimensions = [newWidth, newHeight];
 
-        // Offset the position to ensure that the center of the view remains the same
-        const xOffset = (newWidth - oldWidth) / 2.0;
-        const yOffset = (newHeight - oldHeight) / 2.0;
-        this.setPosition([this.position[0] - xOffset, this.position[1] - yOffset]);
+        // Update the position to preserve the center of the view on resize
+        /*const position = this.getPosition();
+        const offset = this.screenSpaceToViewSpace([
+            0,
+            (newHeight - oldHeight) / 4.0
+        ]);
+
+        this.setPosition([position[0] + offset[0], position[1] + offset[1]]);
+        */
 
         // Update values
         GLC.setViewport(newWidth, newHeight);
@@ -414,7 +411,19 @@ class TextureController {
 
     handleResize() {
         if(!this.initialized) return;
+
         this._handleUpdate();
+    }
+
+    screenSpaceToViewSpace(position) {
+        const width = window.innerWidth;
+        const height = window.innerHeight;
+
+        // Calculate the proportions of the screen
+        const proportions = height / width;
+
+        // Scale and correct for proportions
+        return [position[0] / width, position[1] * proportions / height];
     }
 
     ///////////////
@@ -439,58 +448,35 @@ class TextureController {
         GLC.setUniform(this.program, "angleControl.offset",  "3fv", [this.angleOffset[0],  this.angleOffset[1], this.angleControlTime]);
         GLC.setUniform(this.program, "amountControl.offset", "3fv", [this.amountOffset[0], this.amountOffset[1], this.amountControlTime]);
 
-        //if(this.getValue("multisampling")) {
-            // Bind the frame buffer dedicated to multisampling
-            // We'll now render to a separate texture
-            GLC.bindFramebuffer(this.fbo);
+        GLC.bindFramebuffer(this.fbo);
 
-            // Set the view port to the extended dimensions
-            if(this.getValue("multisampling")) {
-                GLC.setViewport(this.multisamplingDimensions[0], this.multisamplingDimensions[1]); 
-                GLC.setUniform(this.program, "viewport", "2fv", this.multisamplingDimensions);
-                // Alter the scale to make sure the view is unchanged
-                GLC.setUniform(this.program, "scale", "1f", this.getValue("scale") / this.multisamplingMultiplier);
-
-                // Also alter the position of the view to account for the new viewport
-                const xOffset = (this.multisamplingDimensions[0] - this.dimensions[0]) / 2.0;
-                const yOffset = (this.multisamplingDimensions[1] - this.dimensions[1]) / 2.0;
-                GLC.setUniform(this.program, "position", "2fv", [this.position[0] - xOffset, this.position[1] - yOffset]);
-            } else {
-                GLC.setViewport(this.dimensions[0], this.dimensions[1]); 
-                GLC.setUniform(this.program, "viewport", "2fv", this.dimensions);
-                GLC.setUniform(this.program, "position", "2fv", this.position);
-                GLC.setUniform(this.program, "scale", "1f", this.getValue("scale"));
-            }
-
-            // Render to the frame buffer
-            GLC.renderFullScreenQuad(this.program);
-
-            // Bind the default frame buffer
-            GLC.bindFramebuffer(null);
-            GLC.setViewport(this.canvas.width, this.canvas.height); 
-
-            // Use the post processing program, which will sample the texture which we previously rendered to
-            GLC.setShaderProgram(this.postProcessingProgram);
-
-            // Bind and activate the texture
-            GLC.setTexture(this.renderTexture, 0);
-
-            // Tell the shader we bound the texture to texture unit 0
-            //gl.uniform1i(programInfo.uniformLocations.uSampler, 0);
-            GLC.setUniform(this.postProcessingProgram, "texture", "1i", 0);
-
-            GLC.renderFullScreenQuad(this.postProcessingProgram);
-        /*} else {
-            GLC.bindFramebuffer(null);
-            GLC.setViewport(this.canvas.width, this.canvas.height); 
+        // Set the view port to the extended dimensions
+        if(this.getValue("multisampling")) {
+            GLC.setViewport(this.multisamplingDimensions[0], this.multisamplingDimensions[1]); 
+            GLC.setUniform(this.program, "viewport", "2fv", this.multisamplingDimensions);
+        } else {
+            GLC.setViewport(this.dimensions[0], this.dimensions[1]); 
             GLC.setUniform(this.program, "viewport", "2fv", this.dimensions);
-            GLC.setUniform(this.program, "position", "2fv", this.position);
+        }
 
-            GLC.setUniform(this.program, "scale", "1f", this.getValue("scale"));
+        // Render to the frame buffer
+        GLC.renderFullScreenQuad(this.program);
 
-            // Render
-            GLC.renderFullScreenQuad(this.program);
-        }*/
+        // Bind the default frame buffer
+        GLC.bindFramebuffer(null);
+        GLC.setViewport(this.canvas.width, this.canvas.height); 
+
+        // Use the post processing program, which will sample the texture which we previously rendered to
+        GLC.setShaderProgram(this.postProcessingProgram);
+
+        // Bind and activate the texture
+        GLC.setTexture(this.renderTexture, 0);
+
+        // Tell the shader we bound the texture to texture unit 0
+        //gl.uniform1i(programInfo.uniformLocations.uSampler, 0);
+        GLC.setUniform(this.postProcessingProgram, "texture", "1i", 0);
+
+        GLC.renderFullScreenQuad(this.postProcessingProgram);
 
         GLC.setShaderProgram(this.program);
 

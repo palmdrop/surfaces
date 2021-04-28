@@ -176,6 +176,7 @@ const App = (props) => {
     setMouseDown(false);
     const position = TXC.getPosition(); 
     const scale = TXC.getValue("resolution") * TXC.getValue("scale");
+    offset = TXC.screenSpaceToViewSpace(offset);
     TXC.setPosition([position[0] + offset[0] * scale, position[1] + offset[1] * scale]);
   }
 
@@ -183,15 +184,19 @@ const App = (props) => {
 
   // Zoom the view on user scroll (same effect as in changing the "scale" slider)
   const handleScroll = (event) => {
-   const delta = updateScale(Math.sign(event.deltaY) * 0.1);
+    const delta = updateScale(Math.sign(event.deltaY) * 0.1);
     
-    // Scale the offset using the resolution of the canvas
-    const resolution = TXC.getValue("resolution");
+    // Calculate the proportions of the screen
+    const proportions = window.innerHeight / window.innerWidth;
 
     // Offset the center in the direction of the cursor
-    var offset = [(mousePosition.x - window.innerWidth/2) * delta, (mousePosition.y - window.innerHeight/2) * delta];
+    var offset = TXC.screenSpaceToViewSpace([
+      (mousePosition.x - window.innerWidth  / 2) * delta,
+      (mousePosition.y - window.innerHeight / 2) * delta,
+    ]);
+
     var position = TXC.getPosition();
-    TXC.setPosition([position[0] - offset[0] * resolution, position[1] + offset[1] * resolution]); 
+    TXC.setPosition([position[0] - offset[0], position[1] + offset[1]]); 
 
     // Refresh the panel to ensure that the slider value reflects the change
     refreshPanel();
@@ -356,14 +361,15 @@ const App = (props) => {
 
     // Get the current scale. This is used to correctly translate the view
     const scale = TXC.getValue("scale");
-    const resolution = TXC.getValue("resolution");
 
     // The offset from the anchor point 
-    const offset = [(anchor[0] - mousePosition.x) * scale * resolution, 
-                    (anchor[1] - mousePosition.y) * scale * resolution];
+    var offset = TXC.screenSpaceToViewSpace([
+        (anchor[0] - mousePosition.x) * scale,
+        (anchor[1] - mousePosition.y) * scale
+    ]);
 
     // The previous view position
-    // This previous position is set once the mouse button is first pressed
+    // This previous position is set when the mouse button is first pressed
     TXC.setPosition([
       prevPosition[0] + offset[0], 
       prevPosition[1] - offset[1]

@@ -49,9 +49,13 @@ vec3 getColor(vec2 coord, NoiseSettings source, NoiseSettings angle, NoiseSettin
 
 void main()
 {
-    vec2 center = vec2(viewport.x / 2.0, viewport.y / 2.0);
+    float proportions = viewport.y / viewport.x;
+    vec2 center = vec2(0.5, 0.5 * proportions);
+    vec2 pos = vec2(
+        gl_FragCoord.x / viewport.x, 
+       (gl_FragCoord.y / viewport.y) * proportions
+    );
 
-    vec2 pos = gl_FragCoord.xy;
     pos -= center;
     pos *= scale;
     pos += center;
