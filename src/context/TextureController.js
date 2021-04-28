@@ -149,10 +149,18 @@ class TextureController {
             this.dimensions[1] * this.multisamplingMultiplier
         ];
 
-        //console.log(this.multisamplingDimensions[0] + " " + this.multisamplingDimensions[1]);
+        const createRenderTexture = (width, height) => {
+            const gl = GLC.getGL();
+            return GLC.createTexture(width, height, gl.RGBA, gl.RGBA32F, gl.FLOAT);
+            //return GLC.createTexture(width, height);
+            //return GLC.createTexture(width, height, gl.RGB, gl.RGB8, gl.UNSIGNED_BYTE);
+        };
 
         // Create the render texture
-        this.renderTexture = GLC.createTexture(this.multisamplingDimensions[0], this.multisamplingDimensions[1]);
+        this.renderTexture = 
+            this.getValue("multisampling") 
+            ? createRenderTexture(this.multisamplingDimensions[0], this.multisamplingDimensions[1])
+            : createRenderTexture(this.dimensions[0], this.dimensions[1]);
 
         // Create the frame buffer
         this.fbo = GLC.createFramebuffer(this.renderTexture);
@@ -331,6 +339,10 @@ class TextureController {
         if(isUniform) {
             GLC.setUniform(this.program, name, attribute.type, attribute.value);
         } 
+
+        if(name === "multisampling") { //TODO ugly
+            this._handleUpdate(true);
+        }
     }
 
     // Set position of internal view
@@ -351,7 +363,7 @@ class TextureController {
         this.paused = paused;
     }
 
-    _handleUpdate() {
+    _handleUpdate(forceFramebufferSetup = false) {
         //TODO add some kind of hook for only updating resolution/scale when necessary
         const oldWidth = this.dimensions[0];
         const oldHeight = this.dimensions[1];
@@ -390,7 +402,8 @@ class TextureController {
         this.previousResolution = resolution;
 
         // Re-create the framebuffer and render texture to fit the new size
-        if(oldWidth !== newWidth || oldHeight !== newHeight || resolution !== this.previousResolution) {
+        if(forceFramebufferSetup || oldWidth !== newWidth || oldHeight !== newHeight || resolution !== this.previousResolution) {
+            console.log(newWidth);
             this._setupFramebuffer();
         }
     }
@@ -426,21 +439,28 @@ class TextureController {
         GLC.setUniform(this.program, "angleControl.offset",  "3fv", [this.angleOffset[0],  this.angleOffset[1], this.angleControlTime]);
         GLC.setUniform(this.program, "amountControl.offset", "3fv", [this.amountOffset[0], this.amountOffset[1], this.amountControlTime]);
 
-        if(this.getValue("multisampling")) {
+        //if(this.getValue("multisampling")) {
             // Bind the frame buffer dedicated to multisampling
             // We'll now render to a separate texture
             GLC.bindFramebuffer(this.fbo);
 
             // Set the view port to the extended dimensions
-            GLC.setViewport(this.multisamplingDimensions[0], this.multisamplingDimensions[1]); 
-            GLC.setUniform(this.program, "viewport", "2fv", this.multisamplingDimensions);
-            // Alter the scale to make sure the view is unchanged
-            GLC.setUniform(this.program, "scale", "1f", this.getValue("scale") / this.multisamplingMultiplier);
+            if(this.getValue("multisampling")) {
+                GLC.setViewport(this.multisamplingDimensions[0], this.multisamplingDimensions[1]); 
+                GLC.setUniform(this.program, "viewport", "2fv", this.multisamplingDimensions);
+                // Alter the scale to make sure the view is unchanged
+                GLC.setUniform(this.program, "scale", "1f", this.getValue("scale") / this.multisamplingMultiplier);
 
-            // Also alter the position of the view to account for the new viewport
-            const xOffset = (this.multisamplingDimensions[0] - this.dimensions[0]) / 2.0;
-            const yOffset = (this.multisamplingDimensions[1] - this.dimensions[1]) / 2.0;
-            GLC.setUniform(this.program, "position", "2fv", [this.position[0] - xOffset, this.position[1] - yOffset]);
+                // Also alter the position of the view to account for the new viewport
+                const xOffset = (this.multisamplingDimensions[0] - this.dimensions[0]) / 2.0;
+                const yOffset = (this.multisamplingDimensions[1] - this.dimensions[1]) / 2.0;
+                GLC.setUniform(this.program, "position", "2fv", [this.position[0] - xOffset, this.position[1] - yOffset]);
+            } else {
+                GLC.setViewport(this.dimensions[0], this.dimensions[1]); 
+                GLC.setUniform(this.program, "viewport", "2fv", this.dimensions);
+                GLC.setUniform(this.program, "position", "2fv", this.position);
+                GLC.setUniform(this.program, "scale", "1f", this.getValue("scale"));
+            }
 
             // Render to the frame buffer
             GLC.renderFullScreenQuad(this.program);
@@ -460,7 +480,7 @@ class TextureController {
             GLC.setUniform(this.postProcessingProgram, "texture", "1i", 0);
 
             GLC.renderFullScreenQuad(this.postProcessingProgram);
-        } else {
+        /*} else {
             GLC.bindFramebuffer(null);
             GLC.setViewport(this.canvas.width, this.canvas.height); 
             GLC.setUniform(this.program, "viewport", "2fv", this.dimensions);
@@ -470,7 +490,7 @@ class TextureController {
 
             // Render
             GLC.renderFullScreenQuad(this.program);
-        }
+        }*/
 
         GLC.setShaderProgram(this.program);
 

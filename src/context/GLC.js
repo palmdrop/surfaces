@@ -24,7 +24,7 @@ class GLCommander {
         }
 
         // Get the webgl context
-        let gl = canvas.getContext('webgl');
+        let gl = canvas.getContext('webgl2');
 
         // If no context was retrieved, try experimental webgl
         if(!gl) {
@@ -35,6 +35,13 @@ class GLCommander {
         // If there's still no context, abort
         if(!gl) {
             alert("Your browser does not support WebGL");
+            return false;
+        }
+
+        // Acquire the color buffer float extension
+        const ext = gl.getExtension("EXT_color_buffer_float");
+        if (!ext) {
+            alert("need EXT_color_buffer_float");
             return false;
         }
 
@@ -163,38 +170,30 @@ class GLCommander {
             colorTexture,
             0
         );
-
-        //const status = gl.checkFramebufferStatus(gl.FRAMEBUFFER);
+        this.gl.drawBuffers([this.gl.COLOR_ATTACHMENT0]);
 
         return fb;
     }
 
     // Create render texture
-    createTexture(width, height) {
+    createTexture(width, height, format = this.gl.RGBA, internalFormat = this.gl.RGBA, type = this.gl.UNSIGNED_BYTE) {
         // Create and bind a new texture buffer
         const texture = this.gl.createTexture();
         this.gl.bindTexture(this.gl.TEXTURE_2D, texture);
 
         // Define default values and initialize texture
         const level = 0;
-        const internalFormat = this.gl.RGBA;
         const border = 0;
-        const format = this.gl.RGBA;
-        const type = this.gl.UNSIGNED_BYTE;
         const data = null;
         this.gl.texImage2D(this.gl.TEXTURE_2D,
             level, internalFormat,
             width, height, border,
             format, type, data);
-        /*this.gl.texImage2D(this.gl.TEXTURE_2D,
-            0, this.gl.RGBA,
-            1, 1, 0,
-            this.gl.RGBA, this.gl.UNSIGNED_BYTE,
-            new Uint8Array([0, 0, 255, 255]) 
-            );*/
 
         // Set linear filtering and clamping
-        this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_MIN_FILTER, this.gl.LINEAR);
+        //this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_MIN_FILTER, this.gl.LINEAR);
+        this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_MIN_FILTER, this.gl.NEAREST);
+        this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_MAG_FILTER, this.gl.NEAREST);
         this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_WRAP_S, this.gl.CLAMP_TO_EDGE);
         this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_WRAP_T, this.gl.CLAMP_TO_EDGE);
 
