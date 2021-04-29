@@ -6,7 +6,7 @@ import fragmentShaderSource from '../GL/shaders/warp.frag'
 
 import postProcessShaderSource from '../GL/shaders/post.frag'
 
-import { getDefaultAttributes, getRandomAttributes } from './ControllerAttributes';
+import { getTextureAttributes, getAttributeValue, setUniforms, updateAttributeValue, mergeAttributes } from './ControllerAttributes';
 
 class TextureController {
     ////////////////////
@@ -55,8 +55,8 @@ class TextureController {
         // to shader uniforms. 
         this.attributes = 
             //getRandomAttributes();
-            getDefaultAttributes();
-        this.defaultAttributes = getDefaultAttributes();
+            getTextureAttributes();
+        this.defaultAttributes = getTextureAttributes();
 
         this.previousResolution = 1.0;
 
@@ -121,7 +121,7 @@ class TextureController {
         console.log("Setting uniforms");
 
         GLC.setShaderProgram(this.program);
-        this._setUniforms();
+        setUniforms(this.attributes, this.program);
 
         // Finally, set internal states
         console.log("Done initializing texture controller");
@@ -152,8 +152,6 @@ class TextureController {
         const createRenderTexture = (width, height) => {
             const gl = GLC.getGL();
             return GLC.createTexture(width, height, gl.RGBA, gl.RGBA32F, gl.FLOAT);
-            //return GLC.createTexture(width, height);
-            //return GLC.createTexture(width, height, gl.RGB, gl.RGB8, gl.UNSIGNED_BYTE);
         };
 
         // Create the render texture
@@ -177,38 +175,13 @@ class TextureController {
 
     // Import new attributes from a JSON string
     importSettings(jsonString) {
-        // Merge the current settings object, which holds the correct format of the settings,
-        // with a saved, possibly older version. 
-        // The current object will take precedence: a property not existing in current, but existing in changes,
-        // will not be added to the updated object
-        const mergeSettings = (current, changes) => {
-            // Check if the current object is a single value or an array. In that case, update, if 
-            // an updated value exists
-            if(typeof current !== "object" || Array.isArray(current)) return changes || current;
-
-            // If the changes are null or undefined, use the current object
-            if(!changes) return current;
-
-            var updated = {};
-
-            // Iterate over all the properties in the current object, and merge each
-            // property with the corresponding property in the changes object
-            for(var prop in current) {
-                if(Object.prototype.hasOwnProperty.call(current, prop)) {
-                    updated[prop] = mergeSettings(current[prop], changes[prop]);
-                }
-            }
-
-            return updated;
-        }
-        
         var imported = JSON.parse(jsonString);
 
         // Use default settings when merging
-        this.attributes = mergeSettings(getDefaultAttributes(), imported);
+        this.attributes = mergeAttributes(getTextureAttributes(), imported);
 
         // Update all uniforms with the new settings
-        this._setUniforms();
+        setUniforms(this.attributes, this.program);
     }
 
     // Used to capture the next frame of animation
@@ -222,94 +195,15 @@ class TextureController {
     // DATA MANAGEMENT //
     /////////////////////
 
-    // Used to fetch the attribute data of a specific location
-    // Should probably only be used internally
-    _getAttribute(attributes, location) {
-        // Helper function for checking if an object contains a specific property
-        const hasProperty = (object, property) => {
-            return Object.prototype.hasOwnProperty.call(object, property);
-        }
-
-        var subLocations = location.split(".");
-
-        // Check if attribute exists in main attributes object
-        if(!hasProperty(attributes, subLocations[0])) return undefined;
-
-        // Get the current attribute
-        var currentAttribute = attributes[subLocations[0]];
-
-        // If there's more sub-locations in the query, iterate through them
-        // until the bottom level is found
-        for(var i = 1; i < subLocations.length; i++) {
-            // Verify that the new attribute is an object (if not, the query is invalid)
-            if(!(typeof currentAttribute === "object")) return undefined;
-
-            // Check if the attribute contains the requested attribute 
-            if(!hasProperty(currentAttribute.value, subLocations[i])) return undefined;
-
-            // Get the value property of the attribute, since this will contain the next iteration
-            currentAttribute = currentAttribute.value[subLocations[i]];
-        }
-
-        // Returns an array where the first element specifies if the attribute has a corresponding
-        // shader uniform, and the second element is the data itself
-        return [attributes[subLocations[0]].isUniform, currentAttribute];
-    }
-
-    // Set all the uniforms from the attributes object
-    // Should only be used internally
-    _setUniforms() {
-        // Helper function for setting a specific uniform, if it exists
-        // Recursively sets all sub-attributes
-        const setUniform = (attribute, name) => {
-            // Return if the value has no corresponding uniform, or if the texture controller is not initialized
-            // Also, if the root level object is a uniform, assume all children are too
-            if(!attribute.isUniform) return;
-
-            // Recursively sets all sub-attributes' corresponding uniforms 
-            const setAll = (current, location) => {
-                // If the value property of the attribute is an object, then
-                // more sub-attributes exist
-                if(typeof current.value === "object") {
-                    // Iterate over all sub-attributes
-                    for(var name in current.value) {
-                        if(Object.prototype.hasOwnProperty.call(current.value, name)) {
-                            // And set all their corresponding uniforms
-                            // The "." symbol is used to construct the uniform location
-                            setAll(current.value[name], location + "." + name);
-                        }
-                    }
-                // If the value property is not an object, a leaf has been reached and we can set
-                // the attribute uniform directly
-                } else {
-                    GLC.setUniform(this.program, location, current.type, current.value);
-                }
-            };
-
-            setAll(attribute, name);
-        }
-
-        // Iterate over all attributes and set their coorresponding uniforms
-        for (var name in this.attributes) {
-            if(Object.prototype.hasOwnProperty.call(this.attributes, name)) {
-                setUniform(this.attributes[name], name);
-            }
-        }
-    }
-
     // Returns a value from the attribute object
     // Used to query the internal state of the texture controller
-    getValue(name) {
-        const [, v] = this._getAttribute(this.attributes, name);
-        if(typeof v === "undefined") return undefined;
-        return v.value;
+    getValue(location) {
+        return getAttributeValue(this.attributes, location);
     }
 
     // Returns the default (initial) value
-    getDefault(name) {
-        const [, v] = this._getAttribute(this.defaultAttributes, name);
-        if(typeof v === "undefined") return undefined;
-        return v.value;
+    getDefault(location) {
+        return getAttributeValue(this.defaultAttributes, location);
     }
 
     getDimensions() {
@@ -320,29 +214,17 @@ class TextureController {
         return this.position;
     }
 
-    
-
     // Updates a value and it's corresponding uniform (if such exists)
-    updateValue(name, v) {
+    updateValue(location, value) {
         //TODO create some form of callback to sliders that force them to re-read when a value is changed?!
 
-        // Find the requested attribute, or return if it does not exist
-        const [isUniform, attribute] = this._getAttribute(this.attributes, name);
-        if(typeof v === "undefined") return -1;
+        const result = updateAttributeValue(this.attributes, this.program, location, value)
 
-        // Do nothing if the value is unchanged
-        if(attribute.value === v) return;
-
-        // Set the new value, and set the corresponding uniform
-        attribute.value = v;
-
-        if(isUniform) {
-            GLC.setUniform(this.program, name, attribute.type, attribute.value);
-        } 
-
-        if(name === "multisampling") { //TODO ugly
+        if(location === "multisampling") { //TODO ugly 
             this._handleUpdate(true);
         }
+
+        return result;
     }
 
     // Set position of internal view
@@ -400,7 +282,6 @@ class TextureController {
 
         // Re-create the framebuffer and render texture to fit the new size
         if(forceFramebufferSetup || oldWidth !== newWidth || oldHeight !== newHeight || resolution !== this.previousResolution) {
-            console.log(newWidth);
             this._setupFramebuffer();
         }
     }
