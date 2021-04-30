@@ -10,10 +10,14 @@ class GLCommander {
 
         // Map for storing uniform locations
         this.uniformLocations = new Map();
+
+        // Extensions
+        this.EXT_color_buffer_float = null; // For rendering to float textures
+        this.KHR_parallel_shader_compile = null; // For paralell shader ocmpilation
     }
 
     // Initialize the canvas and webgl context variables
-    init(canvas) {
+    initialize(canvas) {
         // INITIALIZE THE WEBGL CONTEXT
         console.log("Initializing webgl context");
 
@@ -39,11 +43,17 @@ class GLCommander {
         }
 
         // Acquire the color buffer float extension
-        const ext = gl.getExtension("EXT_color_buffer_float");
-        if (!ext) {
+        this.EXT_color_buffer_float = gl.getExtension("EXT_color_buffer_float");
+        if (!this.EXT_color_buffer_float) {
             alert("need EXT_color_buffer_float");
             return false;
         }
+
+        // Acquire extension for parallel shader compilation (not required)
+        /*this.KHR_parallel_shader_compile = gl.getExtension("KHR_parallel_shader_compile");
+        if(!this.KHR_parallel_shader_compile) {
+            console.log("no support for parallel shader compilation")
+        }*/
 
         this.canvas = canvas;
         this.gl = gl;
@@ -108,50 +118,6 @@ class GLCommander {
         }
     }
 
-    // Creates a shader program, loads with shader source, compiles, links, and verifies
-    createShaderProgram(vertexSource, fragmentSource) {
-        const validateShader = (shader, shaderType) => {
-            if(!this.gl.getShaderParameter(shader, this.gl.COMPILE_STATUS)) {
-                console.error('ERROR compiling ' + shaderType + ' shader', this.gl.getShaderInfoLog(shader));
-                return false;
-            }
-            return true;
-        }
-
-        var vs = this.gl.createShader(this.gl.VERTEX_SHADER);
-        var fs = this.gl.createShader(this.gl.FRAGMENT_SHADER);
-
-        this.gl.shaderSource(vs, vertexSource);
-        this.gl.shaderSource(fs, fragmentSource);
-
-        this.gl.compileShader(vs);
-
-        if(!validateShader(vs, 'vertex')) return -1;
-
-        this.gl.compileShader(fs);
-
-        if(!validateShader(fs, 'fragment')) return -1;
-
-        var program = this.gl.createProgram();
-        this.gl.attachShader(program, vs);
-        this.gl.attachShader(program, fs);
-
-        this.gl.linkProgram(program);
-
-        if(!this.gl.getProgramParameter(program, this.gl.LINK_STATUS)) {
-            console.error('ERROR linking program', this.gl.getProgramInfoLog(program));
-            return -1;
-        }
-
-        this.gl.validateProgram(program);
-        if(!this.gl.getProgramParameter(program, this.gl.VALIDATE_STATUS)) {
-            console.error('ERROR validating program', this.gl.getProgramInfoLog(program));
-            return -1;
-        }
-
-        return program;
-    }
-
     // Creates an arbitrary webgl buffer and loads it with data
     createBuffer(bufferType, data, drawMode) {
         var buffer = this.gl.createBuffer();
@@ -201,6 +167,78 @@ class GLCommander {
         this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_WRAP_T, this.gl.CLAMP_TO_EDGE);
 
         return texture;
+    }
+
+    /////////////
+    // SHADERS //
+    /////////////
+
+    // Creates shader programs, loads with shader source, compiles and links 
+    // Allows for parallel compilation/linking if browser supports it
+    compileAndLinkShaders(sources) {
+        // Create a list of tuples: [vertexShader, fragmentShader, shaderProgram]
+        // If the browser supports it, these will then be compiled and linked in parallell
+        const programs = [];
+        for (const [vertexSource, fragmentSource] of sources) {
+            const vs = this._createShader(vertexSource, this.gl.VERTEX_SHADER);
+            const fs = this._createShader(fragmentSource, this.gl.FRAGMENT_SHADER);
+            const program = this._createShaderProgram(vs, fs);
+            programs.push([vs, fs, program]);
+        }
+
+        // Compile all shaders
+        for (const [vs, fs, ] of programs) {
+            this._compileShader(vs);
+            this._compileShader(fs);
+        }
+
+        // Link all programs
+        for (const [, , program] of programs) {
+            this.gl.linkProgram(program);
+        }
+
+        // Check for link errors        
+        for (const [vs, fs, program] of programs) {
+            if (!this.gl.getProgramParameter(program, this.gl.LINK_STATUS)) {
+                console.error('Link failed: ' + this.gl.getProgramInfoLog(program));
+                console.error('vs info-log: ' + this.gl.getShaderInfoLog(vs));
+                console.error('fs info-log: ' + this.gl.getShaderInfoLog(fs));
+            }
+        }
+
+        // Only return the actual shader programs
+        return programs.map(([,,program]) => program);
+    }
+
+    compileAndLinkShader(vertexSource, fragmentSource) {
+        return this.compileAndLinkShaders([[vertexSource, fragmentSource]])[0];
+    }
+
+    /*_validateShader(shader, shaderType) {
+        if(!this.gl.getShaderParameter(shader, this.gl.COMPILE_STATUS)) {
+            console.error('ERROR compiling ' + shaderType + ' shader', this.gl.getShaderInfoLog(shader));
+            return false;
+        }
+        return true;
+    }*/
+
+    _createShader(source, type) {
+        const shader = this.gl.createShader(type);
+        this.gl.shaderSource(shader, source);
+        return shader;
+    }
+
+    _compileShader(shader) {
+        if (shader.compiled) return;
+        this.gl.compileShader(shader);
+        shader.compiled = true;
+    }
+
+    _createShaderProgram(vs, fs) {
+        const program = this.gl.createProgram();
+        this.gl.attachShader(program, vs);
+        this.gl.attachShader(program, fs);
+        return program;
     }
 
     ////////////

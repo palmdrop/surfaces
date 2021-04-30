@@ -1,7 +1,11 @@
 
 import React, { useRef, useState, useEffect, useLayoutEffect, useReducer } from 'react'
 import ControlPanel from './components/input/ControlPanel'
+
+import GLC from './context/GLC'
 import TXC from './context/TextureController'
+import CC  from './context/ColorController'
+
 import AM from './context/AnimationManager'
 
 import { downloadJSON, promptDownload } from './tools/Utils'
@@ -11,7 +15,12 @@ import { useKeyboardInput } from './hooks/KeyboardInputHook'
 import './App.css';
 import DataViewer from './components/tooltip/DataViewer'
 import PanelController from './components/input/PanelController'
-//import './Canvas.css'
+
+// Shaders
+import quadVertShaderSoruce from './GL/shaders/simple.vert'
+import textureFragShaderSource from './GL/shaders/warp.frag'
+import colorFragShaderSource from './GL/shaders/post.frag'
+
 
 const App = (props) => {
   ////////////////
@@ -24,6 +33,8 @@ const App = (props) => {
   ////////////
   // STATES //
   ////////////
+  const [initialized, setInitialized] = useState(false); // True if WebGL and the controllers are initialized
+
   const mousePosition = useMousePosition(); // Custom state/hook which tracks the current mouse position
   const [, setOnPressed, setOnHeld, executeHeldActions] = useKeyboardInput(); // Custom hook for handling keyboard input
 
@@ -187,9 +198,6 @@ const App = (props) => {
   const handleScroll = (event) => {
     const delta = updateScale(Math.sign(event.deltaY) * 0.1);
     
-    // Calculate the proportions of the screen
-    const proportions = window.innerHeight / window.innerWidth;
-
     // Offset the center in the direction of the cursor
     var offset = TXC.screenSpaceToViewSpace([
       (mousePosition.x - window.innerWidth  / 2) * delta,
@@ -286,13 +294,34 @@ const App = (props) => {
   // Initialize texture controller
   // A hook is used to ensure that the canvas element has been initialized first
   useEffect(() => {
-    // If the texture controller hasn't been initialized yet, initialize
-    if(!TXC.isInitialized()) {
-      if(!TXC.initialize(canvasRef.current)) {
+    if(!initialized) {
+      const canvas = canvasRef.current;
+
+      // Initialize WebGL controller
+      if(!GLC.initialize(canvas)) {
+        throw new Error("GLC failed to initialize");
+      }
+
+      // Compile and link shaders
+      const [textureProgram, colorProgram] = GLC.compileAndLinkShaders([
+        [quadVertShaderSoruce, textureFragShaderSource],
+        [quadVertShaderSoruce, colorFragShaderSource]
+      ]);
+
+      // Initialize texture controller
+      if(!TXC.initialize(canvas, textureProgram, colorProgram)) {
         throw new Error("Texture controller failed to initialize");
       }
+
+      // Initialize color controller
+      if(!CC.initialize(canvas, colorProgram)) {
+        throw new Error("Color controller failed to initialize");
+      }
+
       // Immediately resize to fill the available space
       TXC.handleResize();
+
+      setInitialized(true);
     }
 
     if(!AM.isRunning()) {
@@ -495,8 +524,6 @@ const App = (props) => {
             {
               name: "Color Controller"
             },
-
-
           ]}
         />
 

@@ -1,4 +1,9 @@
+#ifdef GL_FRAGMENT_PRECISION_HIGH
+precision highp float;
+#else
 precision mediump float;
+#endif
+
 
 #pragma glslify: NoiseSettings = require(../tools/settings/noiseSettings.glsl)
 #pragma glslify: noiseSupplier = require(../tools/suppliers/simplexNoiseSupplier.glsl)

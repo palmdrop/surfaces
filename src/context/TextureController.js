@@ -27,13 +27,8 @@ class TextureController {
         // Many actions are unavailable until then
         this.initialized = false;
 
-        // The ID of the shader program
-        this.program = -1;
-
-        this.programs = {
-            layerProgram: -1,
-            warpProgram: -1
-        };
+        // Shader program for rendering the texture
+        this.program = null;
 
         // Random offsets for each layer
         this.sourceOffset = randomOffset();
@@ -79,36 +74,33 @@ class TextureController {
     }
 
     _createShader(vertexShaderSource, fragmentShaderSource) {
-        const program = GLC.createShaderProgram(vertexShaderSource, fragmentShaderSource);
+        const program = GLC.compileAndLinkShader(vertexShaderSource, fragmentShaderSource);
         GLC.flush();
-        if(!this.program) {
+        if(!program) {
             throw new Error("Shader not created");
         }
         return program;
     }
 
     // Initializes the WebGL context and loads the GPU with vertex data
-    initialize(canvas) {
+    initialize(canvas, program, pp) {
         if(this.initialized) {
             console.log("The texture controller is already initialized");
             return true;
         }
 
-        // INITIALIZE GLC (HELPER CLASS)
-        console.log("Initializing webgl controller (GLC)");
+        console.log("Initializing texture controller");
 
-        // This class is used as a facade against the webgl context
-        if(!GLC.init(canvas)) {
-            throw new Error("GLC failed to initialize");
-        }
         this.canvas = canvas;
 
         // COMPILE SHADERS
         console.log("Compiling shaders");
 
         // Create the shader program using the imported shaders
-        this.program = this._createShader(vertexShaderSource, fragmentShaderSource);
-        this.postProcessingProgram = this._createShader(vertexShaderSource, postProcessShaderSource);
+        //this.program = this._createShader(vertexShaderSource, fragmentShaderSource);
+        //this.postProcessingProgram = this._createShader(vertexShaderSource, postProcessShaderSource);
+        this.program = program;
+        this.postProcessingProgram = pp;
 
         // Setup full screen quad
         console.log("Initializing vertex data");
