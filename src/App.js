@@ -10,6 +10,7 @@ import { useKeyboardInput } from './hooks/KeyboardInputHook'
 
 import './App.css';
 import DataViewer from './components/tooltip/DataViewer'
+import PanelController from './components/input/PanelController'
 //import './Canvas.css'
 
 const App = (props) => {
@@ -406,81 +407,98 @@ const App = (props) => {
     }
   },[mousePosition, autoHide, panelVisible]);
 
+  const textureControlPanel = (
+    /* Settings panel */
+    <div 
+      className={"settings" + (panelVisible ? "" : " settings-hidden")}
+      ref={settingsRef}
+    > 
+
+      { /* Download canvas button */}
+      <div className="button-container settings__capture-button-container">
+        <button className="button settings__capture-button-container__button" onClick={handleCanvasDownload}>Capture frame</button>
+      </div>
+
+      { /* Container for export and import buttons */ }
+      <div className="settings__import-export-container">
+
+        { /* Export settings button */}
+        <div className="button-container settings__export-button-container">
+          <button className="button settings__export-button-container__button" onClick={handleSettingsDownload}>Export</button>
+        </div>
+
+        { /* Import settings button */}
+        <div className="button-container settings__import-button-container">
+          <button className="button settings__import-button-container__button" onClick={handleSettingsImport}>Import</button>
+          <input 
+            ref={fileInputRef} 
+            type="file" 
+            style={{ display: "none" }}
+            onChange={handleInputChange}
+            accept="application/JSON"
+          />
+        </div>
+      </div>
+
+      { /* Pause button */}
+      <div className="button-container settings__pause-button-container">
+        <button 
+          className={"button settings__pause-button-container__button" + (paused ? " active " : "")}
+          onClick={togglePause}>{paused ? "Unpause" : "Pause" }</button>
+      </div>
+
+      { /* General control panel */}
+      <ControlPanel 
+        attributes={TXC.attributes}
+        getter={(name) => TXC.getValue(name)}
+        setter={(name, value) => TXC.updateValue(name, value)}
+        defaults={(name) => TXC.getDefault(name)}
+        separator={"."}
+        //key={panelRefresh}
+      />
+
+      { /* Button for auto hinding settings panel */}
+      { /*
+      <div className="settings__auto-hide-button-container button-container">
+        <button 
+          className={"button settings__auto-hide-button-container__button" + (autoHide ? " active" : "")} 
+          onClick={handleAutoHide}>
+            {!autoHide ? "Hide panel" : "Disable panel hiding"}
+        </button>
+      </div>
+      */ }
+
+      { /* Button for hiding data viewer */}
+      <div className="settings__hide-data-viewer-button-container button-container">
+        <button 
+          className={"button settings__hide-data-viewer-button-container__button" + (!dataViewerVisible ? " active" : "")} 
+          onClick={handleDataViewerHide}>
+            {dataViewerVisible ? "Hide data viewer" : "Unhide data viewer"}
+        </button>
+      </div>
+    </div> 
+    /* Settings panel end */
+  );
+
   //////////
   // BODY //
   //////////
   return (
       /* Root container */
       <div className="canvas-container">
+        <PanelController
+          panels={[
+            {
+              name: "Texture Controller",
+              content: textureControlPanel
+            },
+            {
+              name: "Color Controller"
+            },
 
-        { /* Settings panel */}
-        <div 
-          className={"settings" + (panelVisible ? "" : " settings-hidden")}
-          ref={settingsRef}
-        > 
 
-          { /* Download canvas button */}
-          <div className="button-container settings__capture-button-container">
-            <button className="button settings__capture-button-container__button" onClick={handleCanvasDownload}>Capture frame</button>
-          </div>
-
-          { /* Container for export and import buttons */ }
-          <div className="settings__import-export-container">
-
-            { /* Export settings button */}
-            <div className="button-container settings__export-button-container">
-              <button className="button settings__export-button-container__button" onClick={handleSettingsDownload}>Export</button>
-            </div>
-
-            { /* Import settings button */}
-            <div className="button-container settings__import-button-container">
-              <button className="button settings__import-button-container__button" onClick={handleSettingsImport}>Import</button>
-              <input 
-                ref={fileInputRef} 
-                type="file" 
-                style={{ display: "none" }}
-                onChange={handleInputChange}
-                accept="application/JSON"
-              />
-            </div>
-          </div>
-
-          { /* Pause button */}
-          <div className="button-container settings__pause-button-container">
-            <button 
-              className={"button settings__pause-button-container__button" + (paused ? " active " : "")}
-              onClick={togglePause}>{paused ? "Unpause" : "Pause" }</button>
-          </div>
-
-          { /* General control panel */}
-          <ControlPanel 
-            attributes={TXC.attributes}
-            getter={(name) => TXC.getValue(name)}
-            setter={(name, value) => TXC.updateValue(name, value)}
-            defaults={(name) => TXC.getDefault(name)}
-            separator={"."}
-            //key={panelRefresh}
-          />
-
-          { /* Button for auto hinding settings panel */}
-          <div className="settings__auto-hide-button-container button-container">
-            <button 
-              className={"button settings__auto-hide-button-container__button" + (autoHide ? " active" : "")} 
-              onClick={handleAutoHide}>
-                {!autoHide ? "Hide panel" : "Disable panel hiding"}
-            </button>
-          </div>
-
-          { /* Button for hiding data viewer */}
-          <div className="settings__hide-data-viewer-button-container button-container">
-            <button 
-              className={"button settings__hide-data-viewer-button-container__button" + (!dataViewerVisible ? " active" : "")} 
-              onClick={handleDataViewerHide}>
-                {dataViewerVisible ? "Hide data viewer" : "Unhide data viewer"}
-            </button>
-          </div>
-
-        </div>
+          ]}
+        />
 
         { /* Data viewer */
           dataViewerVisible ? (

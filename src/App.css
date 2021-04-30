@@ -1,22 +1,4 @@
 .settings {
-    width: min(20%, 20rem);
-    height: 100%;
-
-    position: absolute;
-
-    overflow-y: scroll;
-    overflow-x: hidden;
-    -ms-overflow-style: none;
-    scrollbar-width: none;
-    background-color: #04040488;
-    padding: 0.0vh 0.2vh;
-
-    transform: translateX(0);
-
-    -webkit-transition: 0.5s ease !important;
-    -moz-transition: 0.5s ease !important;
-    -o-transition: 0.5s ease !important;
-    transition: 0.5s ease !important;
 }
 
 .data-tooltip {
@@ -24,7 +6,8 @@
     background-color: #04040488;
     padding: 0.2h 0.2vh;
 
-    right: 0
+    right: 0;
+    bottom: 0
 }
 
 .button {

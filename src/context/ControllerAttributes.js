@@ -154,7 +154,7 @@ const getRandomAttributes = (attributes) => {
             var result;
             if(current.marks) {
                 result = current.marks[Math.floor(random(0, current.marks.length))];
-            } else if(current.type == "1i") {
+            } else if(current.type === "1i") {
                 result = Math.floor(random(current.min, current.max));
             } else {
                 result = random(current.min, current.max);

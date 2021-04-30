@@ -1,0 +1,51 @@
+.panel-controller {
+
+}
+
+.panel-controller__panel {
+    width: min(20%, 20rem);
+    height: 97.0%;
+
+    position: absolute;
+
+    overflow-y: scroll;
+    overflow-x: hidden;
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+    background-color: #04040488;
+    margin: 2.8vh 0.0vh;
+
+    transform: translateX(0);
+
+    -webkit-transition: 0.5s ease !important;
+    -moz-transition: 0.5s ease !important;
+    -o-transition: 0.5s ease !important;
+    transition: 0.5s ease !important;
+}
+
+.panel-controller__nav {
+    position: absolute;
+    width: 100%;
+
+    padding: 0.1rem;
+
+    overflow-y: hidden;
+    overflow-x: scroll;
+    background-color: #04040488;
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around;
+
+}
+
+.panel-controller__nav__entry {
+    background-color: transparent;
+    padding: 0.1rem
+}
+
+.panel-controller__nav__entry__button {
+    padding: 0vw 5vw
+}

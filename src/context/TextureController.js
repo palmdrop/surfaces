@@ -367,6 +367,11 @@ class TextureController {
             var captureData = this.canvas.toDataURL("image/png");
             this.dataCallback(captureData);
         }
+
+        return {
+            framebuffer: this.fbo,
+            renderTexture: this.renderTexture
+        }
     }
 }
 
