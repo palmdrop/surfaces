@@ -1,5 +1,9 @@
 import GLC from './GLC'
 
+/////////////
+// TEXTURE //
+/////////////
+
 // Helper function for creating noise settings
 const noiseSettings = () => {
     return {
@@ -136,6 +140,40 @@ const getTextureAttributes = () => {
         amountControl: noiseSettings()
     };
 }
+
+///////////
+// COLOR //
+///////////
+
+const getColorAttributes = () => {
+    return {
+        brightness: {
+            value: 1.0,
+            isUniform: true,
+            type: "1f",
+
+            min: 0.001,
+            max: 10
+        },
+        power: {
+            value: 1.0,
+            isUniform: true,
+            type: "1f",
+
+            min: 0.001,
+            max: 10
+        },
+        hueOffset: {
+            value: 0.0,
+            isUniform: true,
+            type: "1f",
+
+            min: -0.5,
+            max: 0.5
+        },
+    }
+};
+
 
 // Randomizer of attributes
 const getRandomAttributes = (attributes) => {
@@ -299,4 +337,13 @@ const mergeAttributes = (current, changes) => {
     return updated;
 }
 
-export { getTextureAttributes, getAttribute, getAttributeValue, setUniforms, updateAttributeValue, mergeAttributes, getRandomAttributes }
+export { 
+    getTextureAttributes, 
+    getColorAttributes, 
+    getAttribute, 
+    getAttributeValue, 
+    setUniforms, 
+    updateAttributeValue, 
+    mergeAttributes, 
+    getRandomAttributes 
+}

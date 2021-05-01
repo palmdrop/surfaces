@@ -19,7 +19,7 @@ import PanelController from './components/input/PanelController'
 // Shaders
 import quadVertShaderSoruce from './GL/shaders/simple.vert'
 import textureFragShaderSource from './GL/shaders/warp.frag'
-import colorFragShaderSource from './GL/shaders/post.frag'
+import colorFragShaderSource from './GL/shaders/color.frag'
 
 
 const App = (props) => {
@@ -235,7 +235,7 @@ const App = (props) => {
     // Capture the next frame and prompt a download using a callback function
     // This is required since the canvas has to be captured after the render
     // Otherwise, the resulting image will be blank
-    TXC.captureFrame((dataURL) => {
+    CC.captureFrame((dataURL) => {
       promptDownload(dataURL, "canvas.png");
     });
   };
@@ -308,6 +308,10 @@ const App = (props) => {
         [quadVertShaderSoruce, colorFragShaderSource]
       ]);
 
+      GLC.createFullScreenQuad();
+      GLC.setQuadAttributeLayout(textureProgram, "vertPosition");
+      GLC.setQuadAttributeLayout(colorProgram, "vertPosition", "inTexCoord");
+
       // Initialize texture controller
       if(!TXC.initialize(canvas, textureProgram, colorProgram)) {
         throw new Error("Texture controller failed to initialize");
@@ -326,7 +330,9 @@ const App = (props) => {
 
     if(!AM.isRunning()) {
       AM.setCallback((delta) => {
-        TXC.render(delta)
+        const texture = TXC.render(delta)
+        CC.render(texture, delta)
+
         setFrameRate(AM.getFrameRate());
         executeHeldActions();
       });
@@ -509,6 +515,22 @@ const App = (props) => {
     /* Settings panel end */
   );
 
+  const colorControlPanel = (
+    <div 
+      className={"settings" + (panelVisible ? "" : " settings-hidden")}
+    > 
+      { /* General control panel */}
+      <ControlPanel 
+        attributes={CC.attributes}
+        getter={(name) => CC.getValue(name)}
+        setter={(name, value) => CC.updateValue(name, value)}
+        defaults={(name) => CC.getDefault(name)}
+        separator={"."}
+        //key={panelRefresh}
+      />
+    </div>
+  );
+
   //////////
   // BODY //
   //////////
@@ -522,7 +544,8 @@ const App = (props) => {
               content: textureControlPanel
             },
             {
-              name: "Color Controller"
+              name: "Color Controller",
+              content: colorControlPanel
             },
           ]}
         />

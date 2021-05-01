@@ -1,11 +1,6 @@
 import GLC from './GLC'
 
 // Shaders imported using glslify
-import vertexShaderSource from '../GL/shaders/simple.vert'
-import fragmentShaderSource from '../GL/shaders/warp.frag'
-
-import postProcessShaderSource from '../GL/shaders/post.frag'
-
 import { getTextureAttributes, getAttributeValue, setUniforms, updateAttributeValue, mergeAttributes } from './ControllerAttributes';
 
 class TextureController {
@@ -55,11 +50,6 @@ class TextureController {
 
         this.previousResolution = 1.0;
 
-        // Used for saving the canvas as an image
-        this.captureNext = false; // True if next frame should be captured
-        this.dataCallback = null; // The callback function that should be used to return the contents 
-                                  // of the render
-
         // Values used for multisampling
         // A framebuffer is used and a texture with double the size of the canvas is 
         // bound as render texture. This texture is then downsampled using linear filtering
@@ -83,7 +73,7 @@ class TextureController {
     }
 
     // Initializes the WebGL context and loads the GPU with vertex data
-    initialize(canvas, program, pp) {
+    initialize(canvas, program) {
         if(this.initialized) {
             console.log("The texture controller is already initialized");
             return true;
@@ -97,17 +87,7 @@ class TextureController {
         console.log("Compiling shaders");
 
         // Create the shader program using the imported shaders
-        //this.program = this._createShader(vertexShaderSource, fragmentShaderSource);
-        //this.postProcessingProgram = this._createShader(vertexShaderSource, postProcessShaderSource);
         this.program = program;
-        this.postProcessingProgram = pp;
-
-        // Setup full screen quad
-        console.log("Initializing vertex data");
-
-        GLC.createFullScreenQuad();
-        GLC.setQuadAttributeLayout(this.program, "vertPosition");
-        GLC.setQuadAttributeLayout(this.postProcessingProgram, "vertPosition", "inTexCoord");
 
         // SET SHADER UNIFORMS 
         console.log("Setting uniforms");
@@ -143,7 +123,8 @@ class TextureController {
 
         const createRenderTexture = (width, height) => {
             const gl = GLC.getGL();
-            return GLC.createTexture(width, height, gl.RGBA, gl.RGBA32F, gl.FLOAT);
+            //return GLC.createTexture(width, height, gl.RGBA, gl.RGBA32F, gl.FLOAT);
+            return GLC.createTexture(width, height, gl.RGBA, gl.RGBA8, gl.UNSINGED_BYTE);
         };
 
         // Create the render texture
@@ -174,13 +155,6 @@ class TextureController {
 
         // Update all uniforms with the new settings
         setUniforms(this.attributes, this.program);
-    }
-
-    // Used to capture the next frame of animation
-    // The data callback function will be used to return the result
-    captureFrame(dataCallback) {
-        this.captureNext = true;
-        this.dataCallback = dataCallback;
     }
 
     /////////////////////
@@ -332,38 +306,10 @@ class TextureController {
             GLC.setUniform(this.program, "viewport", "2fv", this.dimensions);
         }
 
-        // Render to the frame buffer
+        // Render to render texture
         GLC.renderFullScreenQuad(this.program);
 
-        // Bind the default frame buffer
-        GLC.bindFramebuffer(null);
-        GLC.setViewport(this.canvas.width, this.canvas.height); 
-
-        // Use the post processing program, which will sample the texture which we previously rendered to
-        GLC.setShaderProgram(this.postProcessingProgram);
-
-        // Bind and activate the texture
-        GLC.setTexture(this.renderTexture, 0);
-
-        // Tell the shader we bound the texture to texture unit 0
-        //gl.uniform1i(programInfo.uniformLocations.uSampler, 0);
-        GLC.setUniform(this.postProcessingProgram, "texture", "1i", 0);
-
-        GLC.renderFullScreenQuad(this.postProcessingProgram);
-
-        GLC.setShaderProgram(this.program);
-
-        // Capture the frame if requested
-        if(this.captureNext) {
-            this.captureNext = false;
-            var captureData = this.canvas.toDataURL("image/png");
-            this.dataCallback(captureData);
-        }
-
-        return {
-            framebuffer: this.fbo,
-            renderTexture: this.renderTexture
-        }
+        return this.renderTexture;
     }
 }
 

@@ -304,6 +304,8 @@ class GLCommander {
 
     // Enables a specific shader
     setShaderProgram(program) {
+        if(this.currentProgram === program) return;
+        this.currentProgram = program;
         this.gl.useProgram(program);
     }
 
@@ -312,6 +314,8 @@ class GLCommander {
     // For example, if "value" is an integer, then "type" should be "1i"
     // If "value" is a float array with three elements, "type" should be "3fv", and so on
     setUniform(program, name, type, value) {
+        this.setShaderProgram(program);
+
         // Store the locations in a map, to avoid having to unnecessary uniform location lookups
         const key = { program, name };
         var location = this.uniformLocations.get(key);
