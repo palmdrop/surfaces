@@ -46,10 +46,19 @@ vec2 recursiveWarp(vec2 p, NoiseSettings angleControl, NoiseSettings amountContr
 
 vec3 getColor(vec2 coord, NoiseSettings source, NoiseSettings angle, NoiseSettings amount) {
     vec2 p = recursiveWarp(coord, angle, amount);
-    float v = noiseSupplier(source, vec3(p.xy, 0));
+
     float e = noiseSupplier(angle, vec3(p.xy, 0));
+
     float a = noiseSupplier(amount, vec3(p.xy, 0));
-    return vec3(v, e, a);
+
+    float v = noiseSupplier(source, vec3(p.xy, 0));
+
+    /*vec2 pack = vec2(1.0 * v, 255.0 * v);
+    pack = fract(pack);
+    pack -= pack.yy * vec2(1.0 / 255.0, 0.0);*/
+
+    //return vec3(e, a, pack.xy);
+    return vec3(e, a, v);
 }
 
 void main()

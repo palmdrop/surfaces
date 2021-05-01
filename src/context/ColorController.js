@@ -58,6 +58,11 @@ class ColorController {
         return this.initialized;
     }
 
+    handleResize() {
+        if(!this.initialized) return;
+        GLC.setUniform(this.program, "viewport", "2fv", [this.canvas.width, this.canvas.height]);
+    }
+
     // Updates a value and it's corresponding uniform (if such exists)
     updateValue(location, value) {
         //TODO create some form of callback to sliders that force them to re-read when a value is changed?!
@@ -75,7 +80,7 @@ class ColorController {
 
 
     // Renders and modifies a source textures and exports the result to default frame buffer
-    render(sourceTexture, delta) {
+    render(sourceTexture, delta, multisampling) {
         // Bind the default frame buffer
         GLC.bindFramebuffer(null);
         GLC.setViewport(this.canvas.width, this.canvas.height); 
@@ -87,8 +92,9 @@ class ColorController {
         GLC.setTexture(sourceTexture, 0);
 
         // Tell the shader we bound the texture to texture unit 0
-        //gl.uniform1i(programInfo.uniformLocations.uSampler, 0);
         GLC.setUniform(this.program, "texture", "1i", 0);
+
+        GLC.setUniform(this.program, "multisampling", "1i", multisampling);
 
         GLC.renderFullScreenQuad(this.program);
 

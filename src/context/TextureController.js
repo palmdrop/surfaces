@@ -123,8 +123,8 @@ class TextureController {
 
         const createRenderTexture = (width, height) => {
             const gl = GLC.getGL();
-            //return GLC.createTexture(width, height, gl.RGBA, gl.RGBA32F, gl.FLOAT);
-            return GLC.createTexture(width, height, gl.RGBA, gl.RGBA8, gl.UNSINGED_BYTE);
+            return GLC.createTexture(width, height, gl.RGBA, gl.RGBA32F, gl.FLOAT);
+            //return GLC.createTexture(width, height, gl.RGBA, gl.RGBA8, gl.UNSINGED_BYTE);
         };
 
         // Create the render texture
@@ -222,16 +222,6 @@ class TextureController {
         const newWidth      = resolution * window.innerWidth;
         const newHeight     = resolution * window.innerHeight;
         const newDimensions = [newWidth, newHeight];
-
-        // Update the position to preserve the center of the view on resize
-        /*const position = this.getPosition();
-        const offset = this.screenSpaceToViewSpace([
-            0,
-            (newHeight - oldHeight) / 4.0
-        ]);
-
-        this.setPosition([position[0] + offset[0], position[1] + offset[1]]);
-        */
 
         // Update values
         GLC.setViewport(newWidth, newHeight);

@@ -145,16 +145,40 @@ const getTextureAttributes = () => {
 // COLOR //
 ///////////
 
+const componentController = (source, angle, amount) => {
+    return {
+        value: {
+            mult: {
+                value: 0,
+                type: "1i",
+                min: 0,
+                max: 1,
+            },
+            source: {
+                value: source,
+                type: "1f",
+                min: -1,
+                max: 1,
+            },
+            angle: {
+                value: angle,
+                type: "1f",
+                min: -1,
+                max: 1,
+            },
+            amount: {
+                value: amount,
+                type: "1f",
+                min: -1,
+                max: 1,
+            }
+        },
+        isUniform: true
+    };
+};
+
 const getColorAttributes = () => {
     return {
-        brightness: {
-            value: 1.0,
-            isUniform: true,
-            type: "1f",
-
-            min: 0.001,
-            max: 10
-        },
         power: {
             value: 1.0,
             isUniform: true,
@@ -163,14 +187,37 @@ const getColorAttributes = () => {
             min: 0.001,
             max: 10
         },
-        hueOffset: {
-            value: 0.0,
-            isUniform: true,
-            type: "1f",
+        general: {
+            value: {
+                hue: {
+                    value: 0.0,
+                    type: "1f",
 
-            min: -0.5,
-            max: 0.5
+                    min: -0.5,
+                    max: 0.5
+                },
+                saturation: {
+                    value: 1.0,
+                    isUniform: true,
+                    type: "1f",
+
+                    min: 0.001,
+                    max: 10
+                },
+                brightness: {
+                    value: 1.0,
+                    isUniform: true,
+                    type: "1f",
+
+                    min: 0.001,
+                    max: 10
+                }
+            },
+            isUniform: true
         },
+        hueController: componentController(1.0, 0.0, 0.0),
+        saturationController: componentController(0.0, 1.0, 0.0),
+        brightnessController: componentController(0.0, 0.0, 1.0),
     }
 };
 

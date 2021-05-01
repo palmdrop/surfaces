@@ -303,10 +303,16 @@ const App = (props) => {
       }
 
       // Compile and link shaders
-      const [textureProgram, colorProgram] = GLC.compileAndLinkShaders([
+      const programs = GLC.compileAndLinkShaders([
         [quadVertShaderSoruce, textureFragShaderSource],
         [quadVertShaderSoruce, colorFragShaderSource]
       ]);
+
+      if(!programs) {
+        throw new Error("Shader program linking failed");
+      }
+
+      const [textureProgram, colorProgram] = programs;
 
       GLC.createFullScreenQuad();
       GLC.setQuadAttributeLayout(textureProgram, "vertPosition");
@@ -323,7 +329,8 @@ const App = (props) => {
       }
 
       // Immediately resize to fill the available space
-      TXC.handleResize();
+      TXC.handleResize(); //TODO do in initialize function instead
+      CC.handleResize();
 
       setInitialized(true);
     }
@@ -331,7 +338,7 @@ const App = (props) => {
     if(!AM.isRunning()) {
       AM.setCallback((delta) => {
         const texture = TXC.render(delta)
-        CC.render(texture, delta)
+        CC.render(texture, delta, TXC.getValue("multisampling"))
 
         setFrameRate(AM.getFrameRate());
         executeHeldActions();
@@ -348,7 +355,10 @@ const App = (props) => {
   // Handle resize events
   useLayoutEffect(() => {
     // Let the texture controller handle the resize
-    const handleResize = () => TXC.handleResize();
+    const handleResize = () => {
+      TXC.handleResize();
+      CC.handleResize();
+    }
 
     window.addEventListener('resize', handleResize);
     handleResize();

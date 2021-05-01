@@ -203,6 +203,8 @@ class GLCommander {
                 console.error('Link failed: ' + this.gl.getProgramInfoLog(program));
                 console.error('vs info-log: ' + this.gl.getShaderInfoLog(vs));
                 console.error('fs info-log: ' + this.gl.getShaderInfoLog(fs));
+
+                return null;
             }
         }
 
