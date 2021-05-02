@@ -1,7 +1,7 @@
 import GLC from './GLC'
 
 
-import { getColorAttributes, getAttributeValue, setUniforms, updateAttributeValue, mergeAttributes } from './ControllerAttributes';
+import { getColorAttributes, getAttributeValue, getAttributeDefault, setUniforms, updateAttributeValue, mergeAttributes } from './ControllerAttributes';
 
 class ColorController {
     ////////////////////
@@ -25,6 +25,8 @@ class ColorController {
         this.captureNext = false; // True if next frame should be captured
         this.dataCallback = null; // The callback function that should be used to return the contents 
                                   // of the render
+
+        this.handleResize();
     }
 
     // Used to capture the next frame of animation
@@ -75,7 +77,7 @@ class ColorController {
 
     // Returns the default (initial) value
     getDefault(location) {
-        return getAttributeValue(this.defaultAttributes, location);
+        return getAttributeDefault(this.attributes, location);
     }
 
 

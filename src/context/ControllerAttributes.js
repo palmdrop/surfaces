@@ -4,18 +4,24 @@ import GLC from './GLC'
 // TEXTURE //
 /////////////
 
+const randomElement = (array) => {
+    return array[Math.floor(Math.random() * array.length)];
+}
+
 // Helper function for creating noise settings
 const noiseSettings = () => {
     return {
         value: {
             frequency: {
-                value: Math.random() * 4 + 0.1,
+                value: Math.random() * 1 + 0.2,
+                default: 1.0,
                 min: 0.0000001,
                 max: 1.0000,
                 type: "1f",
             },
             octaves: {
-                value: 3,
+                value: randomElement([1, 3, 5]),
+                default: 3,
                 type: "1i",
                 min: 1,
                 max: 5,
@@ -23,19 +29,22 @@ const noiseSettings = () => {
                 marks: [1, 3, 5]
             },
             lacunarity: {
-                value: 2.0,
+                value: Math.random() * 4 + 1.0,
+                default: 2.0,
                 type: "1f",
                 min: 0.1,
                 max: 10.0,
             },
             persistence: {
-                value: 0.5,
+                value: Math.random() * 0.3,
+                default: 0.5,
                 type: "1f",
                 min: 0.1,
                 max: 5.0,
             },
             amplitude: {
                 value: 1.0,
+                default: 1.0,
                 type: "1f",
                 min: 0.1,
                 max: 10.0,
@@ -43,25 +52,29 @@ const noiseSettings = () => {
             modifications: {
                 value: {
                     ridgeThreshold: {
-                        value: 1.0,
+                        value: Math.random(),
+                        default: 1.0,
                         type: "1f",
                         min: 0.5,
                         max: 1.0,
                     },
                     pow: {
-                        value: 1.0,
+                        value: Math.random() + 1.0,
+                        default: 1.0,
                         type: "1f",
                         min: -1.0,
                         max: 5
                     },
                     xStretch: {
                         value: 1.0,
+                        default: 1.0,
                         type: "1f",
                         min: 0.001,
                         max: 10
                     },
                     yStretch: {
                         value: 1.0,
+                        default: 1.0,
                         type: "1f",
                         min: 0.001,
                         max: 10
@@ -74,9 +87,10 @@ const noiseSettings = () => {
 };
 
 // Helper function for creating time settings
-const timeSettings = (value) => {
+const timeSettings = (value, def = null) => {
     return {
         value: value,
+        default: def || value,
         min: 0.0,
         max: 1,
     }
@@ -87,6 +101,7 @@ const getTextureAttributes = () => {
     return {
         scale: {
             value: 1.0,
+            default: 1.0,
             isUniform: true,
             type: "1f",
 
@@ -94,7 +109,8 @@ const getTextureAttributes = () => {
             max: 3
         },
         iterations: {
-            value: 2,
+            value: randomElement([1, 2, 3, 4]),
+            default: 2,
             isUniform: true,
             type: "1i",
 
@@ -102,7 +118,8 @@ const getTextureAttributes = () => {
             max: 4,
         },
         warpAmount: {
-            value: 1,
+            value: Math.random() * 2 + 0.5,
+            default: 1.0,
             isUniform: true,
             type: "1f",
 
@@ -111,6 +128,7 @@ const getTextureAttributes = () => {
         },
         resolution: {
             value: 1.0,
+            default: 1.0,
             isUniform: false,
             type: "1f",
 
@@ -119,6 +137,7 @@ const getTextureAttributes = () => {
         },
         multisampling: {
             value: 0,
+            default: 0,
             isUniform: false,
             type: "1i",
 
@@ -145,29 +164,33 @@ const getTextureAttributes = () => {
 // COLOR //
 ///////////
 
-const componentController = (source, angle, amount) => {
+const componentController = (source, angle, amount, defaults=[1.0, 1.0, 1.0]) => {
     return {
         value: {
             mult: {
                 value: 0,
+                default: 0,
                 type: "1i",
                 min: 0,
                 max: 1,
             },
             source: {
                 value: source,
+                default: defaults[0],
                 type: "1f",
                 min: -1,
                 max: 1,
             },
             angle: {
                 value: angle,
+                default: defaults[1],
                 type: "1f",
                 min: -1,
                 max: 1,
             },
             amount: {
                 value: amount,
+                default: defaults[2],
                 type: "1f",
                 min: -1,
                 max: 1,
@@ -181,6 +204,7 @@ const getColorAttributes = () => {
     return {
         power: {
             value: 1.0,
+            default: 1.0,
             isUniform: true,
             type: "1f",
 
@@ -191,13 +215,15 @@ const getColorAttributes = () => {
             value: {
                 hue: {
                     value: 0.0,
+                    default: 0.0,
                     type: "1f",
 
                     min: -0.5,
                     max: 0.5
                 },
                 saturation: {
-                    value: 1.0,
+                    value: 0.7,
+                    default: 0.7,
                     isUniform: true,
                     type: "1f",
 
@@ -206,18 +232,49 @@ const getColorAttributes = () => {
                 },
                 brightness: {
                     value: 1.0,
+                    default: 1.0,
                     isUniform: true,
                     type: "1f",
 
                     min: 0.001,
-                    max: 10
+                    max: 4
+                },
+                red: {
+                    value: 1.0,
+                    default: 1.0,
+                    isUniform: true,
+                    type: "1f",
+
+                    min: 0.001,
+                    max: 4
+                },
+                green: {
+                    value: 1.0,
+                    default: 1.0,
+                    isUniform: true,
+                    type: "1f",
+
+                    min: 0.001,
+                    max: 4
+                },
+                blue: {
+                    value: 1.0,
+                    default: 1.0,
+                    isUniform: true,
+                    type: "1f",
+
+                    min: 0.001,
+                    max: 4
                 }
             },
             isUniform: true
         },
-        hueController: componentController(1.0, 0.0, 0.0),
-        saturationController: componentController(0.0, 1.0, 0.0),
-        brightnessController: componentController(0.0, 0.0, 1.0),
+        hueController:        componentController(2.0 * Math.random() - 1.0, 2.0 * Math.random() - 1.0, 2.0 * Math.random() - 1.0,
+                                                 [1.0, 1.0, 0.0]),
+        saturationController: componentController(1.0 * Math.random(), 1.0 * Math.random(), 1.0 * Math.random(),
+                                                 [0.0, 1.0, -0.5]),
+        brightnessController: componentController(1.0, 0.0, 0.0,
+                                                 [1.0, 0.0, 0.0]),
     }
 };
 
@@ -335,11 +392,47 @@ const setUniforms = (attributes, program) => {
     }
 }
 
+// Do an operation for each attribute
+const forEach = (attributes, operation, stopCondition) => {
+    const performOperation = (current) => {
+        if(stopCondition && stopCondition(current)) return;
+
+        if(typeof current.value === "object") {
+            for(var name in current.value) {
+                if(Object.prototype.hasOwnProperty.call(current.value, name)) {
+                    performOperation(current.value[name]);
+                }
+            }
+        } else {
+            operation(current);
+        }
+    }
+
+    for (var name in attributes) {
+        if(Object.prototype.hasOwnProperty.call(attributes, name)) {
+            performOperation(attributes[name], name);
+        }
+    }
+
+    return attributes;
+};
+
+const resetAttributesToDefault = (attributes) => {
+    return forEach(attributes, (current) => current.value = current.default);
+}
+
 // Returns the value of a specified attribute
 const getAttributeValue = (attributes, location) => {
     const [, v] = getAttribute(attributes, location);
     if(typeof v === "undefined") return undefined;
     return v.value;
+}
+
+// Returns the default of a specified attribute
+const getAttributeDefault = (attributes, location) => {
+    const [, v] = getAttribute(attributes, location);
+    if(typeof v === "undefined") return undefined;
+    return v.default;
 }
 
 // Updates an attribute value and the corresponding uniform (if one exists)
@@ -389,6 +482,8 @@ export {
     getColorAttributes, 
     getAttribute, 
     getAttributeValue, 
+    getAttributeDefault,
+    resetAttributesToDefault,
     setUniforms, 
     updateAttributeValue, 
     mergeAttributes, 

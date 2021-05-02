@@ -55,6 +55,8 @@ class GLCommander {
             console.log("no support for parallel shader compilation")
         }*/
 
+        gl.enableVertexAttribArray(0);
+
         this.canvas = canvas;
         this.gl = gl;
         this.initialized = true;

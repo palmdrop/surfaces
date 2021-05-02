@@ -20,11 +20,15 @@ struct ColorBalance {
     float hue;
     float saturation;
     float brightness;
+
+    float red;
+    float green;
+    float blue;
 };
 
 //varying vec3 fragColor;
 varying vec2 texCoord;
-uniform sampler2D texture;
+uniform highp sampler2D texture;
 
 uniform vec2 viewport;
 
@@ -55,8 +59,14 @@ float getComponent(vec4 data, ComponentController controller) {
 
 vec3 getColor(vec4 data) {
     float h = getComponent(data, hueController);
+    if(h > 1.0) h = fract(h);
+    else if(h < 1.0) h = 1.0 - fract(h);
+
     float s = getComponent(data, saturationController);
+    s = max(0.0, min(s, 1.0));
+
     float b = getComponent(data, brightnessController);
+    b = max(0.0, min(b, 1.0));
 
     // Hue modifications
     h += general.hue;
@@ -69,6 +79,11 @@ vec3 getColor(vec4 data) {
     s *= general.saturation;
 
     vec3 color = hsv2rgb(vec3(h, s, b));
+
+    // RGB modifications
+    color.r *= pow(general.red, general.saturation);
+    color.g *= pow(general.green, general.saturation);
+    color.b *= pow(general.blue, general.saturation);
 
     return color;
 }

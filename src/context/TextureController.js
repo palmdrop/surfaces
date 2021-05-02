@@ -1,7 +1,13 @@
 import GLC from './GLC'
 
-// Shaders imported using glslify
-import { getTextureAttributes, getAttributeValue, setUniforms, updateAttributeValue, mergeAttributes } from './ControllerAttributes';
+import { getTextureAttributes, 
+         getAttributeValue, 
+         getAttributeDefault, 
+         resetAttributesToDefault,
+         setUniforms, 
+         updateAttributeValue, 
+         mergeAttributes 
+       } from './ControllerAttributes';
 
 class TextureController {
     ////////////////////
@@ -46,7 +52,7 @@ class TextureController {
         this.attributes = 
             //getRandomAttributes();
             getTextureAttributes();
-        this.defaultAttributes = getTextureAttributes();
+        //this.defaultAttributes = getTextureAttributes();
 
         this.previousResolution = 1.0;
 
@@ -100,8 +106,8 @@ class TextureController {
 
         this.initialized = true;
 
-        // Sets up frame buffer for multisampling
-        this._setupFramebuffer();
+        // Update necessary values
+        this._handleUpdate(true);
 
         return true;
     };
@@ -151,6 +157,7 @@ class TextureController {
         var imported = JSON.parse(jsonString);
 
         // Use default settings when merging
+        //TODO merge attributes should use default values
         this.attributes = mergeAttributes(getTextureAttributes(), imported);
 
         // Update all uniforms with the new settings
@@ -161,6 +168,16 @@ class TextureController {
     // DATA MANAGEMENT //
     /////////////////////
 
+    reset() {
+        this.attributes = resetAttributesToDefault(this.attributes);
+        setUniforms(this.attributes, this.program);
+    }
+
+    randomize() {
+        this.attributes = getTextureAttributes();
+        setUniforms(this.attributes, this.program);
+    }
+
     // Returns a value from the attribute object
     // Used to query the internal state of the texture controller
     getValue(location) {
@@ -169,7 +186,7 @@ class TextureController {
 
     // Returns the default (initial) value
     getDefault(location) {
-        return getAttributeValue(this.defaultAttributes, location);
+        return getAttributeDefault(this.attributes, location);
     }
 
     getDimensions() {

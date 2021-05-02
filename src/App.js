@@ -181,6 +181,14 @@ const App = (props) => {
       onHeld: true,
       description: ""
     })
+    .set('r', {
+      action: () => {
+        TXC.randomize();
+        refreshPanel();
+      },
+      onHeld: false,
+      description: ""
+    })
   ;
 
 
@@ -314,12 +322,13 @@ const App = (props) => {
 
       const [textureProgram, colorProgram] = programs;
 
+      // Initialize quad that will be used to render to the entire screen
       GLC.createFullScreenQuad();
       GLC.setQuadAttributeLayout(textureProgram, "vertPosition");
       GLC.setQuadAttributeLayout(colorProgram, "vertPosition", "inTexCoord");
 
       // Initialize texture controller
-      if(!TXC.initialize(canvas, textureProgram, colorProgram)) {
+      if(!TXC.initialize(canvas, textureProgram)) {
         throw new Error("Texture controller failed to initialize");
       }
 
@@ -327,10 +336,6 @@ const App = (props) => {
       if(!CC.initialize(canvas, colorProgram)) {
         throw new Error("Color controller failed to initialize");
       }
-
-      // Immediately resize to fill the available space
-      TXC.handleResize(); //TODO do in initialize function instead
-      CC.handleResize();
 
       setInitialized(true);
     }
@@ -503,15 +508,13 @@ const App = (props) => {
       />
 
       { /* Button for auto hinding settings panel */}
-      { /*
-      <div className="settings__auto-hide-button-container button-container">
+      <div className="settings__randomize-button-container button-container">
         <button 
-          className={"button settings__auto-hide-button-container__button" + (autoHide ? " active" : "")} 
-          onClick={handleAutoHide}>
-            {!autoHide ? "Hide panel" : "Disable panel hiding"}
+          className={"button settings__randomize-button-container__button"} 
+          onClick={() => TXC.randomize()}>
+            Randomize
         </button>
       </div>
-      */ }
 
       { /* Button for hiding data viewer */}
       <div className="settings__hide-data-viewer-button-container button-container">
