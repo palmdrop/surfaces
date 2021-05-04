@@ -1,7 +1,7 @@
 import GLC from './GLC'
 
 
-import { getColorAttributes, getAttributeValue, getAttributeDefault, setUniforms, updateAttributeValue, mergeAttributes } from './ControllerAttributes';
+import { getColorAttributes, getAttributeValue, getAttributeDefault, resetAttributesToDefault, setUniforms, updateAttributeValue, mergeAttributes } from './ControllerAttributes';
 
 class ColorController {
     ////////////////////
@@ -78,6 +78,16 @@ class ColorController {
     // Returns the default (initial) value
     getDefault(location) {
         return getAttributeDefault(this.attributes, location);
+    }
+
+    reset() {
+        this.attributes = resetAttributesToDefault(this.attributes);
+        setUniforms(this.attributes, this.program);
+    }
+
+    randomize() {
+        this.attributes = getColorAttributes();
+        setUniforms(this.attributes, this.program);
     }
 
 

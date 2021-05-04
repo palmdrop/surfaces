@@ -89,6 +89,12 @@ const App = (props) => {
     return delta;
   }
 
+  const randomize = () => {
+    TXC.randomize();
+    CC.randomize();
+    refreshPanel();
+  }
+
 
   // KEYBOARD INPUT
 
@@ -183,8 +189,7 @@ const App = (props) => {
     })
     .set('r', {
       action: () => {
-        TXC.randomize();
-        refreshPanel();
+        randomize();
       },
       onHeld: false,
       description: ""
@@ -464,38 +469,6 @@ const App = (props) => {
       ref={settingsRef}
     > 
 
-      { /* Download canvas button */}
-      <div className="button-container settings__capture-button-container">
-        <button className="button settings__capture-button-container__button" onClick={handleCanvasDownload}>Capture frame</button>
-      </div>
-
-      { /* Container for export and import buttons */ }
-      <div className="settings__import-export-container">
-
-        { /* Export settings button */}
-        <div className="button-container settings__export-button-container">
-          <button className="button settings__export-button-container__button" onClick={handleSettingsDownload}>Export</button>
-        </div>
-
-        { /* Import settings button */}
-        <div className="button-container settings__import-button-container">
-          <button className="button settings__import-button-container__button" onClick={handleSettingsImport}>Import</button>
-          <input 
-            ref={fileInputRef} 
-            type="file" 
-            style={{ display: "none" }}
-            onChange={handleInputChange}
-            accept="application/JSON"
-          />
-        </div>
-      </div>
-
-      { /* Pause button */}
-      <div className="button-container settings__pause-button-container">
-        <button 
-          className={"button settings__pause-button-container__button" + (paused ? " active " : "")}
-          onClick={togglePause}>{paused ? "Unpause" : "Pause" }</button>
-      </div>
 
       { /* General control panel */}
       <ControlPanel 
@@ -507,23 +480,6 @@ const App = (props) => {
         //key={panelRefresh}
       />
 
-      { /* Button for auto hinding settings panel */}
-      <div className="settings__randomize-button-container button-container">
-        <button 
-          className={"button settings__randomize-button-container__button"} 
-          onClick={() => TXC.randomize()}>
-            Randomize
-        </button>
-      </div>
-
-      { /* Button for hiding data viewer */}
-      <div className="settings__hide-data-viewer-button-container button-container">
-        <button 
-          className={"button settings__hide-data-viewer-button-container__button" + (!dataViewerVisible ? " active" : "")} 
-          onClick={handleDataViewerHide}>
-            {dataViewerVisible ? "Hide data viewer" : "Unhide data viewer"}
-        </button>
-      </div>
     </div> 
     /* Settings panel end */
   );
@@ -561,7 +517,59 @@ const App = (props) => {
               content: colorControlPanel
             },
           ]}
-        />
+        >
+          { /* Button for hiding data viewer */}
+          <div className="settings__hide-data-viewer-button-container button-container">
+            <button 
+              className={"button settings__hide-data-viewer-button-container__button" + (!dataViewerVisible ? " active" : "")} 
+              onClick={handleDataViewerHide}>
+                {dataViewerVisible ? "Hide data viewer" : "Unhide data viewer"}
+            </button>
+          </div>
+
+          { /* Download canvas button */}
+          <div className="button-container settings__capture-button-container">
+            <button className="button settings__capture-button-container__button" onClick={handleCanvasDownload}>Capture frame</button>
+          </div>
+
+          { /* Container for export and import buttons */ }
+          <div className="settings__import-export-container">
+
+            { /* Export settings button */}
+            <div className="button-container settings__export-button-container">
+              <button className="button settings__export-button-container__button" onClick={handleSettingsDownload}>Export</button>
+            </div>
+
+            { /* Import settings button */}
+            <div className="button-container settings__import-button-container">
+              <button className="button settings__import-button-container__button" onClick={handleSettingsImport}>Import</button>
+              <input 
+                ref={fileInputRef} 
+                type="file" 
+                style={{ display: "none" }}
+                onChange={handleInputChange}
+                accept="application/JSON"
+              />
+            </div>
+          </div>
+
+          { /* Pause button */}
+          <div className="button-container settings__pause-button-container">
+            <button 
+              className={"button settings__pause-button-container__button" + (paused ? " active " : "")}
+              onClick={togglePause}>{paused ? "Unpause" : "Pause" }</button>
+          </div>
+
+          { /* Button for randomizing settings */}
+          <div className="settings__randomize-button-container button-container">
+            <button 
+              className={"button settings__randomize-button-container__button"} 
+              onClick={randomize}>
+                Randomize
+            </button>
+          </div>
+        </PanelController>
+
 
         { /* Data viewer */
           dataViewerVisible ? (
