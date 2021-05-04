@@ -3,8 +3,8 @@ import React, { useRef, useState, useEffect, useLayoutEffect, useReducer } from 
 import ControlPanel from './components/input/ControlPanel'
 
 import GLC from './context/GLC'
-import TXC from './context/TextureController'
-import CC  from './context/ColorController'
+import TXC from './context/warp/TextureController'
+import CC  from './context/warp/ColorController'
 
 import AM from './context/AnimationManager'
 
@@ -200,7 +200,7 @@ const App = (props) => {
   const handleMovement = (offset) => {
     setMouseDown(false);
     const position = TXC.getPosition(); 
-    const scale = TXC.getValue("resolution") * TXC.getValue("scale");
+    const scale = TXC.getValue("scale");
     offset = TXC.screenSpaceToViewSpace(offset);
     TXC.setPosition([position[0] + offset[0] * scale, position[1] + offset[1] * scale]);
   }

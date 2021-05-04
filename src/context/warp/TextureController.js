@@ -1,4 +1,4 @@
-import GLC from './GLC'
+import GLC from '../GLC'
 
 import { getTextureAttributes, 
          getAttributeValue, 
@@ -323,3 +323,7 @@ class TextureController {
 // Initialize a global instance of the texture controller, and export
 const TXC = new TextureController();
 export default TXC;
+export {
+    TXC,
+    TextureController
+};

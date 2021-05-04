@@ -1,4 +1,4 @@
-import GLC from './GLC'
+import GLC from '../GLC'
 
 
 import { getColorAttributes, getAttributeValue, getAttributeDefault, resetAttributesToDefault, setUniforms, updateAttributeValue, mergeAttributes } from './ControllerAttributes';
@@ -121,3 +121,7 @@ class ColorController {
 
 const CC = new ColorController();
 export default CC;
+export {
+    ColorController,
+    CC
+};

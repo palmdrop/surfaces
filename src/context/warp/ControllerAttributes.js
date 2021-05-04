@@ -1,4 +1,4 @@
-import GLC from './GLC'
+import GLC from '../GLC'
 
 /////////////
 // TEXTURE //
