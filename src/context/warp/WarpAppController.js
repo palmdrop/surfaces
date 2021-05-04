@@ -9,9 +9,10 @@ import AM from '../AnimationManager'
 import GLC from '../GLC'
 
 // Shaders
-import quadVertShaderSoruce from './GL/shaders/simple.vert'
-import textureFragShaderSource from './GL/shaders/warp.frag'
-import colorFragShaderSource from './GL/shaders/color.frag'
+import quadVertShaderSoruce from '../../GL/shaders/simple.vert'
+import textureFragShaderSource from '../../GL/shaders/warp.frag'
+import colorFragShaderSource from '../../GL/shaders/color.frag'
+import { mergeAttributes, resetAttributesToDefault } from './ControllerAttributes'
 
 // Class for controlling the entire application
 class WarpAppController {
@@ -69,18 +70,21 @@ class WarpAppController {
 
         this.controllers = {
             // Texture controller
-            txc: TXC,
-            textureController: TXC,
+            TXC: TXC,
 
             // Color controller
-            cc: CC,
-            colorController: CC
+            CC: CC,
         };
 
         this.canvas = canvas;
         this.initialized = true;
+
+        return true;
     }
 
+    isInitialized() {
+        return this.initialized;
+    }
 
     /////////////////////////
     // ANIMATION/RENDERING //
@@ -88,7 +92,7 @@ class WarpAppController {
 
     // Starts the animation manager
     // This is required for anything to be rendered to the canvas
-    start() {
+    start(callback = null) {
         // If already running, do nothing
         if(AM.isRunning()) return;
 
@@ -99,6 +103,8 @@ class WarpAppController {
             const texture = TXC.render(delta)
             // Also tell the color controller if multisampling is enabled
             CC.render(texture, delta, TXC.getValue("multisampling"))
+
+            callback && callback();
         });
         AM.start();
     }
@@ -133,7 +139,7 @@ class WarpAppController {
         TXC.updateValue("animationSpeed.general", Math.max(speed * (1 + delta)));
     }
 
-    changeScale(amount, position = null) {
+    changeScale(amount, sourcePosition = null) {
         // Get the current scale value
         var scale = TXC.getValue("scale");
 
@@ -144,13 +150,13 @@ class WarpAppController {
         // Update the value in the texture controller
         TXC.updateValue("scale", scale);
 
-        // If a position is supplied, scale around that position
-        if(!position) return;
+        // If a source position is supplied, scale around that position
+        if(!sourcePosition) return;
 
         // Offset the center in the direction of the cursor
         var offset = TXC.screenSpaceToViewSpace([
-            (position.x - window.innerWidth  / 2) * delta,
-            (position.y - window.innerHeight / 2) * delta,
+            (sourcePosition[0] - window.innerWidth  / 2) * delta,
+            (sourcePosition[1] - window.innerHeight / 2) * delta,
         ]);
 
         const position = TXC.getPosition();
@@ -158,6 +164,8 @@ class WarpAppController {
     }
 
     move(offset) {
+        this.anchored = false; // Lift anchor if moving regularly
+
         const position = TXC.getPosition(); 
         const scale = TXC.getValue("scale");
 
@@ -168,9 +176,9 @@ class WarpAppController {
         TXC.setPosition([position[0] + offset[0] * scale, position[1] + offset[1] * scale]);
     }
 
-    setAnchor(position) {
+    setAnchor(anchor) {
         if(this.anchored) return false; // The current anchor has to be lifted first
-        this.anchor = position;
+        this.anchor = anchor;
         
         // Store a copy of the previous position, will be used
         // to calculate offsets
@@ -191,22 +199,23 @@ class WarpAppController {
     // Moves the view using the specified offset from the anchor position
     anchorMove(offset) {
         if(!this.anchored) return false;
-        
+
         // Get the current scale. This is used to correctly translate the view
         const scale = TXC.getValue("scale");
 
         // The offset from the anchor point 
         const viewSpaceOffset = TXC.screenSpaceToViewSpace([
-            (anchor[0] - offset.x) * scale,
-            (anchor[1] - offset.y) * scale
+            (this.anchor[0] - offset[0]) * scale,
+            (this.anchor[1] - offset[1]) * scale
         ]);
 
         // The previous view position
         // This previous position is set when the mouse button is first pressed
         TXC.setPosition([
             this.previousPosition[0] + viewSpaceOffset[0], 
-            this.previousPosition[1] + viewSpaceOffset[1]
+            this.previousPosition[1] - viewSpaceOffset[1]
         ]);
+
     }
 
     randomize() {
@@ -220,13 +229,40 @@ class WarpAppController {
 
     // Exports the relevant settings as a JSON file
     exportSettings() {
-        // TODO include CC settings as well!!
-        return TXC.exportSettings();
+        const exported = {};
+
+        // Iterate over all the controllers
+        for (const controllerName in this.controllers) {
+            const controller = this._getController(controllerName);
+
+            // Set their corresponding attributes
+            exported[controllerName] = controller.getAttributes();
+        }
+
+        return JSON.stringify(exported, null, 2);
     }
 
     importSettings(settingsJSON) {
-        //TODO include CC settings
-        TXC.importSettings(settingsJSON);
+        const imported = JSON.parse(settingsJSON);
+
+        // Iterate over all the controllers
+        for (const controllerName in this.controllers) {
+            const controller = this._getController(controllerName);
+
+            var importedAttributes = imported[controllerName];
+            var oldAttributes = controller.getAttributes();
+
+            // Merge the imported attributes with the default attributes
+            // This ensures settings for old remains as compatible as possible
+            // with settings for never versions of the application
+            var newAttributes = mergeAttributes(
+                resetAttributesToDefault(oldAttributes), // Use default values as base
+                importedAttributes                       // Override with imported values
+            );
+
+            // Set their corresponding attributes
+            controller.setAttributes(newAttributes);
+        }
     }
 
     /////////////
@@ -253,16 +289,27 @@ class WarpAppController {
     }
 
     getValue(controllerName, location) {
+        if(!this.initialized) return;
         return this._getController(controllerName)
         .getValue(location);
     }
     getDefault(controllerName, location) {
+        if(!this.initialized) return;
         return this._getController(controllerName)
         .getDefault(location);
     }
 
+    getAttributes(controllerName) {
+        if(!this.initialized) return;
+        return this._getController(controllerName).getAttributes();
+    }
+
     isAnchored() {
         return this.anchored;
+    }
+
+    isPaused() {
+        return this.paused;
     }
 
     /////////////
@@ -270,6 +317,7 @@ class WarpAppController {
     /////////////
 
     updateValue(controllerName, location, value) {
+        if(!this.initialized) return;
         return this._getController(controllerName) 
         .updateValue(location, value);
     }

@@ -278,6 +278,9 @@ const getColorAttributes = () => {
     }
 };
 
+//////////
+// UTIL //
+//////////
 
 // Randomizer of attributes
 const getRandomAttributes = (attributes) => {

@@ -80,6 +80,17 @@ class ColorController {
         return getAttributeDefault(this.attributes, location);
     }
 
+    getAttributes() {
+        return this.attributes;
+    }
+
+    setAttributes(attributes) {
+        this.attributes = attributes;
+
+        // Update all uniforms with the new settings
+        setUniforms(this.attributes, this.program);
+    }
+
     reset() {
         this.attributes = resetAttributesToDefault(this.attributes);
         setUniforms(this.attributes, this.program);

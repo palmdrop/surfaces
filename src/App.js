@@ -2,11 +2,7 @@
 import React, { useRef, useState, useEffect, useLayoutEffect, useReducer } from 'react'
 import ControlPanel from './components/input/ControlPanel'
 
-import GLC from './context/GLC'
-import TXC from './context/warp/TextureController'
-import CC  from './context/warp/ColorController'
-
-import AM from './context/AnimationManager'
+import WAC from './context/warp/WarpAppController'
 
 import { downloadJSON, promptDownload } from './tools/Utils'
 import { useMousePosition } from './hooks/MousePositionHook'
@@ -15,12 +11,6 @@ import { useKeyboardInput } from './hooks/KeyboardInputHook'
 import './App.css';
 import DataViewer from './components/tooltip/DataViewer'
 import PanelController from './components/input/PanelController'
-
-// Shaders
-import quadVertShaderSoruce from './GL/shaders/simple.vert'
-import textureFragShaderSource from './GL/shaders/warp.frag'
-import colorFragShaderSource from './GL/shaders/color.frag'
-
 
 const App = (props) => {
   ////////////////
@@ -44,12 +34,6 @@ const App = (props) => {
   const [autoHide, setAutoHide] = useState(false); // If true, the panel will hide automatically 
   const [dataViewerVisible, setDataViewerVisible] = useState(true); // If true, a popup with render information will be displayed
 
-  // States for handling view change using mouse
-  // The user can drag the canvas to move the view
-  const [mouseDown, setMouseDown] = useState(false); // True if the primary mouse button is held
-  const [anchor, setAnchor] = useState([0, 0]); // The "anchor" is the position where the mouse was first pressed
-  const [prevPosition, setPrevPosition] = useState([0, 0]); // A copy of the previous view position
-
   // A reducer used to force update the panel (required when the settings are changed outside the panel)
   const [, refreshPanel] = useReducer(x => x + 1, 0);
 
@@ -63,35 +47,22 @@ const App = (props) => {
 
   // Pauses the animation entirely (same effect as setting the general animation speed to 0.0)
   const togglePause = () => {
-    TXC.setPaused(!paused);
-    setPaused(!paused);
+    WAC.togglePause();
+    setPaused(WAC.isPaused());
   };
 
   const changeAnimationSpeed = (delta) => {
-    var speed = TXC.getValue("animationSpeed.general");
-    TXC.updateValue("animationSpeed.general", Math.max(speed * (1 + delta), 0.0));
+    WAC.changeAnimationSpeed(delta);
     refreshPanel();
   };
 
   const updateScale = (amount) => {
-    // Get the current scale value
-    var scale = TXC.getValue("scale");
-
-    // Calculate a new scale value based on the previous one
-    const delta = amount * scale; 
-    scale += delta;
-
-    // Update the value in the texture controller
-    TXC.updateValue("scale", scale);
-
+    WAC.changeScale(amount);
     refreshPanel();
-
-    return delta;
   }
 
   const randomize = () => {
-    TXC.randomize();
-    CC.randomize();
+    WAC.randomize();
     refreshPanel();
   }
 
@@ -198,27 +169,14 @@ const App = (props) => {
 
 
   const handleMovement = (offset) => {
-    setMouseDown(false);
-    const position = TXC.getPosition(); 
-    const scale = TXC.getValue("scale");
-    offset = TXC.screenSpaceToViewSpace(offset);
-    TXC.setPosition([position[0] + offset[0] * scale, position[1] + offset[1] * scale]);
+    WAC.move(offset);
   }
 
   // MOUSE INPUT
 
   // Zoom the view on user scroll (same effect as in changing the "scale" slider)
   const handleScroll = (event) => {
-    const delta = updateScale(Math.sign(event.deltaY) * 0.1);
-    
-    // Offset the center in the direction of the cursor
-    var offset = TXC.screenSpaceToViewSpace([
-      (mousePosition.x - window.innerWidth  / 2) * delta,
-      (mousePosition.y - window.innerHeight / 2) * delta,
-    ]);
-
-    var position = TXC.getPosition();
-    TXC.setPosition([position[0] - offset[0], position[1] + offset[1]]); 
+    WAC.changeScale(Math.sign(event.deltaY) * 0.1, [event.clientX, event.clientY]);
 
     // Refresh the panel to ensure that the slider value reflects the change
     refreshPanel();
@@ -227,18 +185,21 @@ const App = (props) => {
   // Sets the anchor point and stores the previous offset
   // These values will then be used to calculate the new position of the view
   const handleMouseDown = (event) => {
-    if(mouseDown) return;
-    setAnchor([mousePosition.x, mousePosition.y]);
-    setPrevPosition([TXC.getPosition()[0], TXC.getPosition()[1]]);
-    setMouseDown(true);
+    //WAC.setAnchor([mousePosition.x, mousePosition.y]);
+    WAC.setAnchor([event.clientX, event.clientY]);
   }
 
   // Register when the mouse is released
   // This will be triggered if the mouse button is let go, or if the
   // mouse leaves the canvas area
   const handleMouseReleased = (event) => {
-    if(!mouseDown) return;
-    setMouseDown(false);
+    WAC.liftAnchor();
+  }
+
+  // Will be called if the mouse is moved
+  // Handles anchor movement (action will only be performed if the anchor position is set)
+  const handleMouseMoved = (event) => {
+    WAC.anchorMove([event.clientX, event.clientY]);
   }
 
   // IMPORT/EXPORT
@@ -248,7 +209,8 @@ const App = (props) => {
     // Capture the next frame and prompt a download using a callback function
     // This is required since the canvas has to be captured after the render
     // Otherwise, the resulting image will be blank
-    CC.captureFrame((dataURL) => {
+    //CC.captureFrame((dataURL) => {
+    WAC.captureFrame((dataURL) => {
       promptDownload(dataURL, "canvas.png");
     });
   };
@@ -256,7 +218,8 @@ const App = (props) => {
   // Handle settings download
   const handleSettingsDownload = (event) => {
     // Downloads the current settings of the texture controller
-    downloadJSON(TXC.exportSettings(), "settings.json");
+    //downloadJSON(TXC.exportSettings(), "settings.json");
+    downloadJSON(WAC.exportSettings(), "settings.json");
     event.currentTarget.blur();
   };
 
@@ -278,7 +241,8 @@ const App = (props) => {
       // Read file, and import the contents to the texture controller
       var reader = new FileReader();
       reader.onload = (f) => {
-        TXC.importSettings(f.target.result);
+        //TXC.importSettings(f.target.result);
+        WAC.importSettings(f.target.result);
         // Refresh the panel to set the correct slider values
         refreshPanel();
       };
@@ -310,53 +274,18 @@ const App = (props) => {
     if(!initialized) {
       const canvas = canvasRef.current;
 
-      // Initialize WebGL controller
-      if(!GLC.initialize(canvas)) {
-        throw new Error("GLC failed to initialize");
-      }
-
-      // Compile and link shaders
-      const programs = GLC.compileAndLinkShaders([
-        [quadVertShaderSoruce, textureFragShaderSource],
-        [quadVertShaderSoruce, colorFragShaderSource]
-      ]);
-
-      if(!programs) {
-        throw new Error("Shader program linking failed");
-      }
-
-      const [textureProgram, colorProgram] = programs;
-
-      // Initialize quad that will be used to render to the entire screen
-      GLC.createFullScreenQuad();
-      GLC.setQuadAttributeLayout(textureProgram, "vertPosition");
-      GLC.setQuadAttributeLayout(colorProgram, "vertPosition", "inTexCoord");
-
-      // Initialize texture controller
-      if(!TXC.initialize(canvas, textureProgram)) {
-        throw new Error("Texture controller failed to initialize");
-      }
-
-      // Initialize color controller
-      if(!CC.initialize(canvas, colorProgram)) {
-        throw new Error("Color controller failed to initialize");
+      if(!WAC.initialize(canvas)) {
+        throw new Error("Warp controlleer failed to intiialize");
       }
 
       setInitialized(true);
     }
 
-    if(!AM.isRunning()) {
-      AM.setCallback((delta) => {
-        const texture = TXC.render(delta)
-        CC.render(texture, delta, TXC.getValue("multisampling"))
-
-        setFrameRate(AM.getFrameRate());
-        executeHeldActions();
-      });
-      AM.start();
-    }
+    WAC.start((delta) => {
+      executeHeldActions();
+      setFrameRate(WAC.getFrameRate());
+    });
     //return () => AM.stop();
-
     //TODO this hook runs too often... how to fix?
   });
 
@@ -364,16 +293,11 @@ const App = (props) => {
 
   // Handle resize events
   useLayoutEffect(() => {
-    // Let the texture controller handle the resize
-    const handleResize = () => {
-      TXC.handleResize();
-      CC.handleResize();
-    }
+    // Let the warp controller handle the resize
+    window.addEventListener('resize', WAC.handleResize);
+    WAC.handleResize();
 
-    window.addEventListener('resize', handleResize);
-    handleResize();
-
-    return () => window.removeEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', WAC.handleResize);
   });
 
   // INPUT LISTENERS
@@ -396,6 +320,7 @@ const App = (props) => {
     canvasRef.current.addEventListener("mousedown", handleMouseDown);
     canvasRef.current.addEventListener("mouseup", handleMouseReleased);
     canvasRef.current.addEventListener("mouseout", handleMouseReleased);
+    canvasRef.current.addEventListener("mousemove", handleMouseMoved);
 
     const canvasCopy = canvasRef.current;
 
@@ -405,36 +330,21 @@ const App = (props) => {
       canvasCopy.removeEventListener("mousedown", handleMouseDown);
       canvasCopy.removeEventListener("mouseup", handleMouseReleased);
       canvasCopy.removeEventListener("mouseout", handleMouseReleased);
+      canvasCopy.removeEventListener("mousemove", handleMouseMoved);
     };
   });
 
   // MOUSE MOVEMENT
 
   //  Effect for handling view movement using mouse drag
-  useEffect(() => {
-    // If the mouse is not held, do nothing
-    if(!mouseDown) return;
-
-    // Get the current scale. This is used to correctly translate the view
-    const scale = TXC.getValue("scale");
-
-    // The offset from the anchor point 
-    var offset = TXC.screenSpaceToViewSpace([
-        (anchor[0] - mousePosition.x) * scale,
-        (anchor[1] - mousePosition.y) * scale
-    ]);
-
-    // The previous view position
-    // This previous position is set when the mouse button is first pressed
-    TXC.setPosition([
-      prevPosition[0] + offset[0], 
-      prevPosition[1] - offset[1]
-    ]);
-  }, [mousePosition, mouseDown, anchor, prevPosition]);
+  /*useEffect(() => {
+    WAC.anchorMove([mousePosition.x, mousePosition.y]);
+  }, [mousePosition]);
+    */
 
   // Effect for hiding the settings panel if 
   // the mouse is not hovering over it
-  useEffect(() => {
+  /*useEffect(() => {
     // Check if the mouse is inside a rectangle
     const insideRect = (position, rect) => {
       var x = position.x;
@@ -461,21 +371,22 @@ const App = (props) => {
       }
     }
   },[mousePosition, autoHide, panelVisible]);
+  */
 
   const textureControlPanel = (
+    !WAC.isInitialized() ? "" :
+
     /* Settings panel */
     <div 
       className={"settings" + (panelVisible ? "" : " settings-hidden")}
       ref={settingsRef}
     > 
-
-
       { /* General control panel */}
       <ControlPanel 
-        attributes={TXC.attributes}
-        getter={(name) => TXC.getValue(name)}
-        setter={(name, value) => TXC.updateValue(name, value)}
-        defaults={(name) => TXC.getDefault(name)}
+        attributes={WAC.getAttributes("TXC")}
+        getter={(name) => WAC.getValue("TXC", name)}
+        setter={(name, value) => WAC.updateValue("TXC", name, value)}
+        defaults={(name) => WAC.getDefault("TXC", name)}
         separator={"."}
         //key={panelRefresh}
       />
@@ -485,15 +396,17 @@ const App = (props) => {
   );
 
   const colorControlPanel = (
+    !WAC.isInitialized() ? "" :
+
     <div 
       className={"settings" + (panelVisible ? "" : " settings-hidden")}
     > 
       { /* General control panel */}
       <ControlPanel 
-        attributes={CC.attributes}
-        getter={(name) => CC.getValue(name)}
-        setter={(name, value) => CC.updateValue(name, value)}
-        defaults={(name) => CC.getDefault(name)}
+        attributes={WAC.getAttributes("CC")}
+        getter={(name) => WAC.getValue("CC", name)}
+        setter={(name, value) => WAC.updateValue("CC", name, value)}
+        defaults={(name) => WAC.getDefault("CC", name)}
         separator={"."}
         //key={panelRefresh}
       />
@@ -576,13 +489,13 @@ const App = (props) => {
             <div className="data-tooltip">
               <DataViewer 
                 frameRate={Math.round(frameRate)} 
-                averageFrameRate={Math.round(AM.getAverageFrameRate())}
+                averageFrameRate={Math.round(WAC.getAverageFrameRate())}
                 dimensions={
-                    Math.round(TXC.getDimensions()[0]) 
+                    Math.round(WAC.getDimensions()[0])
                   + "x" 
-                  + Math.round(TXC.getDimensions()[1]) 
+                  + Math.round(WAC.getDimensions()[1])
                   + " px"}
-                multisampling={TXC.getValue("multisampling") ? "Enabled" : "Disabled"}
+                multisampling={WAC.getValue("TXC", "multisampling") ? "Enabled" : "Disabled"}
               />
             </div>
             ) : ""

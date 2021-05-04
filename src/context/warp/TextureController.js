@@ -69,15 +69,6 @@ class TextureController {
         return this.initialized;
     }
 
-    _createShader(vertexShaderSource, fragmentShaderSource) {
-        const program = GLC.compileAndLinkShader(vertexShaderSource, fragmentShaderSource);
-        GLC.flush();
-        if(!program) {
-            throw new Error("Shader not created");
-        }
-        return program;
-    }
-
     // Initializes the WebGL context and loads the GPU with vertex data
     initialize(canvas, program) {
         if(this.initialized) {
@@ -143,27 +134,6 @@ class TextureController {
         this.fbo = GLC.createFramebuffer(this.renderTexture);
     }
 
-    ///////////////////
-    // IMPORT/EXPORT //
-    ///////////////////
-
-    // Exports the attributes as a JSON file
-    exportSettings() {
-        return JSON.stringify(this.attributes, null, 2);
-    }
-
-    // Import new attributes from a JSON string
-    importSettings(jsonString) {
-        var imported = JSON.parse(jsonString);
-
-        // Use default settings when merging
-        //TODO merge attributes should use default values
-        this.attributes = mergeAttributes(getTextureAttributes(), imported);
-
-        // Update all uniforms with the new settings
-        setUniforms(this.attributes, this.program);
-    }
-
     /////////////////////
     // DATA MANAGEMENT //
     /////////////////////
@@ -195,6 +165,17 @@ class TextureController {
 
     getPosition() {
         return this.position;
+    }
+
+    getAttributes() {
+        return this.attributes;
+    }
+
+    setAttributes(attributes) {
+        this.attributes = attributes;
+
+        // Update all uniforms with the new settings
+        setUniforms(this.attributes, this.program);
     }
 
     // Updates a value and it's corresponding uniform (if such exists)
