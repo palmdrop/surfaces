@@ -1,7 +1,14 @@
 import GLC from '../GLC'
 
 
-import { getColorAttributes, getAttributeValue, getAttributeDefault, resetAttributesToDefault, setUniforms, updateAttributeValue, mergeAttributes } from './ControllerAttributes';
+import { 
+    getColorAttributes, 
+    getAttributeValue, 
+    getAttributeDefault, 
+    resetAttributesToDefault, 
+    setUniforms, 
+    updateAttributeValue
+} from './ControllerAttributes';
 
 class ColorController {
     ////////////////////

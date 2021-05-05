@@ -1,4 +1,6 @@
-class AnimationController {
+import { addFrame, downloadBundle } from "canvas-recorder"
+
+class AnimationManager {
     constructor() {
         this.previousMillis = Date.now(); // The global time in millisecond for when the the previous frame 
                                  // was rendered
@@ -21,6 +23,9 @@ class AnimationController {
 
         this.frameRateAlpha = 0.3;
         this.averageFrameRate = 0;
+
+        // Recording
+        this.recording = false;
     }
 
     setCallback(callback) {
@@ -74,6 +79,8 @@ class AnimationController {
 
     stop() {
         this.running = false;
+        // Also stop recording if currently recording
+        if(this.recording) this.stopRecording();
         cancelAnimationFrame(this.animationFrameId);
     }
 
@@ -84,8 +91,51 @@ class AnimationController {
     getAverageFrameRate() {
         return this.averageFrameRate;
     }
+
+    startRecording(frameRate, canvas) {
+        // Stop the regular animation 
+        this.stop();
+
+        // Start recording
+        this.recording = true;
+
+        // Create a stable delta, based on the frameRate
+        const delta = (1.0 / frameRate);
+
+        // Record a single frame
+        const recordFrame = () => {
+            if(this.callback) {
+                this.callback(delta);
+            }
+
+            addFrame(canvas).then( () => {
+                // And request a second frame
+                this.animationFrameId = requestAnimationFrame(recordFrame);
+            });
+        };
+
+        recordFrame();
+    }
+
+    stopRecording() {
+        // If not recording, do nothing
+        if(!this.recording) return;
+        this.recording = false;
+
+        // Download the current set of images
+        downloadBundle();
+
+        // Stop the animation
+        this.stop();
+
+        // Update the millis (to ensure smooth transition to regular animation)
+        this.previousMillis = Date.now();
+
+        // Start animating as usually
+        this.start();
+    }
 }
 
-
-const AC = new AnimationController();
-export default AC;
+export {
+    AnimationManager
+}

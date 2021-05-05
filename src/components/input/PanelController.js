@@ -1,4 +1,4 @@
-import React, { useRef, useEffect, useState } from 'react';
+import React, { useState } from 'react';
 
 import './PanelController.css'
 
@@ -59,7 +59,7 @@ const PanelController = ({ panels, children }) => {
                 */
                 panels.map((panel, index) => (
                     <div
-                        className={"panel-controller__panel" + (index == activePanel ? "" : " hidden")}
+                        className={"panel-controller__panel" + (index === activePanel ? "" : " hidden")}
                     >
                         {panel.content}
                     </div>

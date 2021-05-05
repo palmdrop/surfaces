@@ -5,7 +5,6 @@ import ControlPanel from './components/input/ControlPanel'
 import WAC from './context/warp/WarpAppController'
 
 import { downloadJSON, promptDownload } from './tools/Utils'
-import { useMousePosition } from './hooks/MousePositionHook'
 import { useKeyboardInput } from './hooks/KeyboardInputHook'
 
 import './App.css';
@@ -23,9 +22,6 @@ const App = (props) => {
   ////////////
   // STATES //
   ////////////
-  const [initialized, setInitialized] = useState(false); // True if WebGL and the controllers are initialized
-
-  const mousePosition = useMousePosition(); // Custom state/hook which tracks the current mouse position
   const [, setOnPressed, setOnHeld, executeHeldActions] = useKeyboardInput(); // Custom hook for handling keyboard input
 
   const [paused, setPaused] = useState(false); // Pauses/unpauses the animation
@@ -165,8 +161,21 @@ const App = (props) => {
       onHeld: false,
       description: ""
     })
+    .set('n', {
+      action: () => {
+        WAC.startRecording(60);
+      },
+      onHeld: false,
+      description: ""
+    })
+    .set('m', {
+      action: () => {
+        WAC.stopRecording();
+      },
+      onHeld: false,
+      description: ""
+    })
   ;
-
 
   const handleMovement = (offset) => {
     WAC.move(offset);
@@ -185,7 +194,6 @@ const App = (props) => {
   // Sets the anchor point and stores the previous offset
   // These values will then be used to calculate the new position of the view
   const handleMouseDown = (event) => {
-    //WAC.setAnchor([mousePosition.x, mousePosition.y]);
     WAC.setAnchor([event.clientX, event.clientY]);
   }
 
@@ -251,12 +259,6 @@ const App = (props) => {
     }
   };
 
-  // Changes the auto hide state
-  const handleAutoHide = (event) => {
-    setAutoHide(!autoHide);
-    event.currentTarget.blur();
-  };
-
   const handleDataViewerHide = (event) => {
     setDataViewerVisible(!dataViewerVisible);
     event.currentTarget.blur();
@@ -271,20 +273,19 @@ const App = (props) => {
   // Initialize texture controller
   // A hook is used to ensure that the canvas element has been initialized first
   useEffect(() => {
-    if(!initialized) {
+    if(!WAC.isInitialized()) {
       const canvas = canvasRef.current;
 
       if(!WAC.initialize(canvas)) {
         throw new Error("Warp controlleer failed to intiialize");
       }
 
-      setInitialized(true);
+      WAC.start((delta) => {
+        executeHeldActions();
+        setFrameRate(WAC.getFrameRate());
+      });
     }
 
-    WAC.start((delta) => {
-      executeHeldActions();
-      setFrameRate(WAC.getFrameRate());
-    });
     //return () => AM.stop();
     //TODO this hook runs too often... how to fix?
   });
@@ -334,47 +335,9 @@ const App = (props) => {
     };
   });
 
-  // MOUSE MOVEMENT
-
-  //  Effect for handling view movement using mouse drag
-  /*useEffect(() => {
-    WAC.anchorMove([mousePosition.x, mousePosition.y]);
-  }, [mousePosition]);
-    */
-
-  // Effect for hiding the settings panel if 
-  // the mouse is not hovering over it
-  /*useEffect(() => {
-    // Check if the mouse is inside a rectangle
-    const insideRect = (position, rect) => {
-      var x = position.x;
-      var y = position.y;
-      return x >= rect.x && x < rect.x + rect.width && y >= rect.y  && y < rect.y + rect.height;
-    };
-
-    // If auto hide is enabled, check the mouse position against the settings panel
-    // Hide if outside, unhide if close to the border
-    if(autoHide) {
-      // Get the bounding rect of the settings panel
-      var rect = settingsRef.current.getBoundingClientRect();
-      // Create small offset and expand the rectangle using this offset
-      // This ensures that the panel can be unhidden by sliding the mouse close to its regular spot
-      var offset = rect.width / 10;
-      var expandedRect = { x: rect.x - offset, y: rect.y - offset, width: rect.width + 2 * offset, height: rect.height + 2 * offset};
-
-      // If the settings panel is currently visible and the mouse is outside its rectangle, hide
-      if(panelVisible && !insideRect(mousePosition, expandedRect)) {
-        setPanelVisible(false);
-      // If the settingsp anel is hidden and the mouse is inside its expanded rectangle (close to the window border), unhide
-      } else if(!panelVisible && insideRect(mousePosition, expandedRect)) {
-        setPanelVisible(true);
-      }
-    }
-  },[mousePosition, autoHide, panelVisible]);
-  */
-
+  // CONTROL PANELS
   const textureControlPanel = (
-    !WAC.isInitialized() ? "" :
+    !WAC.isInitialized() ? "" : // Only form if the warp controller is initialized
 
     /* Settings panel */
     <div 
@@ -396,7 +359,7 @@ const App = (props) => {
   );
 
   const colorControlPanel = (
-    !WAC.isInitialized() ? "" :
+    !WAC.isInitialized() ? "" : // Only form if the warp controller is initialized
 
     <div 
       className={"settings" + (panelVisible ? "" : " settings-hidden")}

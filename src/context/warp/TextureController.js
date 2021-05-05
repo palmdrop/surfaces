@@ -1,13 +1,13 @@
 import GLC from '../GLC'
 
-import { getTextureAttributes, 
-         getAttributeValue, 
-         getAttributeDefault, 
-         resetAttributesToDefault,
-         setUniforms, 
-         updateAttributeValue, 
-         mergeAttributes 
-       } from './ControllerAttributes';
+import { 
+    getTextureAttributes, 
+    getAttributeValue, 
+    getAttributeDefault, 
+    resetAttributesToDefault,
+    setUniforms, 
+    updateAttributeValue, 
+} from './ControllerAttributes';
 
 class TextureController {
     ////////////////////

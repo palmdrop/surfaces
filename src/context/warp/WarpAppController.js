@@ -3,7 +3,7 @@ import TXC from './TextureController'
 import CC from './ColorController'
 
 // Animation
-import AM from '../AnimationManager'
+import { AnimationManager } from '../AnimationManager'
 
 // WebGL wrapper
 import GLC from '../GLC'
@@ -26,12 +26,18 @@ class WarpAppController {
         this.controllers = null; // Holds all the controllers responsible for managing the domain warp
         this.paused = false; // True if the animation is paused
 
+        this.canvas = null;
+
         // Anchored movement
         this.anchored = false; // True if an anchor exists
         this.anchor = null;    // The anchor position specifies which location should be used to calculate 
                                // offsets when using anchored movement (good for moving using mouse)
         this.previousPosition = null; // Is used to calculate offsets
 
+        // Controllers and help classes
+        this.controllers = null; // Will directly control the warp texture
+
+        this.AM = new AnimationManager();
     }
 
     initialize(canvas) {
@@ -94,10 +100,10 @@ class WarpAppController {
     // This is required for anything to be rendered to the canvas
     start(callback = null) {
         // If already running, do nothing
-        if(AM.isRunning()) return;
+        if(this.AM.isRunning()) return;
 
         // Set the render callback for the animation manager
-        AM.setCallback((delta) => {
+        this.AM.setCallback((delta) => {
             // The texture controller will render to a texture
             // Pass this texture along to the color controller
             const texture = TXC.render(delta)
@@ -106,12 +112,26 @@ class WarpAppController {
 
             callback && callback();
         });
-        AM.start();
+
+        this.AM.start();
     }
 
     // Stops the animation
     stop() {
-        AM.stop();
+        this.AM.stop();
+    }
+
+    animationManager() {
+        console.log(this.AM)
+        return this.AM;
+    }
+
+    startRecording(frameRate = 60) {
+        this.AM.startRecording(frameRate, this.canvas);
+    }
+
+    stopRecording() {
+        this.AM.stopRecording();
     }
 
     // Resize the canvas (will use the dimensions of the window)
@@ -270,11 +290,11 @@ class WarpAppController {
     /////////////
 
     getFrameRate() {
-        return AM.getFrameRate();
+        return this.AM.getFrameRate();
     }
 
     getAverageFrameRate() {
-        return AM.getAverageFrameRate();
+        return this.AM.getAverageFrameRate();
     }
 
 
