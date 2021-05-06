@@ -295,10 +295,12 @@ const App = (props) => {
   // Handle resize events
   useLayoutEffect(() => {
     // Let the warp controller handle the resize
-    window.addEventListener('resize', WAC.handleResize);
-    WAC.handleResize();
+    const handleResize = () => WAC.handleResize();
 
-    return () => window.removeEventListener('resize', WAC.handleResize);
+    window.addEventListener('resize', handleResize);
+    handleResize();
+
+    return () => window.removeEventListener('resize', handleResize);
   });
 
   // INPUT LISTENERS

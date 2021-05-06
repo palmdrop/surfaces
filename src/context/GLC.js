@@ -1,4 +1,4 @@
-class GLCommander {
+class GLController {
     ////////////////////
     // INITIALIZATION //
     ////////////////////
@@ -74,7 +74,7 @@ class GLCommander {
 
     setQuadAttributeLayout(program, positionLocation, texCoordLocation = null) {
         // Set and enable the corresponding position attribute 
-        GLC.setAttribLayout(
+        this.setAttribLayout(
             program, 
             positionLocation,
             2,
@@ -85,7 +85,7 @@ class GLCommander {
 
         // If supplied, also set the location for texture coords
         if(texCoordLocation) {
-            GLC.setAttribLayout(
+            this.setAttribLayout(
                 program, 
                 texCoordLocation,
                 2,
@@ -112,7 +112,7 @@ class GLCommander {
         ];
 
         // Array buffer for triangle vertices
-        this.quadBuffer = GLC.createBuffer(this.gl.ARRAY_BUFFER, triangleVertices, this.gl.STATIC_DRAW);
+        this.quadBuffer = this.createBuffer(this.gl.ARRAY_BUFFER, triangleVertices, this.gl.STATIC_DRAW);
 
         // Set attribute layouts if supplied
         if(program && positionLocation) {
@@ -371,5 +371,7 @@ class GLCommander {
 }
 
 // Create and export a static GLC instance which can be used globally
-const GLC = new GLCommander();
-export default GLC;
+//const GLC = new GLCommander();
+export {
+    GLController
+}

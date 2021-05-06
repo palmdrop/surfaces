@@ -1,4 +1,4 @@
-import GLC from '../GLC'
+//import GLC from '../GLC'
 
 import { 
     getTextureAttributes, 
@@ -23,6 +23,7 @@ class TextureController {
 
         // A reference to the canvas element that holds the WebGL context
         this.canvas = null;
+        this.GLC = null;
 
         // Set to true once the controller is initialized
         // Many actions are unavailable until then
@@ -70,7 +71,7 @@ class TextureController {
     }
 
     // Initializes the WebGL context and loads the GPU with vertex data
-    initialize(canvas, program) {
+    initialize(canvas, program, GLC) {
         if(this.initialized) {
             console.log("The texture controller is already initialized");
             return true;
@@ -78,6 +79,7 @@ class TextureController {
 
         console.log("Initializing texture controller");
 
+        this.GLC = GLC;
         this.canvas = canvas;
 
         // COMPILE SHADERS
@@ -89,8 +91,8 @@ class TextureController {
         // SET SHADER UNIFORMS 
         console.log("Setting uniforms");
 
-        GLC.setShaderProgram(this.program);
-        setUniforms(this.attributes, this.program);
+        this.GLC.setShaderProgram(this.program);
+        setUniforms(this.attributes, this.program, this.GLC);
 
         // Finally, set internal states
         console.log("Done initializing texture controller");
@@ -108,8 +110,8 @@ class TextureController {
     _setupFramebuffer() {
         // If initialzied, delete the existing texture and frame buffer
         if(this.renderTexture) {
-            GLC.deleteTexture(this.renderTexture);
-            GLC.deleteFramebuffer(this.fbo);
+            this.GLC.deleteTexture(this.renderTexture);
+            this.GLC.deleteFramebuffer(this.fbo);
         }
 
         // Calculate the dimensions of the multisample texture
@@ -119,8 +121,8 @@ class TextureController {
         ];
 
         const createRenderTexture = (width, height) => {
-            const gl = GLC.getGL();
-            return GLC.createTexture(width, height, gl.RGBA, gl.RGBA32F, gl.FLOAT);
+            const gl = this.GLC.getGL();
+            return this.GLC.createTexture(width, height, gl.RGBA, gl.RGBA32F, gl.FLOAT);
             //return GLC.createTexture(width, height, gl.RGBA, gl.RGBA8, gl.UNSINGED_BYTE);
         };
 
@@ -131,7 +133,7 @@ class TextureController {
             : createRenderTexture(this.dimensions[0], this.dimensions[1]);
 
         // Create the frame buffer
-        this.fbo = GLC.createFramebuffer(this.renderTexture);
+        this.fbo = this.GLC.createFramebuffer(this.renderTexture);
     }
 
     /////////////////////
@@ -140,12 +142,12 @@ class TextureController {
 
     reset() {
         this.attributes = resetAttributesToDefault(this.attributes);
-        setUniforms(this.attributes, this.program);
+        setUniforms(this.attributes, this.program, this.GLC);
     }
 
     randomize() {
         this.attributes = getTextureAttributes();
-        setUniforms(this.attributes, this.program);
+        setUniforms(this.attributes, this.program, this.GLC);
     }
 
     // Returns a value from the attribute object
@@ -175,14 +177,14 @@ class TextureController {
         this.attributes = attributes;
 
         // Update all uniforms with the new settings
-        setUniforms(this.attributes, this.program);
+        setUniforms(this.attributes, this.program, this.GLC);
     }
 
     // Updates a value and it's corresponding uniform (if such exists)
     updateValue(location, value) {
         //TODO create some form of callback to sliders that force them to re-read when a value is changed?!
 
-        const result = updateAttributeValue(this.attributes, this.program, location, value)
+        const result = updateAttributeValue(this.attributes, this.program, location, value, this.GLC)
 
         if(location === "multisampling") { //TODO ugly 
             this._handleUpdate(true);
@@ -200,8 +202,8 @@ class TextureController {
         this.position[1] = position[1];
         
         // And set the corresponding uniform
-        GLC.setShaderProgram(this.program);
-        GLC.setUniform(this.program, "position", "2fv", position);
+        this.GLC.setShaderProgram(this.program);
+        this.GLC.setUniform(this.program, "position", "2fv", position);
     }
 
     // Pauses and unpauses the animation
@@ -222,14 +224,14 @@ class TextureController {
         const newDimensions = [newWidth, newHeight];
 
         // Update values
-        GLC.setViewport(newWidth, newHeight);
+        this.GLC.setViewport(newWidth, newHeight);
         this.canvas.style.width = window.innerWidth;
         this.canvas.style.height = window.innerHeight;
 
         this.canvas.width = newWidth;
         this.canvas.height = newHeight;
 
-        GLC.setUniform(this.program, "viewport", "2fv", newDimensions);
+        this.GLC.setUniform(this.program, "viewport", "2fv", newDimensions);
 
         this.dimensions = newDimensions;
         this.previousResolution = resolution;
@@ -267,6 +269,7 @@ class TextureController {
 
     // Render to the canvas
     render(delta) {
+        const GLC = this.GLC;
         GLC.setShaderProgram(this.program);
 
         // Do not increment time if the animation is paused
@@ -302,9 +305,6 @@ class TextureController {
 }
 
 // Initialize a global instance of the texture controller, and export
-const TXC = new TextureController();
-export default TXC;
 export {
-    TXC,
     TextureController
 };

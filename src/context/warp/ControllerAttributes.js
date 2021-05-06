@@ -1,5 +1,3 @@
-import GLC from '../GLC'
-
 /////////////
 // TEXTURE //
 /////////////
@@ -63,6 +61,13 @@ const noiseSettings = () => {
                         default: 1.0,
                         type: "1f",
                         min: -1.0,
+                        max: 5
+                    },
+                    mod: {
+                        value: 1.0,
+                        default: 1.0,
+                        type: "1f",
+                        min: 1.0,
                         max: 5
                     },
                     xStretch: {
@@ -356,7 +361,7 @@ const getAttribute = (attributes, location) => {
 }
 
 // Sets uniforms for all attributes that have one
-const setUniforms = (attributes, program) => {
+const setUniforms = (attributes, program, GLC) => {
     // Helper function for setting a specific uniform, if it exists
     // Recursively sets all sub-attributes
     const setUniform = (attribute, name) => {
@@ -439,7 +444,7 @@ const getAttributeDefault = (attributes, location) => {
 }
 
 // Updates an attribute value and the corresponding uniform (if one exists)
-const updateAttributeValue = (attributes, program, location, value) => {
+const updateAttributeValue = (attributes, program, location, value, GLC) => {
     // Find the requested attribute, or return if it does not exist
     const [isUniform, attribute] = getAttribute(attributes, location);
     if(typeof attribute === "undefined") return false;

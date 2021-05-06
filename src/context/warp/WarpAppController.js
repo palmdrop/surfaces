@@ -1,12 +1,13 @@
 // Controllers
-import TXC from './TextureController'
-import CC from './ColorController'
+import { TextureController } from './TextureController'
+import { ColorController } from './ColorController'
 
 // Animation
 import { AnimationManager } from '../AnimationManager'
 
 // WebGL wrapper
-import GLC from '../GLC'
+//import GLC from '../GLC'
+import { GLController } from '../GLC'
 
 // Shaders
 import quadVertShaderSoruce from '../../GL/shaders/simple.vert'
@@ -35,19 +36,27 @@ class WarpAppController {
         this.previousPosition = null; // Is used to calculate offsets
 
         // Controllers and help classes
-        this.controllers = null; // Will directly control the warp texture
-
+        this.GLC = new GLController();
         this.AM = new AnimationManager();
+        this.TXC = new TextureController();
+        this.CC  = new ColorController();
+
+        this.controllers = {
+            TXC: this.TXC,
+            CC:  this.CC
+        }; // Will directly control the warp texture
     }
 
     initialize(canvas) {
+        if(this.initialized) return;
+
         // Initialize WebGL controller
-        if(!GLC.initialize(canvas)) {
+        if(!(this.GLC.initialize(canvas))) {
             throw new Error("GLC failed to initialize");
         }
 
         // Compile and link shaders
-        const programs = GLC.compileAndLinkShaders([
+        const programs = this.GLC.compileAndLinkShaders([
             [quadVertShaderSoruce, textureFragShaderSource],
             [quadVertShaderSoruce, colorFragShaderSource]
         ]);
@@ -59,28 +68,20 @@ class WarpAppController {
         const [textureProgram, colorProgram] = programs;
 
         // Initialize quad that will be used to render to the entire screen
-        GLC.createFullScreenQuad();
-        GLC.setQuadAttributeLayout(textureProgram, "vertPosition");
-        GLC.setQuadAttributeLayout(colorProgram, "vertPosition", "inTexCoord");
+        this.GLC.createFullScreenQuad();
+        this.GLC.setQuadAttributeLayout(textureProgram, "vertPosition");
+        this.GLC.setQuadAttributeLayout(colorProgram, "vertPosition", "inTexCoord");
 
         // Initialize texture controller
-        if(!TXC.initialize(canvas, textureProgram)) {
+        if(!(this.TXC.initialize(canvas, textureProgram, this.GLC))) {
             throw new Error("Texture controller failed to initialize");
         }
-        TXC.setPaused(this.paused);
+        this.TXC.setPaused(this.paused);
 
         // Initialize color controller
-        if(!CC.initialize(canvas, colorProgram)) {
+        if(!this.CC.initialize(canvas, colorProgram, this.GLC)) {
             throw new Error("Color controller failed to initialize");
         }
-
-        this.controllers = {
-            // Texture controller
-            TXC: TXC,
-
-            // Color controller
-            CC: CC,
-        };
 
         this.canvas = canvas;
         this.initialized = true;
@@ -106,9 +107,9 @@ class WarpAppController {
         this.AM.setCallback((delta) => {
             // The texture controller will render to a texture
             // Pass this texture along to the color controller
-            const texture = TXC.render(delta)
+            const texture = this.TXC.render(delta)
             // Also tell the color controller if multisampling is enabled
-            CC.render(texture, delta, TXC.getValue("multisampling"))
+            this.CC.render(texture, delta, this.TXC.getValue("multisampling"))
 
             callback && callback();
         });
@@ -137,14 +138,14 @@ class WarpAppController {
     // Resize the canvas (will use the dimensions of the window)
     // TODO allow passing custom dimensions
     handleResize() {
-        TXC.handleResize();
-        CC.handleResize();
+        this.TXC.handleResize();
+        this.CC.handleResize();
     }
 
     // Capture the next frame
     // The data callback should be a function that takes a data URL of a PNG
     captureFrame(dataCallback) {
-        CC.captureFrame(dataCallback);
+        this.CC.captureFrame(dataCallback);
     }
 
     ///////////////////
@@ -155,45 +156,45 @@ class WarpAppController {
     }
 
     changeAnimationSpeed(delta) {
-        const speed = TXC.getValue("animationSpeed.general");
-        TXC.updateValue("animationSpeed.general", Math.max(speed * (1 + delta)));
+        const speed = this.TXC.getValue("animationSpeed.general");
+        this.TXC.updateValue("animationSpeed.general", Math.max(speed * (1 + delta)));
     }
 
     changeScale(amount, sourcePosition = null) {
         // Get the current scale value
-        var scale = TXC.getValue("scale");
+        var scale = this.TXC.getValue("scale");
 
         // Calculate a new scale value based on the previous one
         const delta = amount * scale; 
         scale += delta;
 
         // Update the value in the texture controller
-        TXC.updateValue("scale", scale);
+        this.TXC.updateValue("scale", scale);
 
         // If a source position is supplied, scale around that position
         if(!sourcePosition) return;
 
         // Offset the center in the direction of the cursor
-        var offset = TXC.screenSpaceToViewSpace([
+        var offset = this.TXC.screenSpaceToViewSpace([
             (sourcePosition[0] - window.innerWidth  / 2) * delta,
             (sourcePosition[1] - window.innerHeight / 2) * delta,
         ]);
 
-        const position = TXC.getPosition();
-        TXC.setPosition([position[0] - offset[0], position[1] + offset[1]]); 
+        const position = this.TXC.getPosition();
+        this.TXC.setPosition([position[0] - offset[0], position[1] + offset[1]]); 
     }
 
     move(offset) {
         this.anchored = false; // Lift anchor if moving regularly
 
-        const position = TXC.getPosition(); 
-        const scale = TXC.getValue("scale");
+        const position = this.TXC.getPosition(); 
+        const scale = this.TXC.getValue("scale");
 
         // Translate the offset to view space coordinates
-        offset = TXC.screenSpaceToViewSpace(offset);
+        offset = this.TXC.screenSpaceToViewSpace(offset);
 
         // Add offset to current position and scale to ensure expected movement speed
-        TXC.setPosition([position[0] + offset[0] * scale, position[1] + offset[1] * scale]);
+        this.TXC.setPosition([position[0] + offset[0] * scale, position[1] + offset[1] * scale]);
     }
 
     setAnchor(anchor) {
@@ -202,7 +203,7 @@ class WarpAppController {
         
         // Store a copy of the previous position, will be used
         // to calculate offsets
-        const position = TXC.getPosition();
+        const position = this.TXC.getPosition();
         this.previousPosition = [position[0], position[1]];
 
         this.anchored = true;
@@ -221,17 +222,17 @@ class WarpAppController {
         if(!this.anchored) return false;
 
         // Get the current scale. This is used to correctly translate the view
-        const scale = TXC.getValue("scale");
+        const scale = this.TXC.getValue("scale");
 
         // The offset from the anchor point 
-        const viewSpaceOffset = TXC.screenSpaceToViewSpace([
+        const viewSpaceOffset = this.TXC.screenSpaceToViewSpace([
             (this.anchor[0] - offset[0]) * scale,
             (this.anchor[1] - offset[1]) * scale
         ]);
 
         // The previous view position
         // This previous position is set when the mouse button is first pressed
-        TXC.setPosition([
+        this.TXC.setPosition([
             this.previousPosition[0] + viewSpaceOffset[0], 
             this.previousPosition[1] - viewSpaceOffset[1]
         ]);
@@ -239,8 +240,8 @@ class WarpAppController {
     }
 
     randomize() {
-        TXC.randomize();
-        CC.randomize();
+        this.TXC.randomize();
+        this.CC.randomize();
     }
 
     ///////////////////
@@ -269,13 +270,13 @@ class WarpAppController {
         for (const controllerName in this.controllers) {
             const controller = this._getController(controllerName);
 
-            var importedAttributes = imported[controllerName];
-            var oldAttributes = controller.getAttributes();
+            const importedAttributes = imported[controllerName];
+            const oldAttributes = controller.getAttributes();
 
             // Merge the imported attributes with the default attributes
             // This ensures settings for old remains as compatible as possible
             // with settings for never versions of the application
-            var newAttributes = mergeAttributes(
+            const newAttributes = mergeAttributes(
                 resetAttributesToDefault(oldAttributes), // Use default values as base
                 importedAttributes                       // Override with imported values
             );
@@ -299,7 +300,7 @@ class WarpAppController {
 
 
     getDimensions() {
-        return TXC.getDimensions();
+        return this.TXC.getDimensions();
     }
 
     _getController(controllerName) {
@@ -344,7 +345,7 @@ class WarpAppController {
 
     setPaused(paused) {
         this.paused = paused;
-        TXC.setPaused(this.paused);
+        this.TXC.setPaused(this.paused);
     }
 }
 

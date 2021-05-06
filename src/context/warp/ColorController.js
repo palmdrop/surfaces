@@ -1,6 +1,3 @@
-import GLC from '../GLC'
-
-
 import { 
     getColorAttributes, 
     getAttributeValue, 
@@ -17,6 +14,7 @@ class ColorController {
     constructor() {
         // A reference to the canvas element that holds the WebGL context
         this.canvas = null;
+        this.GLC = null;
 
         // Set to true once the controller is initialized
         this.initialized = false;
@@ -32,8 +30,6 @@ class ColorController {
         this.captureNext = false; // True if next frame should be captured
         this.dataCallback = null; // The callback function that should be used to return the contents 
                                   // of the render
-
-        this.handleResize();
     }
 
     // Used to capture the next frame of animation
@@ -44,7 +40,7 @@ class ColorController {
     }
 
     // Initializes the color controller
-    initialize(canvas, program) {
+    initialize(canvas, program, GLC) {
         if(this.initialized) {
             console.log("The color controller is already initialized");
             return true;
@@ -52,13 +48,16 @@ class ColorController {
 
         console.log("Initializing color controller");
 
+        this.GLC = GLC;
         this.canvas = canvas;
         this.program = program;
 
-        GLC.setShaderProgram(this.program);
-        setUniforms(this.attributes, this.program);
+        this.GLC.setShaderProgram(this.program);
+        setUniforms(this.attributes, this.program, this.GLC);
 
         this.initialized = true;
+
+        this.handleResize();
 
         return true;
     }
@@ -69,13 +68,13 @@ class ColorController {
 
     handleResize() {
         if(!this.initialized) return;
-        GLC.setUniform(this.program, "viewport", "2fv", [this.canvas.width, this.canvas.height]);
+        this.GLC.setUniform(this.program, "viewport", "2fv", [this.canvas.width, this.canvas.height]);
     }
 
     // Updates a value and it's corresponding uniform (if such exists)
     updateValue(location, value) {
         //TODO create some form of callback to sliders that force them to re-read when a value is changed?!
-        return updateAttributeValue(this.attributes, this.program, location, value)
+        return updateAttributeValue(this.attributes, this.program, location, value, this.GLC)
     }
 
     getValue(location) {
@@ -95,22 +94,24 @@ class ColorController {
         this.attributes = attributes;
 
         // Update all uniforms with the new settings
-        setUniforms(this.attributes, this.program);
+        setUniforms(this.attributes, this.program, this.GLC);
     }
 
     reset() {
         this.attributes = resetAttributesToDefault(this.attributes);
-        setUniforms(this.attributes, this.program);
+        setUniforms(this.attributes, this.program, this.GLC);
     }
 
     randomize() {
         this.attributes = getColorAttributes();
-        setUniforms(this.attributes, this.program);
+        setUniforms(this.attributes, this.program, this.GLC);
     }
 
 
     // Renders and modifies a source textures and exports the result to default frame buffer
     render(sourceTexture, delta, multisampling) {
+        const GLC = this.GLC;
+
         // Bind the default frame buffer
         GLC.bindFramebuffer(null);
         GLC.setViewport(this.canvas.width, this.canvas.height); 
@@ -137,9 +138,6 @@ class ColorController {
     }
 }
 
-const CC = new ColorController();
-export default CC;
 export {
     ColorController,
-    CC
 };

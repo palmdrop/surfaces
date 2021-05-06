@@ -15,22 +15,6 @@ bool isinf(float val) {
     return (val != 0.0 && val * 2.0 == val) ? true : false;
 }
 
-float applyModifications(float value, Modifications modifications) {
-    if(modifications.ridgeThreshold < 1.0) {
-        float threshold = max(0.5, modifications.ridgeThreshold);
-        if(value > threshold) {
-            value = threshold - (value - threshold);
-        }
-        //TODO fix magic number etc
-        value /= pow(threshold, 0.70);
-    }
-    if(modifications.pow != 1.0) {
-        value = pow(value, modifications.pow);
-    }
-
-    return value;
-}
-
 float getNoise(vec3 position, float frequency, float amplitude, vec3 offset, Modifications modifications) {
     vec3 sample = position * vec3(modifications.xStretch, modifications.yStretch, 1.0) * frequency + offset;
     float result = 0.0;
@@ -49,6 +33,10 @@ float getNoise(vec3 position, float frequency, float amplitude, vec3 offset, Mod
     }
     if(modifications.pow != 1.0) {
         result = pow(result, modifications.pow);
+    }
+
+    if(modifications.mod != 1.0) {
+        result = fract(result * modifications.mod);
     }
 
     // Verify valid result
