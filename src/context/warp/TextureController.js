@@ -2,18 +2,16 @@
 
 import { 
     getTextureAttributes, 
-    getAttributeValue, 
-    getAttributeDefault, 
-    resetAttributesToDefault,
-    setUniforms, 
-    updateAttributeValue, 
+    AttributeController, 
 } from './ControllerAttributes';
 
-class TextureController {
+class TextureController extends AttributeController {
     ////////////////////
     // INITIALIZATION //
     ////////////////////
     constructor() {
+        super(getTextureAttributes);
+
         // Helper function for calculating a random offset
         // The random offset is used to ensure that the different noise
         // functions do not have the same origin. This also doubles as a random seed
@@ -46,14 +44,6 @@ class TextureController {
         this.sourceTime = 0.0;
         this.angleControlTime = 0.0;
         this.amountControlTime = 0.0;
-
-        // Current attributes of the texture controller
-        // These are the general settings of the shader, and most of them directly correspond
-        // to shader uniforms. 
-        this.attributes = 
-            //getRandomAttributes();
-            getTextureAttributes();
-        //this.defaultAttributes = getTextureAttributes();
 
         this.previousResolution = 1.0;
 
@@ -92,7 +82,7 @@ class TextureController {
         console.log("Setting uniforms");
 
         this.GLC.setShaderProgram(this.program);
-        setUniforms(this.attributes, this.program, this.GLC);
+        this._setUniforms();
 
         // Finally, set internal states
         console.log("Done initializing texture controller");
@@ -100,7 +90,7 @@ class TextureController {
         this.initialized = true;
 
         // Update necessary values
-        this._handleUpdate(true);
+        //this._handleUpdate(true);
 
         return true;
     };
@@ -139,28 +129,6 @@ class TextureController {
     /////////////////////
     // DATA MANAGEMENT //
     /////////////////////
-
-    reset() {
-        this.attributes = resetAttributesToDefault(this.attributes);
-        setUniforms(this.attributes, this.program, this.GLC);
-    }
-
-    randomize() {
-        this.attributes = getTextureAttributes();
-        setUniforms(this.attributes, this.program, this.GLC);
-    }
-
-    // Returns a value from the attribute object
-    // Used to query the internal state of the texture controller
-    getValue(location) {
-        return getAttributeValue(this.attributes, location);
-    }
-
-    // Returns the default (initial) value
-    getDefault(location) {
-        return getAttributeDefault(this.attributes, location);
-    }
-
     getDimensions() {
         return this.dimensions;
     }
@@ -169,22 +137,11 @@ class TextureController {
         return this.position;
     }
 
-    getAttributes() {
-        return this.attributes;
-    }
-
-    setAttributes(attributes) {
-        this.attributes = attributes;
-
-        // Update all uniforms with the new settings
-        setUniforms(this.attributes, this.program, this.GLC);
-    }
-
     // Updates a value and it's corresponding uniform (if such exists)
     updateValue(location, value) {
         //TODO create some form of callback to sliders that force them to re-read when a value is changed?!
-
-        const result = updateAttributeValue(this.attributes, this.program, location, value, this.GLC)
+        const result = super.updateValue(location, value);
+        //updateAttributeValue(this.attributes, this.program, location, value, this.GLC)
 
         if(location === "multisampling") { //TODO ugly 
             this._handleUpdate(true);
@@ -211,64 +168,12 @@ class TextureController {
         this.paused = paused;
     }
 
-    _handleUpdate(forceFramebufferSetup = false) {
-        //TODO add some kind of hook for only updating resolution/scale when necessary
-        const oldWidth = this.dimensions[0];
-        const oldHeight = this.dimensions[1];
-
-        const resolution = this.getValue("resolution");
-
-        // Set the dimensions to that of the inner window size, since the canvas covers everything
-        const newWidth      = resolution * window.innerWidth;
-        const newHeight     = resolution * window.innerHeight;
-        const newDimensions = [newWidth, newHeight];
-
-        // Update values
-        this.GLC.setViewport(newWidth, newHeight);
-        this.canvas.style.width = window.innerWidth;
-        this.canvas.style.height = window.innerHeight;
-
-        this.canvas.width = newWidth;
-        this.canvas.height = newHeight;
-
-        this.GLC.setUniform(this.program, "viewport", "2fv", newDimensions);
-
-        this.dimensions = newDimensions;
-        this.previousResolution = resolution;
-
-        // Re-create the framebuffer and render texture to fit the new size
-        if(forceFramebufferSetup || oldWidth !== newWidth || oldHeight !== newHeight || resolution !== this.previousResolution) {
-            this._setupFramebuffer();
-        }
-    }
-
-    //////////////
-    // RESIZING //
-    //////////////
-
-    handleResize() {
-        if(!this.initialized) return;
-
-        this._handleUpdate();
-    }
-
-    screenSpaceToViewSpace(position) {
-        const width = window.innerWidth;
-        const height = window.innerHeight;
-
-        // Calculate the proportions of the screen
-        const proportions = height / width;
-
-        // Scale and correct for proportions
-        return [position[0] / width, position[1] * proportions / height];
-    }
-
     ///////////////
     // RENDERING //
     ///////////////
 
     // Render to the canvas
-    render(delta) {
+    render(fbo, dimensions, delta) {
         const GLC = this.GLC;
         GLC.setShaderProgram(this.program);
 
@@ -286,16 +191,11 @@ class TextureController {
         GLC.setUniform(this.program, "angleControl.offset",  "3fv", [this.angleOffset[0],  this.angleOffset[1], this.angleControlTime]);
         GLC.setUniform(this.program, "amountControl.offset", "3fv", [this.amountOffset[0], this.amountOffset[1], this.amountControlTime]);
 
-        GLC.bindFramebuffer(this.fbo);
+        //GLC.bindFramebuffer(this.fbo);
+        GLC.bindFramebuffer(fbo);
 
-        // Set the view port to the extended dimensions
-        if(this.getValue("multisampling")) {
-            GLC.setViewport(this.multisamplingDimensions[0], this.multisamplingDimensions[1]); 
-            GLC.setUniform(this.program, "viewport", "2fv", this.multisamplingDimensions);
-        } else {
-            GLC.setViewport(this.dimensions[0], this.dimensions[1]); 
-            GLC.setUniform(this.program, "viewport", "2fv", this.dimensions);
-        }
+        GLC.setViewport(dimensions[0], dimensions[1]);
+        GLC.setUniform(this.program, "viewport", "2fv", dimensions);
 
         // Render to render texture
         GLC.renderFullScreenQuad(this.program);

@@ -8,6 +8,7 @@ const PanelController = ({ panels, children }) => {
     // On navigation bar press, change the active panel index
     // Set to -1 (no panel) if the button for the currently active panel is pressed
     const handleButtonPress = (e, index) => {
+        e.currentTarget.blur();
         if(index === activePanel) {
             setActivePanel(-1);
         } else {

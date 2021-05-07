@@ -14,6 +14,7 @@ import quadVertShaderSoruce from '../../GL/shaders/simple.vert'
 import textureFragShaderSource from '../../GL/shaders/warp.frag'
 import colorFragShaderSource from '../../GL/shaders/color.frag'
 import { mergeAttributes, resetAttributesToDefault } from './ControllerAttributes'
+import { RenderController } from './RenderController'
 
 // Class for controlling the entire application
 class WarpAppController {
@@ -38,13 +39,16 @@ class WarpAppController {
         // Controllers and help classes
         this.GLC = new GLController();
         this.AM = new AnimationManager();
+
+        this.RC = new RenderController();
         this.TXC = new TextureController();
         this.CC  = new ColorController();
 
         this.controllers = {
+            RC: this.RC,
             TXC: this.TXC,
             CC:  this.CC
-        }; // Will directly control the warp texture
+        }; 
     }
 
     initialize(canvas) {
@@ -72,6 +76,11 @@ class WarpAppController {
         this.GLC.setQuadAttributeLayout(textureProgram, "vertPosition");
         this.GLC.setQuadAttributeLayout(colorProgram, "vertPosition", "inTexCoord");
 
+        // Initialize render controller
+        if(!(this.RC.initialize(canvas, this.GLC))) {
+            throw new Error("Render controller failed to initialize");
+        }
+
         // Initialize texture controller
         if(!(this.TXC.initialize(canvas, textureProgram, this.GLC))) {
             throw new Error("Texture controller failed to initialize");
@@ -97,6 +106,24 @@ class WarpAppController {
     // ANIMATION/RENDERING //
     /////////////////////////
 
+    _render(delta) {
+        const fbo = this.RC.getFrameBuffer();
+
+        const renderTexture = this.RC.getRenderTexture();
+        const renderTextureDimensions = this.RC.getRenderTextureDimensions();
+
+        const dimensions = this.RC.getDimensions();
+
+        // The texture controller will render to a texture
+        // Pass this texture along to the color controller
+        //const texture = this.TXC.render(delta)
+        // Also tell the color controller if multisampling is enabled
+
+        this.TXC.render(fbo, renderTextureDimensions, delta);
+
+        this.CC.render(renderTexture, dimensions, this.RC.getValue("multisampling"), delta)
+    }
+
     // Starts the animation manager
     // This is required for anything to be rendered to the canvas
     start(callback = null) {
@@ -105,12 +132,7 @@ class WarpAppController {
 
         // Set the render callback for the animation manager
         this.AM.setCallback((delta) => {
-            // The texture controller will render to a texture
-            // Pass this texture along to the color controller
-            const texture = this.TXC.render(delta)
-            // Also tell the color controller if multisampling is enabled
-            this.CC.render(texture, delta, this.TXC.getValue("multisampling"))
-
+            this._render(delta);
             callback && callback();
         });
 
@@ -138,8 +160,7 @@ class WarpAppController {
     // Resize the canvas (will use the dimensions of the window)
     // TODO allow passing custom dimensions
     handleResize() {
-        this.TXC.handleResize();
-        this.CC.handleResize();
+        this.RC.handleResize();
     }
 
     // Capture the next frame
@@ -175,7 +196,7 @@ class WarpAppController {
         if(!sourcePosition) return;
 
         // Offset the center in the direction of the cursor
-        var offset = this.TXC.screenSpaceToViewSpace([
+        var offset = this._screenSpaceToViewSpace([
             (sourcePosition[0] - window.innerWidth  / 2) * delta,
             (sourcePosition[1] - window.innerHeight / 2) * delta,
         ]);
@@ -191,7 +212,7 @@ class WarpAppController {
         const scale = this.TXC.getValue("scale");
 
         // Translate the offset to view space coordinates
-        offset = this.TXC.screenSpaceToViewSpace(offset);
+        offset = this._screenSpaceToViewSpace(offset);
 
         // Add offset to current position and scale to ensure expected movement speed
         this.TXC.setPosition([position[0] + offset[0] * scale, position[1] + offset[1] * scale]);
@@ -225,7 +246,7 @@ class WarpAppController {
         const scale = this.TXC.getValue("scale");
 
         // The offset from the anchor point 
-        const viewSpaceOffset = this.TXC.screenSpaceToViewSpace([
+        const viewSpaceOffset = this._screenSpaceToViewSpace([
             (this.anchor[0] - offset[0]) * scale,
             (this.anchor[1] - offset[1]) * scale
         ]);
@@ -300,7 +321,7 @@ class WarpAppController {
 
 
     getDimensions() {
-        return this.TXC.getDimensions();
+        return this.RC.getDimensions();
     }
 
     _getController(controllerName) {
@@ -346,6 +367,21 @@ class WarpAppController {
     setPaused(paused) {
         this.paused = paused;
         this.TXC.setPaused(this.paused);
+    }
+
+
+    //////////
+    // UTIL //
+    //////////
+    _screenSpaceToViewSpace(position) {
+        const width = window.innerWidth;
+        const height = window.innerHeight;
+
+        // Calculate the proportions of the screen
+        const proportions = height / width;
+
+        // Scale and correct for proportions
+        return [position[0] / width, position[1] * proportions / height];
     }
 }
 

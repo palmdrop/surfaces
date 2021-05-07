@@ -131,24 +131,6 @@ const getTextureAttributes = () => {
             min: 0.0,
             max: 5
         },
-        resolution: {
-            value: 1.0,
-            default: 1.0,
-            isUniform: false,
-            type: "1f",
-
-            min: 0.1,
-            max: 3
-        },
-        multisampling: {
-            value: 0,
-            default: 0,
-            isUniform: false,
-            type: "1i",
-
-            min: 0,
-            max: 1
-        },
         animationSpeed: {
             value: {
                 general: timeSettings(0.1),
@@ -282,6 +264,34 @@ const getColorAttributes = () => {
                                                  [1.0, 0.0, 0.0]),
     }
 };
+
+
+////////////
+// RENDER //
+////////////
+const getRenderAttributes = () => {
+    return {
+        resolution: {
+            value: 1.0,
+            default: 1.0,
+            isUniform: false,
+            type: "1f",
+
+            min: 0.1,
+            max: 3
+        },
+        multisampling: {
+            value: 0,
+            default: 0,
+            isUniform: false,
+            type: "1i",
+
+            min: 0,
+            max: 1
+        },
+    }
+}
+
 
 //////////
 // UTIL //
@@ -455,7 +465,7 @@ const updateAttributeValue = (attributes, program, location, value, GLC) => {
     // Set the new value, and set the corresponding uniform
     attribute.value = value;
 
-    if(isUniform) {
+    if(isUniform && program && GLC) {
         GLC.setUniform(program, location, attribute.type, attribute.value);
     } 
 
@@ -485,9 +495,65 @@ const mergeAttributes = (current, changes) => {
     return updated;
 }
 
+// Helper class for defining a attribute controller
+// Also has support for handling, although "program" can remain null
+class AttributeController {
+    constructor(attributeGetter) {
+        this._attributeGetter = attributeGetter;
+        this.attributes = this._attributeGetter();
+        this.program = null;
+        this.GLC = null;
+    }
+
+    // Updates a value and it's corresponding uniform (if such exists)
+    updateValue(location, value) {
+        return updateAttributeValue(this.attributes, this.program, location, value, this.GLC)
+    }
+
+    // Returns the value at a specified location
+    getValue(location) {
+        return getAttributeValue(this.attributes, location);
+    }
+
+    // Returns the default (initial) value
+    getDefault(location) {
+        return getAttributeDefault(this.attributes, location);
+    }
+
+    // Returns all attributes
+    getAttributes() {
+        return this.attributes;
+    }
+
+    _setUniforms() {
+        if(this.GLC && this.program) {
+            setUniforms(this.attributes, this.program, this.GLC);
+        }
+    }
+
+    // Sets all attributes, and updates uniforms (if such exist)
+    setAttributes(attributes) {
+        this.attributes = attributes;
+        this._setUniforms();
+    }
+
+    // Resets all values to their defaults
+    reset() {
+        this.attributes = resetAttributesToDefault(this.attributes);
+        this._setUniforms();
+    }
+
+    // Randomizes the values (by fetching new attributes)
+    randomize() {
+        this.attributes = this._attributeGetter();
+        this._setUniforms();
+    }
+}
+
 export { 
     getTextureAttributes, 
     getColorAttributes, 
+    getRenderAttributes,
     getAttribute, 
     getAttributeValue, 
     getAttributeDefault,
@@ -495,5 +561,7 @@ export {
     setUniforms, 
     updateAttributeValue, 
     mergeAttributes, 
-    getRandomAttributes 
+    getRandomAttributes,
+
+    AttributeController
 }

@@ -4,14 +4,17 @@ import {
     getAttributeDefault, 
     resetAttributesToDefault, 
     setUniforms, 
-    updateAttributeValue
+    updateAttributeValue,
+
+    AttributeController
 } from './ControllerAttributes';
 
-class ColorController {
+class ColorController extends AttributeController {
     ////////////////////
     // INITIALIZATION //
     ////////////////////
     constructor() {
+        super(getColorAttributes);
         // A reference to the canvas element that holds the WebGL context
         this.canvas = null;
         this.GLC = null;
@@ -23,8 +26,7 @@ class ColorController {
         this.program = null;
 
         // Current color attributes
-        this.attributes = getColorAttributes();
-        this.defaultAttributes = getColorAttributes();
+        //this.attributes = getColorAttributes();
 
         // Used for saving the canvas as an image
         this.captureNext = false; // True if next frame should be captured
@@ -57,8 +59,6 @@ class ColorController {
 
         this.initialized = true;
 
-        this.handleResize();
-
         return true;
     }
 
@@ -66,55 +66,14 @@ class ColorController {
         return this.initialized;
     }
 
-    handleResize() {
-        if(!this.initialized) return;
-        this.GLC.setUniform(this.program, "viewport", "2fv", [this.canvas.width, this.canvas.height]);
-    }
-
-    // Updates a value and it's corresponding uniform (if such exists)
-    updateValue(location, value) {
-        //TODO create some form of callback to sliders that force them to re-read when a value is changed?!
-        return updateAttributeValue(this.attributes, this.program, location, value, this.GLC)
-    }
-
-    getValue(location) {
-        return getAttributeValue(this.attributes, location);
-    }
-
-    // Returns the default (initial) value
-    getDefault(location) {
-        return getAttributeDefault(this.attributes, location);
-    }
-
-    getAttributes() {
-        return this.attributes;
-    }
-
-    setAttributes(attributes) {
-        this.attributes = attributes;
-
-        // Update all uniforms with the new settings
-        setUniforms(this.attributes, this.program, this.GLC);
-    }
-
-    reset() {
-        this.attributes = resetAttributesToDefault(this.attributes);
-        setUniforms(this.attributes, this.program, this.GLC);
-    }
-
-    randomize() {
-        this.attributes = getColorAttributes();
-        setUniforms(this.attributes, this.program, this.GLC);
-    }
-
-
     // Renders and modifies a source textures and exports the result to default frame buffer
-    render(sourceTexture, delta, multisampling) {
+    render(sourceTexture, dimensions, multisampling, delta) {
         const GLC = this.GLC;
 
         // Bind the default frame buffer
         GLC.bindFramebuffer(null);
-        GLC.setViewport(this.canvas.width, this.canvas.height); 
+        GLC.setViewport(dimensions[0], dimensions[1]);
+        this.GLC.setUniform(this.program, "viewport", "2fv", dimensions);
 
         // Use the post processing program, which will sample the texture which we previously rendered to
         GLC.setShaderProgram(this.program);

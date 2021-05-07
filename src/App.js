@@ -26,6 +26,8 @@ const App = (props) => {
 
   const [paused, setPaused] = useState(false); // Pauses/unpauses the animation
 
+  const [recording, setRecording] = useState(false); // True if recording
+
   const [panelVisible, setPanelVisible] = useState(true); // The visiblity state of the settings panel
   const [autoHide, setAutoHide] = useState(false); // If true, the panel will hide automatically 
   const [dataViewerVisible, setDataViewerVisible] = useState(true); // If true, a popup with render information will be displayed
@@ -42,7 +44,8 @@ const App = (props) => {
   // GENERAL
 
   // Pauses the animation entirely (same effect as setting the general animation speed to 0.0)
-  const togglePause = () => {
+  const togglePause = (e) => {
+    if(e) e.currentTarget.blur();
     WAC.togglePause();
     setPaused(WAC.isPaused());
   };
@@ -57,9 +60,21 @@ const App = (props) => {
     refreshPanel();
   }
 
-  const randomize = () => {
+  const randomize = (e) => {
+    if(e) e.currentTarget.blur();
     WAC.randomize();
     refreshPanel();
+  }
+
+  const handleRecording = (e) => {
+    if(e) e.currentTarget.blur();
+    if(recording) {
+      WAC.stopRecording();
+      setRecording(false);
+    } else {
+      WAC.startRecording(60);
+      setRecording(true);
+    }
   }
 
 
@@ -163,14 +178,7 @@ const App = (props) => {
     })
     .set('n', {
       action: () => {
-        WAC.startRecording(60);
-      },
-      onHeld: false,
-      description: ""
-    })
-    .set('m', {
-      action: () => {
-        WAC.stopRecording();
+        handleRecording();
       },
       onHeld: false,
       description: ""
@@ -378,6 +386,34 @@ const App = (props) => {
     </div>
   );
 
+  const renderControlPanel = (
+    !WAC.isInitialized() ? "" :
+    <div
+      className={"settings" + (panelVisible ? "" : " settings-hidden")}
+    >
+      { /* General control panel */}
+      <ControlPanel 
+        attributes={WAC.getAttributes("RC")}
+        getter={(name) => WAC.getValue("RC", name)}
+        setter={(name, value) => WAC.updateValue("RC", name, value)}
+        defaults={(name) => WAC.getDefault("RC", name)}
+        separator={"."}
+        //key={panelRefresh}
+      />
+
+      <div className="settings__record-button-container button-container">
+        <button 
+          className={"button settings__record-button-container__button" + (recording ? " active" : "")} 
+          onClick={handleRecording}>
+            {!recording ? "Record" : "Stop recording"}
+        </button>
+      </div>
+
+
+    </div>
+
+  );
+
   //////////
   // BODY //
   //////////
@@ -387,13 +423,17 @@ const App = (props) => {
         <PanelController
           panels={[
             {
-              name: "Texture Controller",
+              name: "Texture",
               content: textureControlPanel
             },
             {
-              name: "Color Controller",
+              name: "Color",
               content: colorControlPanel
             },
+            {
+              name: "Render",
+              content: renderControlPanel
+            }
           ]}
         >
           { /* Button for hiding data viewer */}
@@ -460,7 +500,7 @@ const App = (props) => {
                   + "x" 
                   + Math.round(WAC.getDimensions()[1])
                   + " px"}
-                multisampling={WAC.getValue("TXC", "multisampling") ? "Enabled" : "Disabled"}
+                multisampling={WAC.getValue("RC", "multisampling") ? "Enabled" : "Disabled"}
               />
             </div>
             ) : ""
