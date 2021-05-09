@@ -7,15 +7,22 @@ class RenderController extends AttributeController {
     constructor() {
         super(getRenderAttributes);
         this.initialized = false;
+
+        // Render dimensions
         this.dimensions = [window.innerWidth, window.innerHeight];
 
+        // Resolution controls the relationship between the canvas size and the
+        // actual texture resolution
         this.previousResolution = 1.0;
         this.resolution = 1.0;
 
         this.canvas = null;
         
+        // Multisample handling
         this.multisamplingMultiplier = 2.0; 
         this.multisamplingDimensions = [-1, -1];
+
+        // FBO and texture control
         this.fbo = null;
         this.renderTexture = null;
 
@@ -31,6 +38,7 @@ class RenderController extends AttributeController {
         this.canvas = canvas;
         this.GLC = GLC;
 
+        // Update dimensions and create a new FBO
         this._handleUpdate(true);
 
         this.initialized = true;
@@ -87,6 +95,7 @@ class RenderController extends AttributeController {
     }
 
     getRenderTextureDimensions() {
+        // The size of the render texture depends on if multisampling is used or not
         return this.getValue("multisampling") 
             ? this.multisamplingDimensions
             : this.dimensions;
@@ -125,8 +134,6 @@ class RenderController extends AttributeController {
         this.canvas.width = newWidth;
         this.canvas.height = newHeight;
 
-        //this.GLC.setUniform(this.program, "viewport", "2fv", newDimensions);
-
         this.dimensions = newDimensions;
         this.previousResolution = resolution;
 
@@ -134,9 +141,6 @@ class RenderController extends AttributeController {
         if(forceFramebufferSetup || oldWidth !== newWidth || oldHeight !== newHeight || resolution !== this.previousResolution) {
             this._setupFramebuffer();
         }
-        
-        console.log(window.innerWidth);
-        console.log(window.innerHeight);
     }
 
     handleResize() {
