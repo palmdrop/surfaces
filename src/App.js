@@ -11,6 +11,8 @@ import './App.css';
 import DataViewer from './components/tooltip/DataViewer'
 import PanelController from './components/input/PanelController'
 
+import test from "./resources/blue-noise/LDR_RGBA_7.png"
+
 const App = (props) => {
   ////////////////
   // REFERENCES //

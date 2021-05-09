@@ -16,6 +16,9 @@ import colorFragShaderSource from '../../GL/shaders/color.frag'
 import { mergeAttributes, resetAttributesToDefault } from './ControllerAttributes'
 import { RenderController } from './RenderController'
 
+// Resources
+import ditheringTexture from '../../resources/blue-noise/LDR_RGBA_7.png'
+
 // Class for controlling the entire application
 class WarpAppController {
     ////////////////////
@@ -88,7 +91,7 @@ class WarpAppController {
         this.TXC.setPaused(this.paused);
 
         // Initialize color controller
-        if(!this.CC.initialize(canvas, colorProgram, this.GLC)) {
+        if(!this.CC.initialize(canvas, colorProgram, this.GLC, ditheringTexture)) {
             throw new Error("Color controller failed to initialize");
         }
 
@@ -121,7 +124,8 @@ class WarpAppController {
 
         this.TXC.render(fbo, renderTextureDimensions, delta);
 
-        this.CC.render(renderTexture, dimensions, this.RC.getValue("multisampling"), delta)
+        this.CC.render(renderTexture, dimensions, this.RC.getValue("multisampling"), 
+            this.paused ? 0.0 : delta);
     }
 
     // Starts the animation manager

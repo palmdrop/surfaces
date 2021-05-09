@@ -198,6 +198,15 @@ const getColorAttributes = () => {
             min: 0.001,
             max: 10
         },
+        ditheringAmount: {
+            value: 1.0 / 255.0,
+            default: 1.0 / 255.0,
+            isUniform: true,
+            type: "1f",
+
+            min: 0.0,
+            max: 0.2 
+        },
         general: {
             value: {
                 hue: {

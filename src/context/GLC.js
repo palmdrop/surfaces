@@ -143,7 +143,7 @@ class GLController {
         return fb;
     }
 
-    // Create render texture
+    // Create empty texture
     createTexture(width, height, format = this.gl.RGBA, internalFormat = this.gl.RGBA, type = this.gl.UNSIGNED_BYTE) {
         // Create and bind a new texture buffer
         const texture = this.gl.createTexture();
@@ -165,9 +165,40 @@ class GLController {
             this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_MIN_FILTER, this.gl.NEAREST);
             this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_MAG_FILTER, this.gl.NEAREST);
         }
+
         this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_WRAP_S, this.gl.CLAMP_TO_EDGE);
         this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_WRAP_T, this.gl.CLAMP_TO_EDGE);
 
+        return texture;
+    }
+
+    // Creates a texture using an image url
+    createImageTexture(src, wrap = this.gl.CLAMP_TO_EDGE, filtering = this.gl.LINEAR, onLoad = null, onError = null) {
+        // Load empty texture
+        const texture = this.createTexture(1, 1, this.gl.RGBA, this.gl.RGBA, this.gl.UNSIGNED_BYTE);
+
+        // Load image
+        var image = new Image();
+        image.onload = () => {
+            // Bind and set image as texture
+            this.gl.bindTexture(this.gl.TEXTURE_2D, texture);
+            this.gl.texImage2D(this.gl.TEXTURE_2D, 0, this.gl.RGBA, this.gl.RGBA, this.gl.UNSIGNED_BYTE, image);
+
+            // Set wrapping and filtering
+            this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_WRAP_S, wrap);
+            this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_WRAP_T, wrap);
+            this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_MIN_FILTER, filtering);
+            this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_MAG_FILTER, filtering);
+
+            // Callback on load
+            onLoad && onLoad(image.width, image.height);
+        };
+        image.onerror = () => {
+            // Callback on error
+            onError && onError();
+        }
+
+        image.src = src;
         return texture;
     }
 
