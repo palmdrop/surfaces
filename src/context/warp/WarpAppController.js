@@ -52,9 +52,12 @@ class WarpAppController {
             TXC: this.TXC,
             CC:  this.CC
         }; 
+
+        // Will be called when any of the attributes are updated
+        this.onUpdate = null;
     }
 
-    initialize(canvas) {
+    initialize(canvas, onUpdate) {
         if(this.initialized) return;
 
         // Initialize WebGL controller
@@ -95,6 +98,7 @@ class WarpAppController {
             throw new Error("Color controller failed to initialize");
         }
 
+        this.onUpdate = onUpdate;
         this.canvas = canvas;
         this.initialized = true;
 
@@ -118,12 +122,10 @@ class WarpAppController {
         const dimensions = this.RC.getDimensions();
 
         // The texture controller will render to a texture
-        // Pass this texture along to the color controller
-        //const texture = this.TXC.render(delta)
-        // Also tell the color controller if multisampling is enabled
-
         this.TXC.render(fbo, renderTextureDimensions, delta);
 
+        // Pass this texture along to the color controller
+        // Also tell the color controller if multisampling is enabled
         this.CC.render(renderTexture, dimensions, this.RC.getValue("multisampling"), 
             this.paused ? 0.0 : delta);
     }
@@ -149,7 +151,6 @@ class WarpAppController {
     }
 
     animationManager() {
-        console.log(this.AM)
         return this.AM;
     }
 
@@ -182,7 +183,7 @@ class WarpAppController {
 
     changeAnimationSpeed(delta) {
         const speed = this.TXC.getValue("animationSpeed.general");
-        this.TXC.updateValue("animationSpeed.general", Math.max(speed * (1 + delta)));
+        this.updateValue("TXC", "animationSpeed.general", Math.max(speed * (1 + delta)));
     }
 
     changeScale(amount, sourcePosition = null) {
@@ -194,7 +195,7 @@ class WarpAppController {
         scale += delta;
 
         // Update the value in the texture controller
-        this.TXC.updateValue("scale", scale);
+        this.updateValue("TXC", "scale", scale);
 
         // If a source position is supplied, scale around that position
         if(!sourcePosition) return;
@@ -267,6 +268,7 @@ class WarpAppController {
     randomize() {
         this.TXC.randomize();
         this.CC.randomize();
+        this.onUpdate && this.onUpdate();
     }
 
     ///////////////////
@@ -309,6 +311,8 @@ class WarpAppController {
             // Set their corresponding attributes
             controller.setAttributes(newAttributes);
         }
+
+        this.onUpdate && this.onUpdate();
     }
 
     /////////////
@@ -364,15 +368,16 @@ class WarpAppController {
 
     updateValue(controllerName, location, value) {
         if(!this.initialized) return;
-        return this._getController(controllerName) 
-        .updateValue(location, value);
+
+        this.onUpdate && this.onUpdate();
+
+        return this._getController(controllerName).updateValue(location, value);
     }
 
     setPaused(paused) {
         this.paused = paused;
         this.TXC.setPaused(this.paused);
     }
-
 
     //////////
     // UTIL //

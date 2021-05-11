@@ -11,8 +11,6 @@ import './App.css';
 import DataViewer from './components/tooltip/DataViewer'
 import PanelController from './components/input/PanelController'
 
-import test from "./resources/blue-noise/LDR_RGBA_7.png"
-
 const App = (props) => {
   ////////////////
   // REFERENCES //
@@ -27,17 +25,12 @@ const App = (props) => {
   const [, setOnPressed, setOnHeld, executeHeldActions] = useKeyboardInput(); // Custom hook for handling keyboard input
 
   const [paused, setPaused] = useState(false); // Pauses/unpauses the animation
-
   const [recording, setRecording] = useState(false); // True if recording
+  const [frameRate, setFrameRate] = useState(0);
 
-  const [panelVisible, setPanelVisible] = useState(true); // The visiblity state of the settings panel
-  const [autoHide, setAutoHide] = useState(false); // If true, the panel will hide automatically 
   const [dataViewerVisible, setDataViewerVisible] = useState(true); // If true, a popup with render information will be displayed
-
   // A reducer used to force update the panel (required when the settings are changed outside the panel)
   const [, refreshPanel] = useReducer(x => x + 1, 0);
-
-  const [frameRate, setFrameRate] = useState(0);
 
   ////////////////////
   // EVENT HANDLERS //
@@ -54,18 +47,15 @@ const App = (props) => {
 
   const changeAnimationSpeed = (delta) => {
     WAC.changeAnimationSpeed(delta);
-    refreshPanel();
   };
 
   const updateScale = (amount) => {
     WAC.changeScale(amount);
-    refreshPanel();
   }
 
   const randomize = (e) => {
     if(e) e.currentTarget.blur();
     WAC.randomize();
-    refreshPanel();
   }
 
   const handleRecording = (e) => {
@@ -86,104 +76,104 @@ const App = (props) => {
 
   // TODO create better interface for changing values using functions
   // TODO ability to change values using keyboard and having it reflect in panel automatically
-  const shortcuts = new Map()
-    .set('h', {
-        action: (e) => {
-          if(autoHide) {
-            setAutoHide(false);
-            setPanelVisible(true);
-          } else {
-            setAutoHide(true);
-          }
-        },
-        onHeld: false,
-        description: "Hide or unhide the settings panel"
-    })
-    .set('c', {
+  const shortcuts = [
+    {
+      keys: 'c',
       action: (e) => {
         handleCanvasDownload(e);
       },
       onHeld: false,
-      description: "Download the current frame as a PNG image"
-    })
-    .set(' ', {
+      description: "Download current frame as PNG"
+    },
+    {
+      keys: ' ', 
       action: (e) => {
         togglePause();
       },
       onHeld: false,
-      description: "Toggle pause of the animation"
-    })
-    .set('-', {
+      description: "Toggle pause"
+    },
+    {
+      keys: '-',
       action: (e) => {
         changeAnimationSpeed(-0.05);
       },
       onHeld: true,
-      description: "Slow down animation speed"
-    })
-    .set('+', {
+      description: "Decrease animation speed"
+    },
+    { 
+      keys: '+', 
       action: (e) => {
         changeAnimationSpeed(0.05);
       },
       onHeld: true,
-      description: "Speed up animation speed"
-    })
-    .set('q', {
+      description: "Increase animation speed"
+    },
+    { 
+      keys: 'q', 
       action: (e) => {
         updateScale(0.02);
       },
       onHeld: true,
       description: "Zoom out"
-    })
-    .set('e', {
+    },
+    { 
+      keys: 'e', 
       action: (e) => {
         updateScale(-0.02);
       },
       onHeld: true,
       description: "Zoom in"
-    })
-    .set(['ArrowLeft', 'a'], {
+    },
+    { 
+      keys: ['ArrowLeft', 'a'], 
       action: () => {
         handleMovement([-10, 0]);
       },
       onHeld: true,
-      description: ""
-    })
-    .set(['ArrowRight', 'd'], {
+      description: "Move left"
+    },
+    { 
+      keys: ['ArrowRight', 'd'], 
       action: () => {
         handleMovement([10, 0]);
       },
       onHeld: true,
-      description: ""
-    })
-    .set(['ArrowUp', 'w'], {
+      description: "Move right"
+    },
+    { 
+      keys: ['ArrowUp', 'w'], 
       action: () => {
         handleMovement([0, 10]);
       },
       onHeld: true,
-      description: ""
-    })
-    .set(['ArrowDown', 's'], {
+      description: "Move upwards"
+    },
+    { 
+      keys: ['ArrowDown', 's'], 
       action: () => {
         handleMovement([0, -10]);
       },
       onHeld: true,
-      description: ""
-    })
-    .set('r', {
+      description: "Move downwards"
+    },
+    { 
+      keys: 'r', 
       action: () => {
         randomize();
       },
       onHeld: false,
-      description: ""
-    })
-    .set('n', {
+      description: "Randomize controller parameters"
+    },
+    { 
+      keys: 'n', 
       action: () => {
         handleRecording();
       },
       onHeld: false,
-      description: ""
-    })
-  ;
+      description: "Start/stop recording"
+    }
+  ];
 
   const handleMovement = (offset) => {
     WAC.move(offset);
@@ -194,9 +184,6 @@ const App = (props) => {
   // Zoom the view on user scroll (same effect as in changing the "scale" slider)
   const handleScroll = (event) => {
     WAC.changeScale(Math.sign(event.deltaY) * 0.1, [event.clientX, event.clientY]);
-
-    // Refresh the panel to ensure that the slider value reflects the change
-    refreshPanel();
   }
 
   // Sets the anchor point and stores the previous offset
@@ -259,8 +246,6 @@ const App = (props) => {
       reader.onload = (f) => {
         //TXC.importSettings(f.target.result);
         WAC.importSettings(f.target.result);
-        // Refresh the panel to set the correct slider values
-        refreshPanel();
       };
 
       reader.readAsText(file);
@@ -284,7 +269,7 @@ const App = (props) => {
     if(!WAC.isInitialized()) {
       const canvas = canvasRef.current;
 
-      if(!WAC.initialize(canvas)) {
+      if(!WAC.initialize(canvas, () => refreshPanel())) {
         throw new Error("Warp controlleer failed to intiialize");
       }
 
@@ -293,6 +278,8 @@ const App = (props) => {
         setFrameRate(WAC.getFrameRate());
       });
     }
+
+    
 
     //return () => AM.stop();
     //TODO this hook runs too often... how to fix?
@@ -316,11 +303,11 @@ const App = (props) => {
   // Register all global listeners
   useEffect(() => {
     // Handle keyboard shortcuts
-    shortcuts.forEach((keyInfo, keys) => {
+    shortcuts.forEach((keyInfo) => {
       if(!keyInfo.onHeld) {
-        setOnPressed(keys, keyInfo.action);
+        setOnPressed(keyInfo.keys, keyInfo.action);
       } else {
-        setOnHeld(keys, keyInfo.action);
+        setOnHeld(keyInfo.keys, keyInfo.action);
       }
     });
 
@@ -351,7 +338,7 @@ const App = (props) => {
 
     /* Settings panel */
     <div 
-      className={"settings" + (panelVisible ? "" : " settings-hidden")}
+      className={"settings"}
       ref={settingsRef}
     > 
       { /* General control panel */}
@@ -361,18 +348,15 @@ const App = (props) => {
         setter={(name, value) => WAC.updateValue("TXC", name, value)}
         defaults={(name) => WAC.getDefault("TXC", name)}
         separator={"."}
-        //key={panelRefresh}
       />
-
     </div> 
-    /* Settings panel end */
   );
 
   const colorControlPanel = (
     !WAC.isInitialized() ? "" : // Only form if the warp controller is initialized
 
     <div 
-      className={"settings" + (panelVisible ? "" : " settings-hidden")}
+      className={"settings"}
     > 
       { /* General control panel */}
       <ControlPanel 
@@ -381,7 +365,6 @@ const App = (props) => {
         setter={(name, value) => WAC.updateValue("CC", name, value)}
         defaults={(name) => WAC.getDefault("CC", name)}
         separator={"."}
-        //key={panelRefresh}
       />
     </div>
   );
@@ -389,7 +372,7 @@ const App = (props) => {
   const renderControlPanel = (
     !WAC.isInitialized() ? "" :
     <div
-      className={"settings" + (panelVisible ? "" : " settings-hidden")}
+      className={"settings"}
     >
       { /* General control panel */}
       <ControlPanel 
@@ -398,7 +381,6 @@ const App = (props) => {
         setter={(name, value) => WAC.updateValue("RC", name, value)}
         defaults={(name) => WAC.getDefault("RC", name)}
         separator={"."}
-        //key={panelRefresh}
       />
 
       <div className="settings__record-button-container button-container">
@@ -408,10 +390,7 @@ const App = (props) => {
             {!recording ? "Record" : "Stop recording"}
         </button>
       </div>
-
-
     </div>
-
   );
 
   //////////
