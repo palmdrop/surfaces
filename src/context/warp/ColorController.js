@@ -1,10 +1,6 @@
 import { 
     getColorAttributes, 
-    getAttributeValue, 
-    getAttributeDefault, 
-    resetAttributesToDefault, 
     setUniforms, 
-    updateAttributeValue,
 
     AttributeController
 } from './ControllerAttributes';
@@ -59,17 +55,20 @@ class ColorController extends AttributeController {
         this.GLC.setShaderProgram(this.program);
         setUniforms(this.attributes, this.program, this.GLC);
 
+        // Create texture for dithering
         this.ditheringTexture = this.GLC.createImageTexture(
             ditheringTexture,
-            //require(ditheringTextureURL), 
-            this.GLC.getGL().REPEAT,
-            this.GLC.getGL().NEAREST,
+            this.GLC.getGL().REPEAT,  // Repeat to ensure that a texture of any size can be used
+            this.GLC.getGL().NEAREST, // No linear filtering, although sampling shader should sample at scale
+            // Callback for when the image is loaded
             (width, height) => {
+                // Bind texture and set related values
                 this.GLC.setUniform(this.program, "hasDitheringTexture", "1i", 1);
                 this.GLC.setTexture(this.ditheringTexture, 1);
                 this.GLC.setUniform(this.program, "ditheringTexture", "1i", 1);
                 this.GLC.setUniform(this.program, "ditheringTextureDimensions", "2fv", [width, height]);
             },
+            // Callback if image fails loading
             () => {
                 console.error("Dithering texture failed to load");
             }

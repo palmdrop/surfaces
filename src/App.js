@@ -79,7 +79,6 @@ const App = (props) => {
     }
   }
 
-
   // KEYBOARD INPUT
 
   // User input through keyboard shortcuts
@@ -87,7 +86,6 @@ const App = (props) => {
 
   // TODO create better interface for changing values using functions
   // TODO ability to change values using keyboard and having it reflect in panel automatically
-  //TODO use array instead since I now iterate over it all the time... will be faster and look better?
   const shortcuts = new Map()
     .set('h', {
         action: (e) => {
