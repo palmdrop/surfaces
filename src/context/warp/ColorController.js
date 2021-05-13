@@ -84,7 +84,7 @@ class ColorController extends AttributeController {
     }
 
     // Renders and modifies a source textures and exports the result to default frame buffer
-    render(sourceTexture, dimensions, multisampling, delta) {
+    render(sourceTexture, dimensions, multisampling, ditheringAmount, delta) {
         this.time += delta;
         const GLC = this.GLC;
 
@@ -92,8 +92,8 @@ class ColorController extends AttributeController {
         GLC.bindFramebuffer(null);
         GLC.setViewport(dimensions[0], dimensions[1]);
         this.GLC.setUniform(this.program, "viewport", "2fv", dimensions);
-
         this.GLC.setUniform(this.program, "time", "1f", this.time);
+        this.GLC.setUniform(this.program, "ditheringAmount", "1f", ditheringAmount);
 
         // Use the post processing program, which will sample the texture which we previously rendered to
         GLC.setShaderProgram(this.program);

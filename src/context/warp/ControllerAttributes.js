@@ -198,7 +198,7 @@ const getColorAttributes = () => {
             min: 0.001,
             max: 10
         },
-        ditheringAmount: {
+        /*ditheringAmount: {
             value: 1.0 / 255.0,
             default: 1.0 / 255.0,
             isUniform: true,
@@ -206,7 +206,7 @@ const getColorAttributes = () => {
 
             min: 0.0,
             max: 0.2 
-        },
+        },*/
         general: {
             value: {
                 hue: {
@@ -288,6 +288,14 @@ const getRenderAttributes = () => {
 
             min: 0.1,
             max: 3
+        },
+        ditheringAmount: {
+            value: 1.0 / 255.0,
+            default: 1.0 / 255.0,
+            isUniform: false,
+
+            min: 0.0,
+            max: 0.2 
         },
         multisampling: {
             value: 0,

@@ -1,6 +1,6 @@
 
 import React, { useRef, useState, useEffect, useLayoutEffect, useReducer } from 'react'
-import ControlPanel from './components/input/ControlPanel'
+import ControlPanel from './components/panel/ControlPanel'
 
 import WAC from './context/warp/WarpAppController'
 
@@ -9,7 +9,8 @@ import { useKeyboardInput } from './hooks/KeyboardInputHook'
 
 import './App.css';
 import DataViewer from './components/tooltip/DataViewer'
-import PanelController from './components/input/PanelController'
+import PanelController from './components/panel/PanelController'
+import HelpPage from './pages/HelpPage'
 
 const App = (props) => {
   ////////////////
@@ -28,6 +29,7 @@ const App = (props) => {
   const [recording, setRecording] = useState(false); // True if recording
   const [frameRate, setFrameRate] = useState(0);
 
+  const [helpVisible, setHelpVisible] = useState(false);
   const [dataViewerVisible, setDataViewerVisible] = useState(true); // If true, a popup with render information will be displayed
   // A reducer used to force update the panel (required when the settings are changed outside the panel)
   const [, refreshPanel] = useReducer(x => x + 1, 0);
@@ -69,6 +71,25 @@ const App = (props) => {
     }
   }
 
+  const toggleHelp = (e) => {
+    if(e) e.currentTarget.blur();
+    const visible = !helpVisible;
+    setHelpVisible(visible);
+
+    const handleClose = (e) => {
+      if((e.key && e.key === "Escape") || e.type === "click") {
+        setHelpVisible(false);
+        window.removeEventListener("keydown", handleClose);
+        canvasRef.current.removeEventListener("click", handleClose, true);
+      }
+    };
+
+    if(visible) {
+      canvasRef.current.addEventListener("click", handleClose, true);
+      window.addEventListener("keydown", handleClose);
+    } 
+  }
+
   // KEYBOARD INPUT
 
   // User input through keyboard shortcuts
@@ -77,14 +98,6 @@ const App = (props) => {
   // TODO create better interface for changing values using functions
   // TODO ability to change values using keyboard and having it reflect in panel automatically
   const shortcuts = [
-    {
-      keys: 'c',
-      action: (e) => {
-        handleCanvasDownload(e);
-      },
-      onHeld: false,
-      description: "Download current frame as PNG"
-    },
     {
       keys: ' ', 
       action: (e) => {
@@ -165,6 +178,14 @@ const App = (props) => {
       onHeld: false,
       description: "Randomize controller parameters"
     },
+    {
+      keys: 'c',
+      action: (e) => {
+        handleCanvasDownload(e);
+      },
+      onHeld: false,
+      description: "Download current frame as PNG"
+    },
     { 
       keys: 'n', 
       action: () => {
@@ -172,6 +193,14 @@ const App = (props) => {
       },
       onHeld: false,
       description: "Start/stop recording"
+    },
+    { 
+      keys: 'h', 
+      action: () => {
+        toggleHelp();
+      },
+      onHeld: false,
+      description: "Hide/show this help popup"
     }
   ];
 
@@ -465,6 +494,15 @@ const App = (props) => {
                 Randomize
             </button>
           </div>
+
+          { /* Button for showing help popup */}
+          <div className="settings__help-button-container button-container">
+            <button 
+              className={"button settings__help-button-container__button" + (helpVisible ? " active " : "")} 
+              onClick={toggleHelp}>
+                Help
+            </button>
+          </div>
         </PanelController>
 
 
@@ -483,7 +521,6 @@ const App = (props) => {
               />
             </div>
             ) : ""
-
         }
 
         { /* Canvas for WebGL context */}
@@ -491,6 +528,137 @@ const App = (props) => {
           className="canvas" 
           ref={canvasRef}
         />
+        { helpVisible ? 
+          <HelpPage 
+            descriptions={[
+              {
+                title: "General",
+                content: (
+                  <div>
+                    <p>
+                      This application provides user control over a shader that performs recursive polar domain warping. 
+                      The implementation of this effect builds 
+                      on <a target="_blank" rel="noreferrer" href="https://en.wikipedia.org/wiki/Simplex_noise">Simplex Noise</a>, a type of 
+                      gradient noise that tend to have less artefacts than traditional Perlin Noise. 
+                    </p>
+                    <p>
+                      The "domain", in this case, is the area in which this noise is sampled. The noise will try to cover
+                      all available space in the browser, as you can see behind this popup, so the domain is this window. Noise 
+                      is sampled for each pixel. However, the domain is "warped", meaning that for each pixel, the actual sampled
+                      position is offset using some other function. 
+                    </p>
+                    <p>
+                      Polar domain warping uses two noise functions to create the warp. One for defining an angle, and one for defining
+                      an amount. Say we want to sample point <span className="math">[10, 10]</span>. First, we sample the angle noise at that point and get a value for
+                      the angle. Then, we sample the amount noise and get a value for the amount. We produce an offset vector 
+                    </p>  
+                    <p className="math">
+                      [cos(angle) * amount, sin(angle) * amount]
+                    </p>
+                    <p>
+                      and add this to our initial position. We'll now sample our source noise at 
+                    </p>
+                    <p className="math">
+                      [10, 10] + [cos(angle) * amount, sin(angle) * amount]
+                    </p>
+                    <p>
+                      I suggest reading Inigo Quilez <a target="_blank" rel="noreferrer" href="https://www.iquilezles.org/www/articles/warp/warp.htm">blog post</a> on the topic, 
+                      or my own <a target="_blank" rel="noreferrer" href="https://palmdrop.github.io/post/domain-warping/">blog post</a> where I discuss the specific technique used on this page. 
+                    </p>
+                    <p>
+                      In the top menu, you'll find a set of functionality to change, save and export the renders. "Capture Frame" will
+                      download the current frame as a PNG image. "Export"/"Import" will save/import your current settings to/from disk. 
+                      "Randomize" will randomize the settings, and so on. Play around.
+                    </p>
+                  </div>
+                )
+              },
+              {
+                title: "Texture",
+                content: (
+                  <div>
+                    <p>
+                      The <i>texture controller</i> changes the characteristics of the underlying noise functions, as well as the warp effect itself. The general sliders control the 
+                      scale, warp and recursion iterations. There's one section for controlling the animation speed of the three layers. Finally, there's a section for each
+                      noise layer: the source, angle and amount layer. The source layer is the core domain being warped. The angle layer control the warp angle and the amount layer
+                      controls the warp amount. Each noise layer have sliders for controlling fractal noise settings (layers of noise). I suggest 
+                      reading <a target="_blank" rel="noreferrer" href="https://palmdrop.github.io/post/characteristics-of-modified-noise/">this post</a>. It also covers some of the 
+                      modifications available.
+                    </p>
+                  </div>
+                )
+              },
+              {
+                title: "Color",
+                content: (
+                  <div>
+                    <p>
+                      The <i>color controller</i> gives precise control over the colors of the render. There are
+                      some (hopefully) self-explanatory general sliders, but also more specific controllers for hue, saturation and brightness. Each one of these sub-controllers
+                      allow you to choose which layers (source, angle and amount) will influence that part of the color. For example, you might want the source layer to increase 
+                      brightness, while the angle layer to decrease it, making the render darker where the angle has a high value. 
+                    </p>
+                  </div>
+                )
+              },
+              {
+                title: "Render",
+                content: (
+                  <div>
+                    <p>
+                      The <i>render controller</i> gives you the ability to change resolution, control dithering and multisample, and to
+                      record a section of the animation. Press record, and each frame will be recorded until you press stop. Unfortunately,
+                      there's not yet any support for converting the recorded footage into an actual video: instead, you'll receive a zipped archive 
+                      of PNG images.
+                    </p>
+                  </div>
+                )
+              }
+            ]}
+            shortcuts={shortcuts}
+            contact={[
+              {
+                title: "Development",
+                entries: [
+                  { 
+                    link: "https://github.com/palmdrop", 
+                    location: "Github Profile", 
+                    description: "My Github profile"},
+                  { 
+                    link: "https://github.com/palmdrop/webgl-domain-warping-controller", 
+                    location: "This Repository", 
+                    description: "Link to the repository for the development version of this application"
+                  }
+                ]
+              },
+              {
+                title: "Social Media",
+                entries: [
+                  { 
+                    link: "https://www.instagram.com/palmdrop/", 
+                    location: "Instagram", 
+                    description: "My Instagram profile"},
+                  { 
+                    link: "https://palmdrop.github.io/", 
+                    location: "Blog", 
+                    description: "Link to personal blog"
+                  }
+                ]
+              },
+              {
+                title: "Contact",
+                entries: [
+                  { 
+                    link: "mailto:anton@exlex.se", 
+                    location: "Email", 
+                    description: "Personal email"},
+                ]
+              },
+            ]}
+            onCloseCallback={() => toggleHelp()}
+          />
+          : ""
+        }
       </div>
   )
 }

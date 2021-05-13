@@ -121,12 +121,15 @@ class WarpAppController {
 
         const dimensions = this.RC.getDimensions();
 
+        const ditheringAmount = this.RC.getValue("ditheringAmount");
+
         // The texture controller will render to a texture
         this.TXC.render(fbo, renderTextureDimensions, delta);
 
         // Pass this texture along to the color controller
         // Also tell the color controller if multisampling is enabled
-        this.CC.render(renderTexture, dimensions, this.RC.getValue("multisampling"), 
+        this.CC.render(renderTexture, dimensions, 
+            this.RC.getValue("multisampling"), ditheringAmount,
             this.paused ? 0.0 : delta);
     }
 

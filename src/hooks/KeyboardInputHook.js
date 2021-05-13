@@ -73,11 +73,6 @@ export const useKeyboardInput = () => {
     return () => {
       window.removeEventListener("keydown", onKeyAction);
       window.removeEventListener("keyup", onKeyAction);
-
-      // Reset states
-      //keyStates.current = {};
-      //pressedActions.current = {};
-      //heldActions.current = {};
     };
   });
 
