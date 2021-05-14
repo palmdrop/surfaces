@@ -81,7 +81,6 @@ float getComponent(vec4 data, ComponentController controller) {
     return max(0.0, min(result, 1.0));
 }
 
-// Applies dithering
 vec3 dither(vec3 value) {
     if(hasDitheringTexture) {
         vec2 ditheringCoord = gl_FragCoord.xy / ditheringTextureDimensions + vec2(fract(time * 13.41), fract(time * 3.451));

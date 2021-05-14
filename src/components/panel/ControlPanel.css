@@ -5,7 +5,7 @@
     font-size: 0.8rem;
     padding: 0rem;
     margin: 0rem;
-    color: #cecece
+    color: var(--foreground);
 }
 
 .control-panel__section legend {
@@ -13,5 +13,5 @@
     font-size: 0.8rem;
     padding: 0.1rem;
     margin: 0rem;
-    color: #cecece
+    color: var(--foreground);
 }

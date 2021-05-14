@@ -3,7 +3,7 @@
 
 .data-tooltip {
     position: absolute;
-    background-color: #04040488;
+    background-color: var(--transparent-background);
     padding: 0.2h 0.2vh;
 
     right: 0;
@@ -14,21 +14,21 @@
     width: 100%;
     font-size: 1.0rem;
     background-color: transparent;
-    color: #cecece;
-    border: 2px solid #cecece;
-    transition-duration: 0.3s;
+    color: var(--foreground);
+    border: var(--border-width) solid var(--button-border-color);
+    transition-duration: var(--on-hover-speed);
 }
 
 .button:hover {
-    color: #cecece;
-    background-color: #4CAF50;
-    border: 2px solid #4CAF50;
+    color: var(--foreground);
+    background-color: var(--button-hover-color);
+    border: var(--border-width) solid var(--button-hover-color);
 }
 
 .active {
-    color: black;
-    background-color: #2CAFFF;
-    border: 2px solid #2CAFFF;
+    color: var(--background);
+    background-color: var(--button-active-color);
+    border: var(--border-width) solid var(--button-active-color);
 }
 .settings-hidden {
     transform: translateX(-100%);

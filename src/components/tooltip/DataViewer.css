@@ -1,5 +1,5 @@
 .viewer {
-    color: #cecece;
+    color: var(--foreground);
 
 }
 

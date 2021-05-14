@@ -1,11 +1,3 @@
-:root {
-    --navbar-height: 3vh;
-}
-
-.panel-controller {
-
-}
-
 .panel-controller__nav {
     position: absolute;
     width: 100%;
@@ -15,7 +7,7 @@
 
     overflow-y: hidden;
     overflow-x: scroll;
-    background-color: #04040488;
+    background-color: var(--transparent-background);
     -ms-overflow-style: none;
     scrollbar-width: none;
 
@@ -36,7 +28,7 @@
     overflow-x: hidden;
     -ms-overflow-style: none;
     scrollbar-width: none;
-    background-color: #04040488;
+    background-color: var(--transparent-background);
     margin: 0vh 0.0vh;
 
     transform: translateX(0);

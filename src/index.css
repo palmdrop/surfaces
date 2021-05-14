@@ -1,3 +1,40 @@
+:root {
+  /* Main colors */
+  --transparent-background: #04040488;
+  --background: #0f0f0f;
+
+  --foreground: #cecece;
+  --foreground-dim: #6f6f6f;
+  --foreground-faded: #353535;
+  --foreground-dark: #1f1f1f;
+
+  --foreground-accent: #AFAFAF;
+  --foreground-highlight: #ffffff;
+
+  --transparent-shadow: #000000D5;
+
+  --alert-dim: #402010;
+  --alert: #701010;
+  --alert-bright: #FF0000;
+
+  /* Button colors */
+  --button-border-color: #cecece;
+  --button-hover-color: #4CAF50;
+  --button-active-color: #2CAFFF;
+
+  /* Misc styling */
+  --border-width: 2px;
+  --border-radius: 15px;
+
+  /* Animation */
+  --on-hover-speed: 0.3s;
+
+
+  /* Pages */
+  --help-page-width: calc(min(50%, 40rem));
+  --navbar-height: 3vh;
+}
+
 body {
   margin: 0;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',

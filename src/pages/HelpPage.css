@@ -1,22 +1,19 @@
-:root {
-    --help-page-width: calc(min(50%, 40rem));
-}
 
 a {
-    color: #cecece;
-    border-bottom: dashed 1px #cecece;
+    color: var(--foreground);
+    border-bottom: dashed 1px var(--foreground);
     text-decoration: none;
 }
 
 a:hover {
-    color: #ffffff;
-    border-bottom: solid 1px #cecece;
+    color: var(--foreground-highlight);
+    border-bottom: solid 1px var(--foreground);
 }
 
 .help-page {
-    background-color: #0f0f0f;
-    color: white;
-    border-radius: 15px;
+    background-color: var(--background);
+    color: var(--foreground);
+    border-radius: var(--border-radius);
 
     display: flex;
     flex-direction: column;
@@ -32,8 +29,8 @@ a:hover {
     padding: 1rem;
     margin: -1rem 0 0 -1rem;
 
-    filter: drop-shadow(10px, 10px, 20px, white);
-    box-shadow: 7px 7px #000000D5;
+    filter: drop-shadow(10px, 10px, 20px, var(--foreground));
+    box-shadow: 7px 7px var(--transparent-shadow);
 }
 
 .help-page__content {
@@ -51,8 +48,8 @@ a:hover {
 }
 
 .shortcut__columns {
-    color: #353535;
-    border-bottom: 2px solid #1f1f1f;
+    color: var(--foreground-faded);
+    border-bottom: var(--border-width) solid var(--foreground-dark);
 
     display: flex;
     flex-direction: row;
@@ -69,7 +66,7 @@ a:hover {
     padding: 0.3rem;
     margin: 0rem 2rem;
 
-    border-bottom: 2px dotted #1f1f1f;
+    border-bottom: var(--border-width) dotted var(--foreground-dark);
 }
 
 .shortcut-entry__keys {
@@ -94,7 +91,7 @@ a:hover {
     justify-content: space-between;
     padding: 0.3rem 0rem;
     margin: 0rem 0rem;
-    border-bottom: 2px dotted #1f1f1f;
+    border-bottom: var(--border-width) dotted var(--foreground-dark);
 }
 
 .contact-category__entry__description {
@@ -107,31 +104,31 @@ a:hover {
     display: flex;
     flex-direction: row;
     justify-content: space-evenly;
-    color: #6f6f6f;
+    color: var(--foreground-dim);
     padding: 1.0rem 0rem 0rem 0rem;
 }
 
 .help-page__buttons__button {
     font-size: 1.0rem;
     background-color: transparent;
-    color: #6f6f6f;
-    border: 0px solid #1f1f1f;
+    color: var(--foreground-dim);
+    border: 0px solid var(--foreground-dark);
     transition-duration: 0.3s;
     padding: 0.2rem;
 }
 
 .help-page__buttons__previous:hover {
-    color: #cecece;
+    color: var(--foreground);
 }
 
 .help-page__buttons__next:hover {
-    color: #cecece;
+    color: var(--foreground);
 }
 
 .math {
     text-align: center;
     vertical-align: middle;
-    color: #AfAfAf
+    color: var(--foreground-accent);
 }
 
 .arrow {
@@ -154,27 +151,27 @@ a:hover {
 
 .help-page__close-button {
     border-radius: 50%;
-    border: 2px solid #701010;
-    background-color: #0f0f0f;
+    border: var(--border-width) solid var(--alert);
+    background-color: var(--background);
     padding: 0.5rem;
     width: 15px;
     height: 15px;
-    color: red;
+    color: var(--alert-bright);
     left: 96%;
     position: relative
 }
 
 .help-page__close-button:hover {
-    border: 2px solid #701010;
-    background-color: #402010;
-    color: #ffffff;
+    border: var(--border-width) solid var(--alert);
+    background-color: var(--alert-dim);
+    color: var(--foreground-highlight);
 }
   
 .help-page__close-button::before {
     content: " ";
     position: absolute;
     display: block;
-    background-color: #701010;
+    background-color: var(--alert);
     width: 2px;
     left: 6px;
     top: 2.0px;
@@ -185,7 +182,7 @@ a:hover {
     content: " ";
     position: absolute;
     display: block;
-    background-color: #701010;
+    background-color: var(--alert);
     height: 2px;
     top: 6px;
     left: 2.0px;
