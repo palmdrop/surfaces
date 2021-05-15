@@ -33,6 +33,10 @@
   /* Pages */
   --help-page-width: calc(min(50%, 40rem));
   --navbar-height: 3vh;
+
+
+  --sidebar-width: min(40%, 30rem);
+  --sidebar-proportions: 0.4;
 }
 
 body {

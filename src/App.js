@@ -2,7 +2,7 @@
 import React, { useRef, useState, useEffect, useLayoutEffect, useReducer } from 'react'
 import ControlPanel from './components/panel/ControlPanel'
 
-import WAC from './context/warp/WarpAppController'
+import WAC from './controllers/warp/WarpAppController'
 
 import { downloadJSON, promptDownload } from './tools/Utils'
 import { useKeyboardInput } from './hooks/KeyboardInputHook'
@@ -11,6 +11,8 @@ import './App.css';
 import DataViewer from './components/tooltip/DataViewer'
 import PanelController from './components/panel/PanelController'
 import HelpPage from './pages/HelpPage'
+import Sidebar from './components/navigation/Sidebar'
+import { TextureController } from './controllers/warp/TextureController'
 
 const App = (props) => {
   ////////////////
@@ -425,86 +427,35 @@ const App = (props) => {
   //////////
   // BODY //
   //////////
+
+  const createSidebarCategories = () => {
+    const createCategory = (controller) => {
+      return {
+        attributes: WAC.getAttributes(controller),
+        getter: (name) => WAC.getValue(controller, name),
+        setter: (name, value) => WAC.updateValue(controller, name, value),
+        default: (name) => WAC.getDefault(controller, name),
+        separator: "."
+      }
+    };
+
+    return {
+      texture: createCategory("TXC"),
+      color: createCategory("CC"),
+      render: createCategory("RC"),
+    }
+  };
+
   return (
       /* Root container */
       <div className="canvas-container">
-        <PanelController
-          panels={[
-            {
-              name: "Texture",
-              content: textureControlPanel
-            },
-            {
-              name: "Color",
-              content: colorControlPanel
-            },
-            {
-              name: "Render",
-              content: renderControlPanel
-            }
-          ]}
+        { !WAC.isInitialized() ? "" :
+        <Sidebar 
+          categories={createSidebarCategories()} 
         >
-          { /* Button for hiding data viewer */}
-          <div className="settings__hide-data-viewer-button-container button-container">
-            <button 
-              className={"button settings__hide-data-viewer-button-container__button" + (!dataViewerVisible ? " active" : "")} 
-              onClick={handleDataViewerHide}>
-                {dataViewerVisible ? "Hide data viewer" : "Unhide data viewer"}
-            </button>
-          </div>
 
-          { /* Download canvas button */}
-          <div className="button-container settings__capture-button-container">
-            <button className="button settings__capture-button-container__button" onClick={handleCanvasDownload}>Capture frame</button>
-          </div>
-
-          { /* Container for export and import buttons */ }
-          <div className="settings__import-export-container">
-
-            { /* Export settings button */}
-            <div className="button-container settings__export-button-container">
-              <button className="button settings__export-button-container__button" onClick={handleSettingsDownload}>Export</button>
-            </div>
-
-            { /* Import settings button */}
-            <div className="button-container settings__import-button-container">
-              <button className="button settings__import-button-container__button" onClick={handleSettingsImport}>Import</button>
-              <input 
-                ref={fileInputRef} 
-                type="file" 
-                style={{ display: "none" }}
-                onChange={handleInputChange}
-                accept="application/JSON"
-              />
-            </div>
-          </div>
-
-          { /* Pause button */}
-          <div className="button-container settings__pause-button-container">
-            <button 
-              className={"button settings__pause-button-container__button" + (paused ? " active " : "")}
-              onClick={togglePause}>{paused ? "Unpause" : "Pause" }</button>
-          </div>
-
-          { /* Button for randomizing settings */}
-          <div className="settings__randomize-button-container button-container">
-            <button 
-              className={"button settings__randomize-button-container__button"} 
-              onClick={randomize}>
-                Randomize
-            </button>
-          </div>
-
-          { /* Button for showing help popup */}
-          <div className="settings__help-button-container button-container">
-            <button 
-              className={"button settings__help-button-container__button" + (helpVisible ? " active " : "")} 
-              onClick={toggleHelp}>
-                Help
-            </button>
-          </div>
-        </PanelController>
-
+        </Sidebar>
+        }
 
         { /* Data viewer */
           dataViewerVisible ? (
@@ -659,6 +610,77 @@ const App = (props) => {
           />
           : ""
         }
+        {/* 
+        <PanelController
+          panels={[
+            {
+              name: "Texture",
+              content: textureControlPanel
+            },
+            {
+              name: "Color",
+              content: colorControlPanel
+            },
+            {
+              name: "Render",
+              content: renderControlPanel
+            }
+          ]}
+        >
+          <div className="settings__hide-data-viewer-button-container button-container">
+            <button 
+              className={"button settings__hide-data-viewer-button-container__button" + (!dataViewerVisible ? " active" : "")} 
+              onClick={handleDataViewerHide}>
+                {dataViewerVisible ? "Hide data viewer" : "Unhide data viewer"}
+            </button>
+          </div>
+
+          <div className="button-container settings__capture-button-container">
+            <button className="button settings__capture-button-container__button" onClick={handleCanvasDownload}>Capture frame</button>
+          </div>
+
+          <div className="settings__import-export-container">
+
+            <div className="button-container settings__export-button-container">
+              <button className="button settings__export-button-container__button" onClick={handleSettingsDownload}>Export</button>
+            </div>
+
+            <div className="button-container settings__import-button-container">
+              <button className="button settings__import-button-container__button" onClick={handleSettingsImport}>Import</button>
+              <input 
+                ref={fileInputRef} 
+                type="file" 
+                style={{ display: "none" }}
+                onChange={handleInputChange}
+                accept="application/JSON"
+              />
+            </div>
+          </div>
+
+          <div className="button-container settings__pause-button-container">
+            <button 
+              className={"button settings__pause-button-container__button" + (paused ? " active " : "")}
+              onClick={togglePause}>{paused ? "Unpause" : "Pause" }</button>
+          </div>
+
+          <div className="settings__randomize-button-container button-container">
+            <button 
+              className={"button settings__randomize-button-container__button"} 
+              onClick={randomize}>
+                Randomize
+            </button>
+          </div>
+
+          <div className="settings__help-button-container button-container">
+            <button 
+              className={"button settings__help-button-container__button" + (helpVisible ? " active " : "")} 
+              onClick={toggleHelp}>
+                Help
+            </button>
+          </div>
+        </PanelController>
+        */}
+
       </div>
   )
 }

@@ -15,4 +15,14 @@ const downloadJSON = (jsonString, name) => {
   promptDownload(data, name);
 }
 
-export { camelToTitle, promptDownload, downloadJSON };
+const isObject = (value) => {
+  return (typeof value === "object");
+}
+
+const forEachProperty = (object, func) => {
+  return Object.entries(object).map(([prop, value], index) => (
+      func(prop, value, index)
+  ));
+};
+
+export { camelToTitle, isObject, forEachProperty, promptDownload, downloadJSON };
