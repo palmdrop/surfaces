@@ -67,12 +67,12 @@ const SidebarCategory = ({name, data}) => {
             className={getClasses("sidebar-category")}
         >
             <div className={getClasses("category-header")}>
-                <h2 
+                <h3 
                     className={getClasses("category-title")}
                     onClick={handleTitleClick}
                 >
                     {camelToTitle(name)}
-                </h2>
+                </h3>
                 <div 
                     className="category-arrow-container"
                     onClick={handleArrowClick}

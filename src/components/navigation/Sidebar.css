@@ -6,16 +6,16 @@
 
     display: flex;
     flex-direction: row;
-    justify-content: space-between;
+    justify-content: left;
 
-    background-color: var(--transparent-background);
+    background-color: var(--background);
     -ms-overflow-style: none;
     scrollbar-width: none;
 }
 
 .sidebar-main {
     height: 100%;
-    width: 40%;
+    width: var(--sidebar-main-width);
 
     color: var(--foreground);
 
@@ -25,40 +25,47 @@
 }
 
 .sidebar-secondary {
-    padding: 0.5rem;
     color: var(--foreground);
-}
-
-.sidebar-settings {
+    width: calc(100% - var(--sidebar-main-width));
 }
 
 /* CATEGORY */
 .sidebar-category {
     transition: 0.5s ease;
-    padding: 5%;
+    padding: 0%;
     margin: 0rem;
 
     color: var(--foreground);
 
     display: flex;
     flex-direction: column;
-    justify-content: space-between;
-
+    background-color: var(--background)
 }
 
 .sidebar-category--expanded {
-
-    color: var(--foreground-highlight)
+    color: var(--foreground-highlight);
+    border-bottom: var(--border-width) solid var(--background-highlight);
 }
 
 .sidebar-category--active {
-    background-color: var(--transparent-background)
 }
 
 .category-header {
     display: flex;
     flex-direction: row;
     justify-content: space-between;
+    background-color: var(--background-secondary);
+    text-align: center;
+}
+
+.category-header:hover {
+    color: var(--foreground-highlight);
+    filter: brightness(120%);
+    background-color: var(--background-bright);
+}
+
+.category-header--active {
+    background-color: var(--background-bright);
 }
 
 .category-arrow-container {
@@ -67,11 +74,13 @@
     display: flex;
     justify-content: center;
     padding: 0.5rem;
+    padding-right: 1rem;
 }
 
 .category-arrow {
     width: 0; 
     height: 0; 
+    margin-top: 4px;
     border-left: 7px solid transparent;
     border-right: 7px solid transparent;
     border-bottom: 7px solid var(--foreground-highlight);
@@ -79,29 +88,24 @@
 }
 
 .category-arrow--expanded {
-    margin-top: 1px;
-    /*width: 0; 
-    height: 0; 
-    border-left: 7px solid transparent;
-    border-right: 7px solid transparent;
-    border-top: 7px solid var(--foreground);*/
+    margin-top: 5px;
     transform: rotate(180deg);
     -webkit-transform: rotate(180deg);
 }
 
 .category-title {
-    padding: 0rem;
-    padding-bottom: 1rem;
+    padding: 0.6rem;
     margin: 0rem;
 
     color: var(--foreground);
 
     cursor: pointer;
+
 }
 
 .category-title--expanded {
-    padding-bottom: 0rem;
     filter: brightness(120%);
+    padding-bottom: 0.6rem;
 }
 
 .category-title--active {
@@ -111,7 +115,8 @@
 
 .category-entries {
     position: relative;
-    visibility: hidden;
+    visibility: visible;
+    overflow-y: hidden;
     opacity: 0;
     max-height: 0px;
     transition: max-height 0.6s, opacity 1s, visiblity 2s ease;
@@ -119,23 +124,68 @@
 
 .category-entries--expanded {
     visibility: visible;
+    overflow-y: hidden;
     max-height: 250px;
     opacity: 1;
     transition: max-height 0.7s, opacity 1s, visibility 2s ease;
 }
 
 .entry {
-    padding: 0.0rem;
+    padding: 0.7rem;
     padding-left: 1.0rem;
+    margin: 0rem;
     cursor: pointer;
-    filter: brightness(70%);
+    background: var(--background-secondary)
 }
 
 .entry:hover {
-    color: var(--button-hover-color);
+    background: var(--background-highlight);
+    filter: brightness(100%);
 }
 
 .entry--picked {
-    filter: brightness(120%);
-    color: var(--button-active-color);
+    background: var(--background-highlight);
+    filter: brightness(90%);
+}
+
+
+/* SETTINGS */
+.sidebar-settings {
+    width: 100%;
+}
+
+.main-settings {
+    background-color: var(--background-bright)
+}
+
+.main-settings-title {
+    margin: 0rem;
+    padding: 0.5rem;
+    color: var(--foreground-highlight);
+    text-align: center;
+}
+
+.main-input-entry {
+}
+
+.chosen-settings {
+}
+
+.chosen-title {
+}
+
+.chosen-section {
+    background-color: var(--background-highlight);
+    font-size: 0.9em;
+}
+
+.chosen-section-title {
+    border-top: var(--border-width) solid var(--foreground-faded);
+    padding: 0.5rem;
+    margin: 0rem;
+    filter: brightness(90%);
+    text-align: center;
+}
+
+.chosen-section-entry {
 }
