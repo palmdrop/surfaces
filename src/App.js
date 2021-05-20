@@ -1,6 +1,6 @@
 
 import React, { useRef, useState, useEffect, useLayoutEffect, useReducer } from 'react'
-import ControlPanel from './components/panel/ControlPanel'
+//import ControlPanel from './components/panel/ControlPanel'
 
 import WAC from './controllers/warp/WarpAppController'
 
@@ -9,17 +9,18 @@ import { useKeyboardInput } from './hooks/KeyboardInputHook'
 
 import './App.css';
 import DataViewer from './components/tooltip/DataViewer'
-import PanelController from './components/panel/PanelController'
+//import PanelController from './components/panel/PanelController'
 import HelpPage from './pages/HelpPage'
-import Sidebar from './components/navigation/Sidebar'
-import { TextureController } from './controllers/warp/TextureController'
+//import Sidebar from './components/navigation/Sidebar'
+//import { TextureController } from './controllers/warp/TextureController'
+//import CategoryBar from './components/control/CategoryBar'
+import ControlPanel from './components/control/ControlPanel'
 
 const App = (props) => {
   ////////////////
   // REFERENCES //
   ////////////////
   const canvasRef    = useRef(); // The canvas object who holds the WebGL context
-  const settingsRef  = useRef(); // The settings panel
   const fileInputRef = useRef(); // The file input tag that is used to handle user file choosing
 
   ////////////
@@ -300,7 +301,10 @@ const App = (props) => {
     if(!WAC.isInitialized()) {
       const canvas = canvasRef.current;
 
-      if(!WAC.initialize(canvas, () => refreshPanel())) {
+      if(!WAC.initialize(canvas, 
+        //() => refreshPanel()
+        null
+        )) {
         throw new Error("Warp controlleer failed to intiialize");
       }
 
@@ -364,15 +368,13 @@ const App = (props) => {
   });
 
   // CONTROL PANELS
-  const textureControlPanel = (
+  /*const textureControlPanel = (
     !WAC.isInitialized() ? "" : // Only form if the warp controller is initialized
 
-    /* Settings panel */
     <div 
       className={"settings"}
       ref={settingsRef}
     > 
-      { /* General control panel */}
       <ControlPanel 
         attributes={WAC.getAttributes("TXC")}
         getter={(name) => WAC.getValue("TXC", name)}
@@ -389,7 +391,6 @@ const App = (props) => {
     <div 
       className={"settings"}
     > 
-      { /* General control panel */}
       <ControlPanel 
         attributes={WAC.getAttributes("CC")}
         getter={(name) => WAC.getValue("CC", name)}
@@ -405,7 +406,6 @@ const App = (props) => {
     <div
       className={"settings"}
     >
-      { /* General control panel */}
       <ControlPanel 
         attributes={WAC.getAttributes("RC")}
         getter={(name) => WAC.getValue("RC", name)}
@@ -422,7 +422,7 @@ const App = (props) => {
         </button>
       </div>
     </div>
-  );
+  );*/
 
   //////////
   // BODY //
@@ -446,15 +446,18 @@ const App = (props) => {
     }
   };
 
+  console.log("test");
+
   return (
       /* Root container */
       <div className="canvas-container">
         { !WAC.isInitialized() ? "" :
-        <Sidebar 
-          categories={createSidebarCategories()} 
-        >
 
-        </Sidebar>
+          <ControlPanel
+            categories={createSidebarCategories()}
+          >
+
+          </ControlPanel>
         }
 
         { /* Data viewer */

@@ -1,0 +1,102 @@
+
+.input-dropdown-container {
+    box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    -webkit-box-sizing: border-box;
+    transition: 0.3s;
+    -ms-transition: 0.3s;
+    border: var(--border-width) solid var(--background-secondary);
+    box-shadow: 0 4px 8px 0 rgba(0,0,0,0.4);
+}
+
+.input-dropdown-container:hover {
+    box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    -webkit-box-sizing: border-box;
+    transition: 0.3s;
+    -ms-transition: 0.3s;
+    border: var(--border-width) solid var(--background-highlight);
+}
+
+.input-dropdown-container--expanded {
+    transition: 0.3s;
+    -ms-transition: 0.3s;
+    border: var(--border-width) solid var(--background-bright);
+    padding-bottom: 1rem;
+}
+
+.input-dropdown-container--expanded:hover {
+    transition: 0.3s;
+    -ms-transition: 0.3s;
+    border: var(--border-width) solid var(--background-bright);
+    filter: brightness(120%);
+}
+
+.input-dropdown-title {
+    margin: 0.0rem;
+    padding: 0.3rem;
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    text-align: center;
+
+    cursor: pointer;
+    font-family: 'Bungee', cursive;
+
+    transition: 0.3s;
+    -ms-transition: 0.3s;
+}
+
+.input-dropdown-title:hover {
+    background-color: var(--background-highlight);
+    color: var(--foreground-highlight);
+}
+
+.input-dropdown-title--expanded {
+    background-color: var(--background-bright);
+}
+
+.input-dropdown-title--expanded:hover {
+    background-color: var(--background-bright);
+}
+
+.input-dropdown-content {
+    position: relative;
+    overflow: hidden;
+    max-height: 0px;
+    visibility: 0;
+    transition: max-height 0.6s, opacity 0.6s, visiblity 0.6s ease;
+}
+
+.input-dropdown-content--expanded {
+    overflow: hidden;
+    height: auto;
+    max-height: 800px;
+    visibility: 1;
+    transition: max-height 0.6s, opacity 0.6s, visibility 0.6s ease;
+}
+
+.input-dropdown__section {
+    padding: 1rem;
+    padding-bottom: 0.0rem;
+    box-shadow: 0 4px 8px 0 rgba(0,0,0,0.4);
+}
+
+.input-dropdown__section-sub {
+    background-color: var(--background-tertiary);
+    padding: 1rem;
+    padding-bottom: 0.0rem;
+    box-shadow: 0 4px 8px 0 rgba(0,0,0,0.4);
+}
+
+.input-dropdown__section__title {
+    font-family: 'Bungee', cursive;
+    padding-bottom: 1.0rem;
+    background-color: var(--background-tertiary);
+    color: var(--foreground-dim);
+    margin: 0rem;
+}
+
+.input-dropdown__section__entry {
+    padding: 0rem;
+    margin: 0rem;
+}

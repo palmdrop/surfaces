@@ -1,6 +1,6 @@
 /* General */
 .input-switch {
-    padding: 0rem 1rem;
+    padding: 0rem 0rem;
     display: flex;
     flex-direction: row;
     justify-content: space-between;

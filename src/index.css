@@ -3,6 +3,7 @@
   --transparent-background: #04040488;
   --background: #0f0f0f;
   --background-secondary: #1f1f1f;
+  --background-tertiary: #2f2f2f;
   --background-bright: #2f4f4f;
   --background-highlight: #4f4f4f;
 
@@ -26,7 +27,7 @@
   --button-active-color: #2CAFFF;
 
   /* Misc styling */
-  --border-width: 2px;
+  --border-width: 3px;
   --border-radius: 15px;
 
   /* Animation */
@@ -34,12 +35,15 @@
 
 
   /* Pages */
-  --help-page-width: calc(min(50%, 40rem));
+  --help-page-width: calc(min(50%, 40em));
   --navbar-height: 3vh;
 
+  --sidebar-width: 20em;
+  --sidebar-category-width: 3.5em;
 
-  --sidebar-width: min(30%, 20rem);
-  --sidebar-main-width: 50%;
+  /* Fonts */
+  --bold-font: 'Bungee', cursive;
+  --normal-font: Arial, Helvetica, sans-serif;
 }
 
 body {
