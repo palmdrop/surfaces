@@ -1,19 +1,19 @@
 :root {
   /* Main colors */
-  --transparent-background: #04040488;
-  --background: #0f0f0f;
-  --background-secondary: #1f1f1f;
-  --background-tertiary: #2f2f2f;
-  --background-bright: #2f4f4f;
-  --background-highlight: #4f4f4f;
+  --transparent-background: #00000000;
+  --background: #1b1b1f;
+  --background-secondary: #28282e;
+  --background-tertiary: #3b3b42;
+  --background-bright: #66666e;
+  --background-highlight: #36363d;
 
-  --foreground: #cecece;
+  --foreground: #b5b5b5;
   --foreground-dim: #8f8f8f;
   --foreground-faded: #353535;
   --foreground-dark: #1f1f1f;
 
   --foreground-accent: #AFAFAF;
-  --foreground-highlight: #ffffff;
+  --foreground-highlight: #dddddd;
 
   --transparent-shadow: #000000D5;
 
@@ -38,11 +38,13 @@
   --help-page-width: calc(min(50%, 40em));
   --navbar-height: 3vh;
 
-  --sidebar-width: 20em;
-  --sidebar-category-width: 3.5em;
+  --sidebar-width: 18em;
+  --sidebar-category-width: 3.2em;
 
   /* Fonts */
-  --bold-font: 'Bungee', cursive;
+  /*--bold-font: 'Bungee', cursive;*/
+  /*--bold-font: 'Staatliches', cursive;*/
+  --bold-font: 'Archivo Black', sans-serif;
   --normal-font: Arial, Helvetica, sans-serif;
 }
 

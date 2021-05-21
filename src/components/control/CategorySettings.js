@@ -1,5 +1,5 @@
 
-import React from 'react'
+import React, { useState, useEffect } from 'react'
 import { useControlPanelContext } from '../../context/ControlPanelContext'
 import { forEachProperty, camelToTitle, isObject } from '../../tools/Utils'
 
@@ -10,14 +10,24 @@ import InputDropdown from './InputDropdown'
 
 const CategorySettings = () => {
     const [activeCategory, categoryData] = useControlPanelContext();
-    const precision = 5;
+    const [mounted, setMounted] = useState(false);
+    const precision = 3;
 
-    if(!activeCategory) return null;
+    useEffect(() => {
+        setTimeout(() => {
+            setMounted(true);
+        }, 0);
+
+        return () => {
+            setTimeout(() => {
+                setMounted(false);
+            }, 0);
+        }
+    }, []);
 
     const createMainSettings = () => {
         return (
             <div className="category-settings__main-container">
-                <h2 className="category-settings__main-title">{camelToTitle(activeCategory)}</h2>
                 <div className="category-settings__main-entries">
                     {forEachProperty(categoryData.attributes, (name, attribute, index) => {
                         return isObject(attribute.value) ? null : (
@@ -59,11 +69,12 @@ const CategorySettings = () => {
     };
 
 
-    return (
-        <div className="category-settings">
-            {createMainSettings()}
-            {createSecondarySettings()}
-        </div>
+    return ( activeCategory ? 
+            <div className={"category-settings" + (mounted ? " mounted" : "")}>
+                {createMainSettings()}
+                {createSecondarySettings()}
+            </div>
+        : null 
     )
 }
 

@@ -4,6 +4,7 @@ import React, { useState } from 'react'
 import { camelToTitle, forEachProperty, isObject } from '../../tools/Utils';
 
 import './InputDropdown.css'
+import UpDownArrow from '../indicator/arrow/UpDownArrow';
 
 const InputDropdown = ( { categoryData, attribute, name, parentName, precision } ) => {
     const [expanded, setExpanded] = useState(false);
@@ -55,12 +56,15 @@ const InputDropdown = ( { categoryData, attribute, name, parentName, precision }
 
     return (
         <div className={getClasses("input-dropdown-container")}>
-            <h3 
-                className={getClasses("input-dropdown-title")}
+            <div 
+                className={getClasses("input-dropdown-header")}
                 onClick={handleClick}
             >
-                {camelToTitle(name)}
-            </h3>
+                <h3 className={getClasses("input-dropdown-title")}>
+                    {camelToTitle(name)}
+                </h3>
+                <UpDownArrow direction={expanded ? "up" : "down"} />
+            </div>
             <div className={getClasses("input-dropdown-content")}>
                 {createSection( attribute, null, parentName, true)}
             </div>

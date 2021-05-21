@@ -4,6 +4,8 @@ import InputSlider from './InputSlider'
 import InputSwitch from './InputSwitch'
 import { camelToTitle } from '../../tools/Utils'
 
+import './Input.css'
+
 const Input = ({ categoryData, attribute, fullName, precision }) => {
     // Sets up a single slider 
     const createSlider = (attribute, name, fullName) => {

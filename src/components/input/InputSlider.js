@@ -74,7 +74,10 @@ const InputSlider = ({ label, valueGetter, defaultValue, onChange, min, max, ste
         <div 
             className="input-slider"
         > 
-            <h3 className="input-slider__label">{label + " (" + state + ")" }</h3>
+            <div className="input-slider__header">
+                <h3 className="input-slider__label">{label}</h3>
+                <div className="input-slider__value">{state}</div>
+            </div>
             <Slider className="input-slider__slider"
                 key={fullName}
                 value={state}

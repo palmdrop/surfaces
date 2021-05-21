@@ -16,6 +16,9 @@
     transition: 0.3s;
     -ms-transition: 0.3s;
     border: var(--border-width) solid var(--background-highlight);
+
+    background-color: var(--background-highlight);
+    color: var(--foreground-highlight);
 }
 
 .input-dropdown-container--expanded {
@@ -23,6 +26,8 @@
     -ms-transition: 0.3s;
     border: var(--border-width) solid var(--background-bright);
     padding-bottom: 1rem;
+
+    background-color: var(--background-secondary);
 }
 
 .input-dropdown-container--expanded:hover {
@@ -30,33 +35,48 @@
     -ms-transition: 0.3s;
     border: var(--border-width) solid var(--background-bright);
     filter: brightness(120%);
+
+    background-color: var(--background-secondary);
+}
+
+.input-dropdown-header {
+    display: flex;
+    flex-direction: row;
+    cursor: pointer;
+}
+
+.input-dropdown-header:hover {
+}
+
+.input-dropdown-header--expanded {
+    background-color: var(--background-bright);
+}
+
+.input-dropdown-header--expanded:hover {
+    background-color: var(--background-bright);
 }
 
 .input-dropdown-title {
+    width: 100%;
     margin: 0.0rem;
     padding: 0.3rem;
-    font-size: 0.9rem;
+    font-size: 0.8rem;
     text-transform: uppercase;
     text-align: center;
 
-    cursor: pointer;
-    font-family: 'Bungee', cursive;
+    font-family: var(--bold-font);
 
     transition: 0.3s;
     -ms-transition: 0.3s;
 }
 
 .input-dropdown-title:hover {
-    background-color: var(--background-highlight);
-    color: var(--foreground-highlight);
 }
 
 .input-dropdown-title--expanded {
-    background-color: var(--background-bright);
 }
 
 .input-dropdown-title--expanded:hover {
-    background-color: var(--background-bright);
 }
 
 .input-dropdown-content {
@@ -64,7 +84,9 @@
     overflow: hidden;
     max-height: 0px;
     visibility: 0;
-    transition: max-height 0.6s, opacity 0.6s, visiblity 0.6s ease;
+    transition: max-height 0.6s, visiblity 0.3s ease;
+
+    background-color: var(--background-secondary);
 }
 
 .input-dropdown-content--expanded {
@@ -72,7 +94,7 @@
     height: auto;
     max-height: 800px;
     visibility: 1;
-    transition: max-height 0.6s, opacity 0.6s, visibility 0.6s ease;
+    transition: max-height 0.6s, visibility 0.3s ease;
 }
 
 .input-dropdown__section {

@@ -8,8 +8,7 @@
 
 /* Label */
 .input-switch__label {
-    font-size: 0.8rem;
-    font-weight: normal;
+    font-size: 1.0em;
     padding: 0rem;
     margin: 0rem;
     color: var(--foreground);

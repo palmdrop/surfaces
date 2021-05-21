@@ -1,0 +1,36 @@
+.arrow-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.arrow {
+    border: solid white;
+    border-width: 0 2px 2px 0;
+    display: inline-block;
+    margin: 0.5em;
+
+    transition: 0.5s;
+
+}
+
+.arrow--left {
+    transform: rotate(135deg);
+    -webkit-transform: rotate(135deg);
+}
+.arrow--right {
+    transform: rotate(-45deg);
+    -webkit-transform: rotate(-45deg);
+}
+.arrow--up {
+    transform: rotate(-135deg) translate(0px,10px);
+    -webkit-transform: rotate(-135deg);
+    margin-top: 0.45em;
+    margin-bottom: 0.35em;
+}
+.arrow--down {
+    transform: rotate(45deg);
+    -webkit-transform: rotate(45deg);
+    margin-top: 0.15em;
+    margin-bottom: 0.65em;
+}

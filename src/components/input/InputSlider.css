@@ -1,15 +1,27 @@
 /* General */
 .input-slider {
     padding: 0rem 0rem;
+    margin: 0rem;
+}
+
+.input-slider__header {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+}
+
+.input-slider__value {
+    padding: 0rem 0.1rem;
+    color: var(--foreground-dim);
 }
 
 /* Label */
 .input-slider__label {
-    font-size: 0.8rem;
-    font-weight: normal;
+    font-size: 1.0em;
     padding: 0rem;
     margin: 0rem;
     color: var(--foreground);
+    margin: 0rem;
 }
 
 /* All input */
@@ -18,22 +30,24 @@
     display: flex;
     flex-direction: row;
     justify-content: space-around;
+    margin: 0rem;
 }
 
 .input-slider__slider {
     flex-grow: 100;
+    margin: 0rem;
 }
 
 
 /* Slider */
 .MuiSlider {
     size: 0.5rem;
-    padding: 1rem;
+    padding: 0rem;
 }
 
 .MuiSlider-root {
     size: 0.5rem;
-    padding: 0px 0;
+    padding: 0rem;
     margin: 0rem;
 }
 
@@ -48,8 +62,8 @@
 }
 
 .MuiSlider-thumb {
-    width: 0.1rem;
-    height: 0.1rem;
+    width: 0.2rem;
+    height: 0.2rem;
     color: var(--foreground);
     padding: 0px 0;
 }
