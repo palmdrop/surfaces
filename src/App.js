@@ -34,8 +34,6 @@ const App = (props) => {
 
   const [helpVisible, setHelpVisible] = useState(false);
   const [dataViewerVisible, setDataViewerVisible] = useState(false); // If true, a popup with render information will be displayed
-  // A reducer used to force update the panel (required when the settings are changed outside the panel)
-  const [, refreshPanel] = useReducer(x => x + 1, 0);
 
   ////////////////////
   // EVENT HANDLERS //
@@ -306,13 +304,13 @@ const App = (props) => {
         throw new Error("Warp controlleer failed to intiialize");
       }
 
+      //WAC.setUpdateCallback("TXC", "scale", (name, location, value) => console.log(value));
+
       WAC.start((delta) => {
         executeHeldActions();
         setFrameRate(WAC.getFrameRate());
       });
     }
-
-    
 
     //return () => AM.stop();
     //TODO this hook runs too often... how to fix?
@@ -436,12 +434,6 @@ const App = (props) => {
     />
   );
 
-  const renderChildren = [
-    captureButton,
-    pauseButton,
-    recordButton
-  ];
-
   const separator = (
     <div className="separator-container">
       <span className="separator">|</span>
@@ -459,6 +451,7 @@ const App = (props) => {
         getter: (name) => WAC.getValue(controller, name),
         setter: (name, value) => WAC.updateValue(controller, name, value),
         default: (name) => WAC.getDefault(controller, name),
+        controller: controller,
         separator: ".",
         before: before,
         after: after
@@ -659,73 +652,6 @@ const App = (props) => {
           />
           : ""
         }
-        {/* 
-        <PanelController
-          panels={[
-            {
-              name: "Texture",
-              content: textureControlPanel
-            },
-            {
-              name: "Color",
-              content: colorControlPanel
-            },
-            {
-              name: "Render",
-              content: renderControlPanel
-            }
-          ]}
-        >
-          <div className="settings__hide-data-viewer-button-container button-container">
-            <button 
-              className={"button settings__hide-data-viewer-button-container__button" + (!dataViewerVisible ? " active" : "")} 
-              onClick={handleDataViewerHide}>
-                {dataViewerVisible ? "Hide data viewer" : "Unhide data viewer"}
-            </button>
-          </div>
-
-          <div className="settings__import-export-container">
-
-            <div className="button-container settings__export-button-container">
-              <button className="button settings__export-button-container__button" onClick={handleSettingsDownload}>Export</button>
-            </div>
-
-            <div className="button-container settings__import-button-container">
-              <button className="button settings__import-button-container__button" onClick={handleSettingsImport}>Import</button>
-              <input 
-                ref={fileInputRef} 
-                type="file" 
-                style={{ display: "none" }}
-                onChange={handleInputChange}
-                accept="application/JSON"
-              />
-            </div>
-          </div>
-
-          <div className="button-container settings__pause-button-container">
-            <button 
-              className={"button settings__pause-button-container__button" + (paused ? " active " : "")}
-              onClick={togglePause}>{paused ? "Unpause" : "Pause" }</button>
-          </div>
-
-          <div className="settings__randomize-button-container button-container">
-            <button 
-              className={"button settings__randomize-button-container__button"} 
-              onClick={randomize}>
-                Randomize
-            </button>
-          </div>
-
-          <div className="settings__help-button-container button-container">
-            <button 
-              className={"button settings__help-button-container__button" + (helpVisible ? " active " : "")} 
-              onClick={toggleHelp}>
-                Help
-            </button>
-          </div>
-        </PanelController>
-        */}
-
       </div>
   )
 }

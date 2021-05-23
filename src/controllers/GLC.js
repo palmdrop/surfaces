@@ -9,7 +9,7 @@ class GLController {
         this.initialized = false;
 
         // Map for storing uniform locations
-        this.uniformLocations = new Map();
+        this.uniformLocations = new WeakMap();
 
         // Extensions
         this.EXT_color_buffer_float = null; // For rendering to float textures

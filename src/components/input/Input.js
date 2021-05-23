@@ -1,18 +1,28 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 
 import InputSlider from './InputSlider'
 import InputSwitch from './InputSwitch'
 import { camelToTitle } from '../../tools/Utils'
 
 import './Input.css'
+import WAC from '../../controllers/warp/WarpAppController'
 
 const Input = ({ categoryData, attribute, fullName, precision }) => {
+    const [refresh, forceRefresh] = useState(false);
+
+    useEffect(() => {
+        WAC.setUpdateCallback(categoryData.controller, fullName, () => {
+            forceRefresh(!refresh);
+        });
+    }, [refresh])
+
+
+    const getter = categoryData.getter;
+    const setter = categoryData.setter;
+    const defaults = categoryData.default;
+
     // Sets up a single slider 
     const createSlider = (attribute, name, fullName) => {
-        const getter = categoryData.getter;
-        const setter = categoryData.setter;
-        const defaults = categoryData.default;
-
         return (<InputSlider
             key={fullName}
             label={camelToTitle(name)}
@@ -37,8 +47,6 @@ const Input = ({ categoryData, attribute, fullName, precision }) => {
 
     // Sets up a single switch
     const createSwitch = (name, fullName) => {
-        const getter = categoryData.getter;
-        const setter = categoryData.setter;
         return (
             <InputSwitch 
                 key={fullName}

@@ -53,6 +53,8 @@ class WarpAppController {
             CC:  this.CC
         }; 
 
+        this.updateCallbacks = new Map();
+
         // Will be called when any of the attributes are updated
         this.onUpdate = null;
     }
@@ -374,12 +376,23 @@ class WarpAppController {
 
         this.onUpdate && this.onUpdate();
 
-        return this._getController(controllerName).updateValue(location, value);
+        const result = this._getController(controllerName).updateValue(location, value);
+
+        const key = controllerName + ":" + location;
+        const callback = this.updateCallbacks.get(key);
+        if(callback) callback(controllerName, location, value);
+
+        return result;
     }
 
     setPaused(paused) {
         this.paused = paused;
         this.TXC.setPaused(this.paused);
+    }
+
+    setUpdateCallback(controllerName, location, callback) {
+        const key = controllerName + ":" + location;
+        this.updateCallbacks.set(key, callback)
     }
 
     //////////
