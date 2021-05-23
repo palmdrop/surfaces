@@ -8,34 +8,22 @@ import Input from '../input/Input'
 import './CategorySettings.css'
 import InputDropdown from './InputDropdown'
 
-const CategorySettings = () => {
-    const [activeCategory, categoryData] = useControlPanelContext();
-    const [mounted, setMounted] = useState(false);
+const CategorySettings = ( { name, data }) => {
+    const [activeCategory, ] = useControlPanelContext();
+    //const [mounted, setMounted] = useState(false);
     const precision = 3;
-
-    useEffect(() => {
-        setTimeout(() => {
-            setMounted(true);
-        }, 0);
-
-        return () => {
-            setTimeout(() => {
-                setMounted(false);
-            }, 0);
-        }
-    }, []);
 
     const createMainSettings = () => {
         return (
             <div className="category-settings__main-container">
                 <div className="category-settings__main-entries">
-                    {forEachProperty(categoryData.attributes, (name, attribute, index) => {
+                    {forEachProperty(data.attributes, (name, attribute, index) => {
                         return isObject(attribute.value) ? null : (
                         <div key={index}
                             className="category-settings__main-entry"
                         >
                             <Input
-                                categoryData={categoryData}
+                                categoryData={data}
                                 attribute={attribute}
                                 fullName={name}
                                 precision={precision}
@@ -48,7 +36,7 @@ const CategorySettings = () => {
     };
 
     const createSecondarySettings = () => {
-        return forEachProperty(categoryData.attributes, (name, attribute, index) => {
+        return forEachProperty(data.attributes, (name, attribute, index) => {
             if (isObject(attribute.value)) {
                 return (
                     <div 
@@ -56,7 +44,7 @@ const CategorySettings = () => {
                         key={index}
                     >
                         <InputDropdown 
-                            categoryData={categoryData}
+                            categoryData={data}
                             attribute={attribute.value}
                             name={name}
                             parentName={name}
@@ -69,12 +57,13 @@ const CategorySettings = () => {
     };
 
 
-    return ( activeCategory ? 
-            <div className={"category-settings" + (mounted ? " mounted" : "")}>
-                {createMainSettings()}
-                {createSecondarySettings()}
-            </div>
-        : null 
+    return (
+        <div className={"category-settings" + (name === activeCategory ? " category-settings--active" : "")}>
+            {data.before}
+            {createMainSettings()}
+            {createSecondarySettings()}
+            {data.after}
+        </div>
     )
 }
 

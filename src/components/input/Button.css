@@ -1,0 +1,43 @@
+.button-container {
+    padding: 0.3rem 0.3rem;
+}
+
+.button-container:hover {
+}
+
+.button-container--active {
+}
+
+.button-container--active:hover {
+    filter: brightness(120%);
+}
+
+.button {
+    width: 100%;
+    font-size: 0.9em;
+    border-width: 0px;
+    color: var(--foreground);
+    background-color: var(--background-secondary);
+    font-family: var(--bold-font);
+    padding: 0.5rem 0.85rem;
+
+    transition: 0.5s;
+
+    box-shadow: var(--box-shadow);
+
+    cursor: pointer;
+
+    border-radius: 5px;
+}
+
+.button:hover {
+    background-color: var(--background-highlight);
+}
+
+.button--active {
+    background-color: var(--background-bright);
+}
+
+.button--active:hover {
+    filter: brightness(120%);
+}

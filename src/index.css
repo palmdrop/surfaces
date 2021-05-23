@@ -21,14 +21,16 @@
   --alert: #701010;
   --alert-bright: #FF0000;
 
+  --box-shadow: 0 4px 8px 0 rgba(0,0,0,0.4);
+
   /* Button colors */
   --button-border-color: #cecece;
   --button-hover-color: #4CAF50;
   --button-active-color: #2CAFFF;
 
   /* Misc styling */
-  --border-width: 3px;
-  --border-radius: 15px;
+  --border-width: 2.5px;
+  --border-radius: 10px;
 
   /* Animation */
   --on-hover-speed: 0.3s;
@@ -36,9 +38,10 @@
 
   /* Pages */
   --help-page-width: calc(min(50%, 40em));
-  --navbar-height: 3vh;
 
-  --sidebar-width: 18em;
+  --topbar-height: 3em;
+
+  --sidebar-width: 16.5em;
   --sidebar-category-width: 3.2em;
 
   /* Fonts */

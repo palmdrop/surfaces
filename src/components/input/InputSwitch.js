@@ -40,7 +40,8 @@ const InputSlider = ({ label, valueGetter, onChange, fullName }) => {
                 name={fullName}
                 checked={state ? true : false}
                 onChange={handleChange}
-                size="small"
+                size={"small"}
+                color={"primary"}
             />
         </div>
     )

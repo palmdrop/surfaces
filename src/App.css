@@ -4,13 +4,13 @@
 .data-tooltip {
     position: absolute;
     background-color: var(--transparent-background);
-    padding: 0.2h 0.2vh;
+    padding: 0.2vh 0.2vh;
 
     right: 0;
     bottom: 0
 }
 
-.button {
+/*.button {
     width: 100%;
     font-size: 1.0rem;
     background-color: transparent;
@@ -29,7 +29,8 @@
     color: var(--background);
     background-color: var(--button-active-color);
     border: var(--border-width) solid var(--button-active-color);
-}
+}*/
+
 .settings-hidden {
     transform: translateX(-100%);
 }

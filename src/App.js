@@ -15,6 +15,7 @@ import HelpPage from './pages/HelpPage'
 //import { TextureController } from './controllers/warp/TextureController'
 //import CategoryBar from './components/control/CategoryBar'
 import ControlPanel from './components/control/ControlPanel'
+import Button from './components/input/Button';
 
 const App = (props) => {
   ////////////////
@@ -29,11 +30,10 @@ const App = (props) => {
   const [, setOnPressed, setOnHeld, executeHeldActions] = useKeyboardInput(); // Custom hook for handling keyboard input
 
   const [paused, setPaused] = useState(false); // Pauses/unpauses the animation
-  const [recording, setRecording] = useState(false); // True if recording
   const [frameRate, setFrameRate] = useState(0);
 
   const [helpVisible, setHelpVisible] = useState(false);
-  const [dataViewerVisible, setDataViewerVisible] = useState(true); // If true, a popup with render information will be displayed
+  const [dataViewerVisible, setDataViewerVisible] = useState(false); // If true, a popup with render information will be displayed
   // A reducer used to force update the panel (required when the settings are changed outside the panel)
   const [, refreshPanel] = useReducer(x => x + 1, 0);
 
@@ -46,8 +46,8 @@ const App = (props) => {
   // Pauses the animation entirely (same effect as setting the general animation speed to 0.0)
   const togglePause = (e) => {
     if(e) e.currentTarget.blur();
-    WAC.togglePause();
-    setPaused(WAC.isPaused());
+    WAC.setPaused(!paused);
+    setPaused(!paused);
   };
 
   const changeAnimationSpeed = (delta) => {
@@ -63,14 +63,12 @@ const App = (props) => {
     WAC.randomize();
   }
 
-  const handleRecording = (e) => {
+  const handleRecording = (e, recording) => {
     if(e) e.currentTarget.blur();
     if(recording) {
-      WAC.stopRecording();
-      setRecording(false);
-    } else {
       WAC.startRecording(60);
-      setRecording(true);
+    } else {
+      WAC.stopRecording();
     }
   }
 
@@ -367,86 +365,133 @@ const App = (props) => {
     };
   });
 
-  // CONTROL PANELS
-  /*const textureControlPanel = (
-    !WAC.isInitialized() ? "" : // Only form if the warp controller is initialized
+  const captureButton = (
+    <Button
+      name={"Capture Frame"}
+      onClick={handleCanvasDownload}
+    />
+  );
+  
+  const pauseButton = (
+    <Button
+      name={"Pause"}
+      activeName={"Unpause"}
+      onClick={togglePause}
+      state={paused}
+    />
+  )
 
-    <div 
-      className={"settings"}
-      ref={settingsRef}
-    > 
-      <ControlPanel 
-        attributes={WAC.getAttributes("TXC")}
-        getter={(name) => WAC.getValue("TXC", name)}
-        setter={(name, value) => WAC.updateValue("TXC", name, value)}
-        defaults={(name) => WAC.getDefault("TXC", name)}
-        separator={"."}
-      />
-    </div> 
+  const recordButton = (
+    <Button 
+      name={"Record"}
+      activeName={"Stop recording"}
+      onClick={handleRecording}
+    />
   );
 
-  const colorControlPanel = (
-    !WAC.isInitialized() ? "" : // Only form if the warp controller is initialized
-
-    <div 
-      className={"settings"}
-    > 
-      <ControlPanel 
-        attributes={WAC.getAttributes("CC")}
-        getter={(name) => WAC.getValue("CC", name)}
-        setter={(name, value) => WAC.updateValue("CC", name, value)}
-        defaults={(name) => WAC.getDefault("CC", name)}
-        separator={"."}
-      />
-    </div>
-  );
-
-  const renderControlPanel = (
-    !WAC.isInitialized() ? "" :
-    <div
-      className={"settings"}
+  const importButton = (
+    <Button
+      name={"Import"}
+      onClick={handleSettingsImport}
     >
-      <ControlPanel 
-        attributes={WAC.getAttributes("RC")}
-        getter={(name) => WAC.getValue("RC", name)}
-        setter={(name, value) => WAC.updateValue("RC", name, value)}
-        defaults={(name) => WAC.getDefault("RC", name)}
-        separator={"."}
+      <input 
+        ref={fileInputRef} 
+        type="file" 
+        style={{ display: "none" }}
+        onChange={handleInputChange}
+        accept="application/JSON"
       />
+    </Button>
+  );
 
-      <div className="settings__record-button-container button-container">
-        <button 
-          className={"button settings__record-button-container__button" + (recording ? " active" : "")} 
-          onClick={handleRecording}>
-            {!recording ? "Record" : "Stop recording"}
-        </button>
-      </div>
+  const exportButton = (
+    <Button
+      name={"Export"}
+      onClick={handleSettingsDownload}
+    />
+  );
+
+  const randomizeButton = (
+    <Button
+      name={"Randomize"}
+      onClick={randomize}
+    />
+  );
+
+  const helpButton = (
+    <Button
+      name={"?"}
+      activeName={"?"}
+      onClick={toggleHelp}
+      state={helpVisible}
+      radius={35}
+    />
+  );
+  
+  const tooltipButton = (
+    <Button
+      name="Show Tooltip"
+      activeName="Hide Tooltip"
+      onClick={handleDataViewerHide}
+    />
+  );
+
+  const renderChildren = [
+    captureButton,
+    pauseButton,
+    recordButton
+  ];
+
+  const separator = (
+    <div className="separator-container">
+      <span className="separator">|</span>
     </div>
-  );*/
+  );
 
   //////////
   // BODY //
   //////////
 
   const createSidebarCategories = () => {
-    const createCategory = (controller) => {
+    const createCategory = (controller, before, after) => {
       return {
         attributes: WAC.getAttributes(controller),
         getter: (name) => WAC.getValue(controller, name),
         setter: (name, value) => WAC.updateValue(controller, name, value),
         default: (name) => WAC.getDefault(controller, name),
-        separator: "."
+        separator: ".",
+        before: before,
+        after: after
       }
     };
 
     return {
       texture: createCategory("TXC"),
       color: createCategory("CC"),
-      render: createCategory("RC"),
+      render: createCategory("RC", null, [captureButton, pauseButton, recordButton]),
     }
   };
 
-  console.log("test");
+
+  const topbarComponents = {
+    left: [
+      helpButton,
+      separator,
+      captureButton,
+      pauseButton, 
+    ],
+    center: [
+      randomizeButton,
+      separator,
+      <div className="button-group">
+        {importButton}
+        {exportButton}
+      </div>,
+    ],
+    right: [
+      tooltipButton
+    ]
+  }
 
   return (
       /* Root container */
@@ -455,6 +500,7 @@ const App = (props) => {
 
           <ControlPanel
             categories={createSidebarCategories()}
+            topbar={topbarComponents}
           >
 
           </ControlPanel>
@@ -636,10 +682,6 @@ const App = (props) => {
               onClick={handleDataViewerHide}>
                 {dataViewerVisible ? "Hide data viewer" : "Unhide data viewer"}
             </button>
-          </div>
-
-          <div className="button-container settings__capture-button-container">
-            <button className="button settings__capture-button-container__button" onClick={handleCanvasDownload}>Capture frame</button>
           </div>
 
           <div className="settings__import-export-container">

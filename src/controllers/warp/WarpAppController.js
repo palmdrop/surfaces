@@ -180,8 +180,8 @@ class WarpAppController {
     ///////////////////
     // STATE CONTROL //
     ///////////////////
-    togglePause() {
-        this.setPaused(!this.paused);
+    setPaused(paused) {
+        this.setPaused(paused);
     }
 
     changeAnimationSpeed(delta) {

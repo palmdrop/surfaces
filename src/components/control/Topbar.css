@@ -1,0 +1,54 @@
+.topbar {
+    position: absolute;
+    left: 0;
+    height: var(--topbar-height);
+    width: 100%;
+
+    background-color: var(--background);
+
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+}
+
+.left-container {
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+    justify-content: left;
+    padding-left: 0.1rem;
+}
+
+.center-container {
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+    justify-content: center;
+}
+
+.right-container {
+    display: flex;
+    flex-direction: row;
+    justify-content: right;
+    width: 100%;
+
+    padding-right: 0.2rem;
+}
+
+.button-group {
+    display: flex;
+    flex-direction: row;
+}
+
+.separator-container {
+    color: var(--foreground-faded);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+    align-items: center;
+}
+
+.separator {
+    font-size: 2rem;
+    padding-bottom: 0.5rem;
+}

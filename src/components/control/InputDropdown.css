@@ -6,7 +6,7 @@
     transition: 0.3s;
     -ms-transition: 0.3s;
     border: var(--border-width) solid var(--background-secondary);
-    box-shadow: 0 4px 8px 0 rgba(0,0,0,0.4);
+    box-shadow: var(--box-shadow);
 }
 
 .input-dropdown-container:hover {

@@ -30,7 +30,11 @@ a:hover {
     margin: -1rem 0 0 -1rem;
 
     filter: drop-shadow(10px, 10px, 20px, var(--foreground));
-    box-shadow: 7px 7px var(--transparent-shadow);
+    /*box-shadow: 7px 7px var(--transparent-shadow);
+    */
+    box-shadow: var(--box-shadow);
+
+    font-family: var(--normal-font);
 }
 
 .help-page__content {
@@ -103,7 +107,8 @@ a:hover {
 .help-page__buttons {
     display: flex;
     flex-direction: row;
-    justify-content: space-evenly;
+    justify-content: space-around;
+    align-items: center;
     color: var(--foreground-dim);
     padding: 1.0rem 0rem 0rem 0rem;
 }
@@ -115,6 +120,11 @@ a:hover {
     border: 0px solid var(--foreground-dark);
     transition-duration: 0.3s;
     padding: 0.2rem;
+
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
 }
 
 .help-page__buttons__previous:hover {
