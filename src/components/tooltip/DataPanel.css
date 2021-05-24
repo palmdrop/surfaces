@@ -1,0 +1,12 @@
+.data-panel {
+    padding: 0.8rem;
+    margin: 0.5rem;
+    background-color: var(--background-highlight);
+    color: var(--foreground-dim);
+    font-family: var(--bold-font);
+    font-size: 0.8rem;
+}
+
+.data-panel__entry-container {
+    padding: 0.2rem 0.0rem;
+}

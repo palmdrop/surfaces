@@ -17,6 +17,8 @@ class RenderController extends AttributeController {
         this.resolution = 1.0;
 
         this.canvas = null;
+
+        this.resizeCallback = null;
         
         // Multisample handling
         this.multisamplingMultiplier = 2.0; 
@@ -140,12 +142,23 @@ class RenderController extends AttributeController {
         // Re-create the framebuffer and render texture to fit the new size
         if(forceFramebufferSetup || oldWidth !== newWidth || oldHeight !== newHeight || resolution !== this.previousResolution) {
             this._setupFramebuffer();
+            this.resizeCallback && this.resizeCallback(this.dimensions);
         }
     }
 
     handleResize() {
         if(!this.initialized) return;
         this._handleUpdate();
+    }
+
+    addResizeCallback(callback) {
+        callback(this.dimensions);
+
+        const previousCallback = this.resizeCallback;
+        this.resizeCallback = (dimensions) => {
+            previousCallback && previousCallback(dimensions);
+            callback(dimensions);
+        }
     }
 
     screenSpaceToViewSpace(position) {

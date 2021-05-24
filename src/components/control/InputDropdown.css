@@ -113,6 +113,7 @@
 .input-dropdown__section__title {
     font-family: 'Bungee', cursive;
     padding-bottom: 1.0rem;
+    text-align: center;
     background-color: var(--background-tertiary);
     color: var(--foreground-dim);
     margin: 0rem;

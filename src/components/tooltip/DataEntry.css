@@ -1,0 +1,14 @@
+.data-entry {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+
+}
+
+.data-entry__name {
+
+}
+
+.data-entry__value {
+
+}

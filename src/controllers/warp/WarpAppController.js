@@ -150,6 +150,14 @@ class WarpAppController {
         this.AM.start();
     }
 
+    addUpdateCallback(callback) {
+        const previousCallback = this.AM.callback;
+        this.AM.setCallback((delta) => {
+            callback(delta);
+            previousCallback(delta);
+        });
+    }
+
     // Stops the animation
     stop() {
         this.AM.stop();
@@ -171,6 +179,11 @@ class WarpAppController {
     // TODO allow passing custom dimensions
     handleResize() {
         this.RC.handleResize();
+        this.resizeCallback && this.resizeCallback(this.getDimensions());
+    }
+
+    addResizeCallback(callback) {
+        this.RC.addResizeCallback(callback);
     }
 
     // Capture the next frame

@@ -25,4 +25,8 @@ const forEachProperty = (object, func) => {
   ));
 };
 
-export { camelToTitle, isObject, forEachProperty, promptDownload, downloadJSON };
+const round = (value, precision) => {
+    return +value.toFixed(precision || 3);
+};
+
+export { camelToTitle, isObject, forEachProperty, round, promptDownload, downloadJSON };

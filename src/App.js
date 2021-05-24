@@ -4,18 +4,14 @@ import React, { useRef, useState, useEffect, useLayoutEffect, useReducer } from 
 
 import WAC from './controllers/warp/WarpAppController'
 
-import { downloadJSON, promptDownload } from './tools/Utils'
+import { downloadJSON, round, promptDownload } from './tools/Utils'
 import { useKeyboardInput } from './hooks/KeyboardInputHook'
 
 import './App.css';
-import DataViewer from './components/tooltip/DataViewer'
-//import PanelController from './components/panel/PanelController'
 import HelpPage from './pages/HelpPage'
-//import Sidebar from './components/navigation/Sidebar'
-//import { TextureController } from './controllers/warp/TextureController'
-//import CategoryBar from './components/control/CategoryBar'
 import ControlPanel from './components/control/ControlPanel'
 import Button from './components/input/Button';
+import DataPanel from './components/tooltip/DataPanel';
 
 const App = (props) => {
   ////////////////
@@ -27,13 +23,12 @@ const App = (props) => {
   ////////////
   // STATES //
   ////////////
+  const [, refresh] = useReducer(x => x + 1, 0);
+
   const [, setOnPressed, setOnHeld, executeHeldActions] = useKeyboardInput(); // Custom hook for handling keyboard input
 
   const [paused, setPaused] = useState(false); // Pauses/unpauses the animation
-  const [frameRate, setFrameRate] = useState(0);
-
   const [helpVisible, setHelpVisible] = useState(false);
-  const [dataViewerVisible, setDataViewerVisible] = useState(false); // If true, a popup with render information will be displayed
 
   ////////////////////
   // EVENT HANDLERS //
@@ -280,11 +275,6 @@ const App = (props) => {
     }
   };
 
-  const handleDataViewerHide = (event) => {
-    setDataViewerVisible(!dataViewerVisible);
-    event.currentTarget.blur();
-  }
-
   //////////////////
   // EFFECT HOOKS //
   //////////////////
@@ -297,19 +287,15 @@ const App = (props) => {
     if(!WAC.isInitialized()) {
       const canvas = canvasRef.current;
 
-      if(!WAC.initialize(canvas, 
-        //() => refreshPanel()
-        null
-        )) {
+      if(!WAC.initialize(canvas, null)) {
         throw new Error("Warp controlleer failed to intiialize");
       }
 
-      //WAC.setUpdateCallback("TXC", "scale", (name, location, value) => console.log(value));
-
       WAC.start((delta) => {
         executeHeldActions();
-        setFrameRate(WAC.getFrameRate());
       });
+
+      refresh();
     }
 
     //return () => AM.stop();
@@ -430,7 +416,7 @@ const App = (props) => {
     <Button
       name="Show Tooltip"
       activeName="Hide Tooltip"
-      onClick={handleDataViewerHide}
+      onClick={null}
     />
   );
 
@@ -443,6 +429,38 @@ const App = (props) => {
   //////////
   // BODY //
   //////////
+
+  const dataPanel = () => {
+    const entries = {
+      frameRate: {
+        setterCallback: (setter) => {
+          WAC.addUpdateCallback(() => {
+            setter(WAC.getFrameRate());
+          });
+        }
+      },
+      avgFrameRate: {
+        setterCallback: (setter) => {
+          WAC.addUpdateCallback(() => {
+            setter(Math.round(WAC.getAverageFrameRate()));
+          });
+        }
+      },
+      dimensions: {
+        setterCallback: (setter) => {
+          WAC.addResizeCallback((dimensions) => {
+            setter(Math.round(dimensions[0]) + "x" + Math.round(dimensions[1]));
+          });
+        }
+      }
+    };
+
+    return (
+      <DataPanel
+        entries={entries}
+      />
+    )
+  }
 
   const createSidebarCategories = () => {
     const createCategory = (controller, before, after) => {
@@ -461,7 +479,9 @@ const App = (props) => {
     return {
       texture: createCategory("TXC"),
       color: createCategory("CC"),
-      render: createCategory("RC", null, [captureButton, pauseButton, recordButton]),
+      render: createCategory("RC", 
+        dataPanel(),
+        [captureButton, pauseButton, recordButton]),
     }
   };
 
@@ -482,7 +502,7 @@ const App = (props) => {
       </div>,
     ],
     right: [
-      tooltipButton
+      /*tooltipButton*/
     ]
   }
 
@@ -494,26 +514,7 @@ const App = (props) => {
           <ControlPanel
             categories={createSidebarCategories()}
             topbar={topbarComponents}
-          >
-
-          </ControlPanel>
-        }
-
-        { /* Data viewer */
-          dataViewerVisible ? (
-            <div className="data-tooltip">
-              <DataViewer 
-                frameRate={Math.round(frameRate)} 
-                averageFrameRate={Math.round(WAC.getAverageFrameRate())}
-                dimensions={
-                    Math.round(WAC.getDimensions()[0])
-                  + "x" 
-                  + Math.round(WAC.getDimensions()[1])
-                  + " px"}
-                multisampling={WAC.getValue("RC", "multisampling") ? "Enabled" : "Disabled"}
-              />
-            </div>
-            ) : ""
+          />
         }
 
         { /* Canvas for WebGL context */}

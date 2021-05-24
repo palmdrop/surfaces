@@ -1,13 +1,10 @@
 import React, { useRef, useEffect, useState } from 'react';
 import { Slider } from '@material-ui/core';
+import { round } from '../../tools/Utils'
 import './InputSlider.css';
 
 const InputSlider = ({ label, valueGetter, defaultValue, onChange, min, max, step, marks, precision, fullName }) => {
     const ref = useRef();
-
-    const round = (value) => {
-        return +value.toFixed(precision || 7);
-    };
 
     // Internal state to keep track of the value
     // This is required if the value getter method does not return a state, 

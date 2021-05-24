@@ -2,6 +2,8 @@
 .input-slider {
     padding: 0rem 0rem;
     margin: 0rem;
+
+    filter: saturate(0%);
 }
 
 .input-slider__header {
@@ -11,7 +13,7 @@
 }
 
 .input-slider__value {
-    padding: 0rem 0.1rem;
+    padding: 0rem 0.0rem;
     color: var(--foreground-dim);
 }
 
@@ -46,8 +48,7 @@
 }
 
 .MuiSlider-root {
-    size: 0.5rem;
-    padding: 0rem;
+    size: 0.2rem;
     margin: 0rem;
 }
 
@@ -62,8 +63,15 @@
 }
 
 .MuiSlider-thumb {
-    width: 0.2rem;
-    height: 0.2rem;
     color: var(--foreground);
     padding: 0px 0;
+}
+
+.MuSlider-thumb .MuiSlider-active {
+    background-color: #fff; 
+    border: 1px solid currentColor;
+    box-shadow: #ebebeb 0 2px 2px;
+}
+
+.Mui-focusVisible {
 }
