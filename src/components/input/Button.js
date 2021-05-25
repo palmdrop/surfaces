@@ -1,10 +1,12 @@
 
 import React, { useState, useEffect } from 'react'
+import { useUpdateHoverContext } from '../../context/ControlPanelContext';
 
 import './Button.css'
 
-const Button = ( {name, activeName, onClick, blurOnClick = true, state, radius, children } ) => {
+const Button = ( {name, activeName, onClick, blurOnClick = true, state, radius, description, children } ) => {
     const [active, setActive] = useState(false);
+    const updateHoverLocation = useUpdateHoverContext();
 
     useEffect(() => {
         if(typeof state !== "undefined") {
@@ -34,6 +36,7 @@ const Button = ( {name, activeName, onClick, blurOnClick = true, state, radius, 
         <div 
             className={getClasses("button-container")}
             onClick={handleClick}
+            onMouseOver={() => updateHoverLocation("button." + name, description)}
         >
             <button 
                 className={getClasses("button")}

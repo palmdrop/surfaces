@@ -5,13 +5,12 @@
 }
 
 .arrow {
-    border: solid white;
+    border: solid var(--foreground);
     border-width: 0 2px 2px 0;
     display: inline-block;
     margin: 0.5em;
-
+    padding: 4px;
     transition: 0.5s;
-
 }
 
 .arrow--left {

@@ -12,6 +12,7 @@ import HelpPage from './pages/HelpPage'
 import ControlPanel from './components/control/ControlPanel'
 import Button from './components/input/Button';
 import DataPanel from './components/tooltip/DataPanel';
+import Tooltip from './components/tooltip/Tooltip';
 
 const App = (props) => {
   ////////////////
@@ -29,6 +30,7 @@ const App = (props) => {
 
   const [paused, setPaused] = useState(false); // Pauses/unpauses the animation
   const [helpVisible, setHelpVisible] = useState(false);
+  const [tooltipsVisible, setTooltipsVisible] = useState(false);
 
   ////////////////////
   // EVENT HANDLERS //
@@ -38,7 +40,7 @@ const App = (props) => {
 
   // Pauses the animation entirely (same effect as setting the general animation speed to 0.0)
   const togglePause = (e) => {
-    if(e) e.currentTarget.blur();
+    if(e) e.target.blur();
     WAC.setPaused(!paused);
     setPaused(!paused);
   };
@@ -52,12 +54,13 @@ const App = (props) => {
   }
 
   const randomize = (e) => {
-    if(e) e.currentTarget.blur();
+    if(e) e.target.blur();
     WAC.randomize();
+    refresh();
   }
 
   const handleRecording = (e, recording) => {
-    if(e) e.currentTarget.blur();
+    if(e) e.target.blur();
     if(recording) {
       WAC.startRecording(60);
     } else {
@@ -66,7 +69,7 @@ const App = (props) => {
   }
 
   const toggleHelp = (e) => {
-    if(e) e.currentTarget.blur();
+    if(e) e.target.blur();
     const visible = !helpVisible;
     setHelpVisible(visible);
 
@@ -82,6 +85,11 @@ const App = (props) => {
       canvasRef.current.addEventListener("click", handleClose, true);
       window.addEventListener("keydown", handleClose);
     } 
+  }
+
+  const toggleTooltips = (e) => {
+    if(e) e.target.blur();
+    setTooltipsVisible(!tooltipsVisible);
   }
 
   // KEYBOARD INPUT
@@ -353,6 +361,7 @@ const App = (props) => {
     <Button
       name={"Capture Frame"}
       onClick={handleCanvasDownload}
+      description={"Save a single frame as a PNG image"}
     />
   );
   
@@ -362,6 +371,7 @@ const App = (props) => {
       activeName={"Unpause"}
       onClick={togglePause}
       state={paused}
+      description={"Pause the animation"}
     />
   )
 
@@ -370,6 +380,7 @@ const App = (props) => {
       name={"Record"}
       activeName={"Stop recording"}
       onClick={handleRecording}
+      description={"Record the animation (the recording will be a zipped archive of sequential PNG images"}
     />
   );
 
@@ -377,6 +388,7 @@ const App = (props) => {
     <Button
       name={"Import"}
       onClick={handleSettingsImport}
+      description={"Import an JSON file of settings"}
     >
       <input 
         ref={fileInputRef} 
@@ -392,6 +404,7 @@ const App = (props) => {
     <Button
       name={"Export"}
       onClick={handleSettingsDownload}
+      description={"Export a JSON file of the current settings"}
     />
   );
 
@@ -399,6 +412,7 @@ const App = (props) => {
     <Button
       name={"Randomize"}
       onClick={randomize}
+      description={"Randomize the settings"}
     />
   );
 
@@ -409,6 +423,7 @@ const App = (props) => {
       onClick={toggleHelp}
       state={helpVisible}
       radius={35}
+      description={"Display a help dialog with information about the application"}
     />
   );
   
@@ -416,7 +431,8 @@ const App = (props) => {
     <Button
       name="Show Tooltip"
       activeName="Hide Tooltip"
-      onClick={null}
+      onClick={toggleTooltips}
+      description={"Toggle tooltips"}
     />
   );
 
@@ -463,7 +479,7 @@ const App = (props) => {
   }
 
   const createSidebarCategories = () => {
-    const createCategory = (controller, before, after) => {
+    const createCategory = (controller, before, after, description) => {
       return {
         attributes: WAC.getAttributes(controller),
         getter: (name) => WAC.getValue(controller, name),
@@ -472,19 +488,22 @@ const App = (props) => {
         controller: controller,
         separator: ".",
         before: before,
-        after: after
+        after: after,
+
+        description: description
       }
     };
 
     return {
-      texture: createCategory("TXC"),
-      color: createCategory("CC"),
+      texture: createCategory("TXC", null, null, "Controls the overall shape/texture/pattern of the animation"),
+      color: createCategory("CC", null, null, "Controls color and the brightness"),
       render: createCategory("RC", 
         dataPanel(),
-        [captureButton, pauseButton, recordButton]),
+        [captureButton, pauseButton, recordButton],
+        "Controls resolution, multisampling, recording, etc"
+      ),
     }
   };
-
 
   const topbarComponents = {
     left: [
@@ -502,7 +521,7 @@ const App = (props) => {
       </div>,
     ],
     right: [
-      /*tooltipButton*/
+      tooltipButton
     ]
   }
 
@@ -514,6 +533,7 @@ const App = (props) => {
           <ControlPanel
             categories={createSidebarCategories()}
             topbar={topbarComponents}
+            showTooltip={tooltipsVisible}
           />
         }
 
@@ -522,8 +542,9 @@ const App = (props) => {
           className="canvas" 
           ref={canvasRef}
         />
-        { helpVisible ? 
+        { 
           <HelpPage 
+            visibility={helpVisible}
             descriptions={[
               {
                 title: "General",
@@ -651,7 +672,6 @@ const App = (props) => {
             ]}
             onCloseCallback={() => toggleHelp()}
           />
-          : ""
         }
       </div>
   )

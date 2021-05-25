@@ -1,14 +1,19 @@
-import React, { useState} from 'react'
+import React, { useState, useEffect } from 'react'
 
 import { camelToTitle } from '../tools/Utils'
+import Arrow from '../components/indicator/arrow/Arrow'
 
 import './HelpPage.css'
 
 // Help popup to display descriptions, keyboard shortcuts, contact/links and so on
-const HelpPage = ({descriptions, shortcuts, contact, onCloseCallback}) => {
+const HelpPage = ({descriptions, shortcuts, contact, visibility, onCloseCallback}) => {
     // The current visible stage
     const [currentPage, setCurrentPage] = useState(0);
     const max = 2; 
+
+    const handleClose = (e) => {
+        onCloseCallback(e);
+    };
 
     // Switch page in a specified direction 
     const handleContentSwitch = (direction) => {
@@ -138,7 +143,7 @@ const HelpPage = ({descriptions, shortcuts, contact, onCloseCallback}) => {
                     key={index}
                     className="contact-category"
                 >
-                    <h4 className="category-title">{category.title}</h4>
+                    <h4 className="contact-category__title">{category.title}</h4>
                     {
                         // Iterate over all category entries...
                         category.entries.map((entry, index) => {
@@ -176,11 +181,14 @@ const HelpPage = ({descriptions, shortcuts, contact, onCloseCallback}) => {
 
     // The entire help page modal
     return (
-        <div className="help-page">
+        <div 
+            className={"help-page" 
+                + (visibility ? " help-page--visible" : "")}
+        >
             { /* Close button */ }
             <button 
                 className="help-page__close-button" 
-                onClick={onCloseCallback}
+                onClick={handleClose}
             />
 
             { /* The current content */}
@@ -192,23 +200,32 @@ const HelpPage = ({descriptions, shortcuts, contact, onCloseCallback}) => {
             <nav className="help-page__buttons">
                 {/* Previous button */ }
                 <button 
-                    className="help-page__buttons__button help-page__buttons__previous"
+                    className={
+                        "help-page__buttons__button help-page__buttons__previous"
+                        + (currentPage === 0 ? " help-page__buttons__disabled" : "")
+                    }
                     onClick={() => handleContentSwitch(-1)}
                 >
-                    <i class="arrow left" />
-                    <span>Previous</span>
+                    <Arrow direction={"left"} />
+                    <Arrow direction={"left"} />
+                    <Arrow direction={"left"} />
+                   {/* <span>Previous</span>*/}
                 </button>
 
                 {/* Page indicator */ }
-                <div>({(currentPage + 1)}/3)</div>
+                <div className="help-page__side-number">{(currentPage + 1)}/3</div>
 
                 {/* Next button */ }
                 <button 
-                    className="help-page__buttons__button help-page__buttons__next"
+                    className={
+                        "help-page__buttons__button help-page__buttons__next"
+                        + (currentPage === max ? " help-page__buttons__disabled" : "")
+                    }
                     onClick={() => handleContentSwitch(+1)}
                 >
-                    <span>Next</span>
-                    <i class="arrow right" />
+                    <Arrow direction={"right"} />
+                    <Arrow direction={"right"} />
+                    <Arrow direction={"right"} />
                 </button>
             </nav>
         </div>

@@ -1,14 +1,15 @@
 
-import React, { useState, useContext } from 'react'
-import { useControlPanelContext, useControlPanelUpdateContext } from '../../context/ControlPanelContext';
+import React from 'react'
+import { useControlPanelContext, useControlPanelUpdateContext, useUpdateHoverContext } from '../../context/ControlPanelContext';
 
 import { forEachProperty, camelToTitle } from '../../tools/Utils'
 
 import './CategoryBar.css'
 
-const CategoryBar = ( {categories} ) => {
+const CategoryBar = ( { categories } ) => {
     const [activeCategory, ] = useControlPanelContext();
-    const [updateActiveCategory,] = useControlPanelUpdateContext();
+    const [updateActiveCategory] = useControlPanelUpdateContext();
+    const updateHoverLocation = useUpdateHoverContext();
 
     const handleClick = (e, category) => {
         if(e) e.currentTarget.blur();
@@ -19,12 +20,13 @@ const CategoryBar = ( {categories} ) => {
     return (
         <div className="category-bar">
         {
-            forEachProperty(categories, (category, _, index) => (
+            forEachProperty(categories, (category, data, index) => (
                 <div 
                     key={category + "." + index}
                     className={"category-bar__category-container" 
                     + (category === activeCategory ? " category-bar__category-container--active" : "")}
                     onClick={(e) => handleClick(e, category)}
+                    onMouseOver={() => updateHoverLocation(category, data.description)}
                 >
                     <div 
                         className={"category-bar__category"

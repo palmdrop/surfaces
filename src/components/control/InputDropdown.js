@@ -4,13 +4,15 @@ import React, { useState } from 'react'
 import { camelToTitle, forEachProperty, isObject } from '../../tools/Utils';
 
 import './InputDropdown.css'
-import UpDownArrow from '../indicator/arrow/UpDownArrow';
+import Arrow from '../indicator/arrow/Arrow';
+import { useUpdateHoverContext } from '../../context/ControlPanelContext';
 
 const InputDropdown = ( { categoryData, attribute, name, parentName, precision } ) => {
     const [expanded, setExpanded] = useState(false);
+    const updateHoverLocation = useUpdateHoverContext();
 
     const handleClick = (e) => {
-        if(e) e.currentTarget.blur();
+        if(e) e.target.blur();
         setExpanded(!expanded);
     };
 
@@ -19,19 +21,24 @@ const InputDropdown = ( { categoryData, attribute, name, parentName, precision }
              + (expanded ? (" " + baseClass + "--expanded") : "");
     }
 
-    const createSection = ( attribute, name, parentName, root ) => {
+    const createSection = (attribute, name, parentName, root ) => {
         return (
             <div className={"input-dropdown__section" + (root ? "" : "-sub")}>
                 {!root 
-                 ? <h4 className="input-dropdown__section__title">{camelToTitle(name)}</h4>
+                 ? <h4 
+                        className="input-dropdown__section__title"
+                        onMouseOver={() => updateHoverLocation(categoryData.controller + "." + parentName, attribute.description)}
+                   >
+                       {camelToTitle(name)}
+                   </h4>
                  : ""}
-                {forEachProperty(attribute, (name, child) => {
+                {forEachProperty(attribute.value, (name, child) => {
                     const fullName = (parentName ? (parentName + categoryData.separator) : "") + name;
 
                     if(isObject(child.value)) {
                         return (
                             <div>
-                                {createSection(child.value, name, fullName, false)}
+                                {createSection(child, name, fullName, false)}
                             </div>
                         )
                     }
@@ -40,6 +47,7 @@ const InputDropdown = ( { categoryData, attribute, name, parentName, precision }
                         <div 
                             className="input-dropdown__section__entry" 
                             key={fullName}
+                            onMouseOver={() => updateHoverLocation(categoryData.controller + "." + fullName, child.description)}
                         >
                             <Input
                                 categoryData={categoryData}
@@ -59,14 +67,15 @@ const InputDropdown = ( { categoryData, attribute, name, parentName, precision }
             <div 
                 className={getClasses("input-dropdown-header")}
                 onClick={handleClick}
+                onMouseOver={() => updateHoverLocation(categoryData.controller + "." + name, attribute.description)}
             >
                 <h3 className={getClasses("input-dropdown-title")}>
                     {camelToTitle(name)}
                 </h3>
-                <UpDownArrow direction={expanded ? "up" : "down"} />
+                <Arrow direction={expanded ? "up" : "down"} />
             </div>
             <div className={getClasses("input-dropdown-content")}>
-                {createSection( attribute, null, parentName, true)}
+                {createSection(attribute, null, parentName, true)}
             </div>
         </div>
     )

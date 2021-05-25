@@ -1,7 +1,7 @@
 
 a {
     color: var(--foreground);
-    border-bottom: dashed 1px var(--foreground);
+    border-bottom: solid 1px var(--foreground);
     text-decoration: none;
 }
 
@@ -30,11 +30,22 @@ a:hover {
     margin: -1rem 0 0 -1rem;
 
     filter: drop-shadow(10px, 10px, 20px, var(--foreground));
-    /*box-shadow: 7px 7px var(--transparent-shadow);
+    
+    /*box-shadow: var(--box-shadow);
     */
-    box-shadow: var(--box-shadow);
+    box-shadow: 0px 0px 8px black;
 
     font-family: var(--normal-font);
+
+    transform: translateY(112%);
+    transition: 1s;
+
+    z-index: 1000;
+    overflow-y: hidden;
+}
+
+.help-page--visible {
+    transform: translateY(0%);
 }
 
 .help-page__content {
@@ -49,6 +60,7 @@ a:hover {
 
 .title {
     text-align: center;
+    font-family: var(--bold-font);
 }
 
 .shortcut__columns {
@@ -60,6 +72,9 @@ a:hover {
     justify-content: space-between;
     padding: 0.3rem;
     margin: 0.5rem 2rem;
+
+    text-transform: uppercase;
+    font-family: var(--bold-font);
 }
 
 
@@ -70,11 +85,12 @@ a:hover {
     padding: 0.3rem;
     margin: 0rem 2rem;
 
-    border-bottom: var(--border-width) dotted var(--foreground-dark);
+    border-bottom: var(--border-width) solid var(--foreground-dark);
 }
 
 .shortcut-entry__keys {
     padding: 0rem 30% 0rem 0rem;
+    font-family: var(--bold-font);
 }
 
 .shortcut-entry__description {
@@ -83,6 +99,16 @@ a:hover {
 
 .descriptions-entry {
     padding: 0.2rem 2rem;
+}
+
+.descriptions-entry__title {
+    font-family: var(--bold-font);
+    text-transform: uppercase;
+    color: var(--foreground-faded);
+}
+
+.descriptions-entry__content {
+
 }
 
 .help-page__content__contact {
@@ -95,12 +121,20 @@ a:hover {
     justify-content: space-between;
     padding: 0.3rem 0rem;
     margin: 0rem 0rem;
-    border-bottom: var(--border-width) dotted var(--foreground-dark);
+    border-bottom: var(--border-width) solid var(--foreground-dark);
 }
 
 .contact-category__entry__description {
     text-align: right;
     padding: 0rem 0rem 0rem 10%;
+}
+
+.contact-category__title {
+    margin-bottom: 0.5rem;
+    margin-top: 1.0rem;
+    text-transform: uppercase;
+    font-family: var(--bold-font);
+    color: var(--foreground-faded);
 }
 
 
@@ -114,26 +148,42 @@ a:hover {
 }
 
 .help-page__buttons__button {
+    width: 100%;
+
     font-size: 1.0rem;
     background-color: transparent;
     color: var(--foreground-dim);
     border: 0px solid var(--foreground-dark);
     transition-duration: 0.3s;
     padding: 0.2rem;
+    margin: 0.0rem 2.0rem;
+    border-radius: 5px;
 
     display: flex;
     flex-direction: row;
     justify-content: center;
     align-items: center;
+
+    cursor: pointer;
+}
+
+.help-page__buttons__button:hover {
+    color: var(--foreground-highlight);
+    background-color: var(--background-bright);
 }
 
 .help-page__buttons__previous:hover {
-    color: var(--foreground);
 }
 
 .help-page__buttons__next:hover {
     color: var(--foreground);
 }
+
+.help-page__buttons__disabled {
+    filter: brightness(40%);
+    cursor: initial;
+}
+
 
 .math {
     text-align: center;
@@ -141,49 +191,33 @@ a:hover {
     color: var(--foreground-accent);
 }
 
-.arrow {
-    border: solid #cecece;
-    border-width: 0 2px 2px 0;
-    display: inline-block;
-    padding: 4px;
-}
-
-
-.right {
-    transform: rotate(-45deg);
-    -webkit-transform: rotate(-45deg);
-}
-  
-.left {
-    transform: rotate(135deg);
-    -webkit-transform: rotate(135deg);
-}
-
 .help-page__close-button {
     border-radius: 50%;
-    border: var(--border-width) solid var(--alert);
+    border: var(--border-width) solid var(--foreground-faded);
     background-color: var(--background);
     padding: 0.5rem;
-    width: 15px;
-    height: 15px;
-    color: var(--alert-bright);
-    left: 96%;
-    position: relative
+    width: 22px;
+    height: 22px;
+    color: var(--foreground-dim);
+    left: 95%;
+    position: relative;
+
+    cursor: pointer;
+    transition: 0.5s;
 }
 
 .help-page__close-button:hover {
-    border: var(--border-width) solid var(--alert);
-    background-color: var(--alert-dim);
-    color: var(--foreground-highlight);
+    background-color: var(--background-secondary);
+    filter: brightness(120%);
 }
   
 .help-page__close-button::before {
     content: " ";
     position: absolute;
     display: block;
-    background-color: var(--alert);
+    background-color: var(--foreground-faded);
     width: 2px;
-    left: 6px;
+    left: 8px;
     top: 2.0px;
     bottom: 2.0px;
     transform: rotate(45deg);
@@ -192,10 +226,14 @@ a:hover {
     content: " ";
     position: absolute;
     display: block;
-    background-color: var(--alert);
+    background-color: var(--foreground-faded);
     height: 2px;
-    top: 6px;
+    top: 8px;
     left: 2.0px;
     right: 2.0px;
     transform: rotate(45deg);
+}
+
+.help-page__side-number {
+    color: var(--foreground-faded);
 }

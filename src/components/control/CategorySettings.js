@@ -1,7 +1,7 @@
 
-import React, { useState, useEffect } from 'react'
-import { useControlPanelContext } from '../../context/ControlPanelContext'
-import { forEachProperty, camelToTitle, isObject } from '../../tools/Utils'
+import React from 'react'
+import { useControlPanelContext, useUpdateHoverContext } from '../../context/ControlPanelContext'
+import { forEachProperty, isObject } from '../../tools/Utils'
 
 import Input from '../input/Input'
 
@@ -10,7 +10,7 @@ import InputDropdown from './InputDropdown'
 
 const CategorySettings = ( { name, data }) => {
     const [activeCategory, ] = useControlPanelContext();
-    //const [mounted, setMounted] = useState(false);
+    const updateHoverLocation = useUpdateHoverContext();
     const precision = 3;
 
     const createMainSettings = () => {
@@ -21,6 +21,7 @@ const CategorySettings = ( { name, data }) => {
                         return isObject(attribute.value) ? null : (
                         <div key={index}
                             className="category-settings__main-entry"
+                            onMouseOver={() => updateHoverLocation(data.controller + "." + name, attribute.description)}
                         >
                             <Input
                                 categoryData={data}
@@ -45,7 +46,7 @@ const CategorySettings = ( { name, data }) => {
                     >
                         <InputDropdown 
                             categoryData={data}
-                            attribute={attribute.value}
+                            attribute={attribute}
                             name={name}
                             parentName={name}
                             precision={precision}

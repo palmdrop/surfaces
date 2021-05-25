@@ -17,8 +17,9 @@
     -ms-user-select: none; /* IE10+/Edge */
     user-select: none; /* Standard */
 
-    border-right: var(--border-width) solid var(--background-bright);
+    /*border-right: var(--border-width) solid var(--background-bright);
     border-top: var(--border-width) solid var(--background-bright);
+    */
 
     z-index: 100;
 }
@@ -35,6 +36,8 @@
 
     transition: 0.5s;
     -webkit-transition: 0.5s;
+
+    cursor: pointer;
 }
 
 .category-bar__category-container:hover {

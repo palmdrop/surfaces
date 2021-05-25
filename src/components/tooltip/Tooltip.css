@@ -1,0 +1,33 @@
+.tooltip-container {
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    min-width: 200px;
+    max-width: calc(min(30vh, 300px));
+
+    background-color: var(--background);
+    padding: 1.0rem;
+    margin: 0.5rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+
+    border-radius: 5px;
+
+    box-shadow: 0px 0px 8px black;
+
+    z-index: 2000;
+}
+
+.tooltip__content {
+    color: var(--foreground);
+    font-family: var(--normal-font);
+}
+
+.tooltip__title {
+    margin: 0rem;
+    padding-bottom: 0.6rem;
+    color: var(--foreground);
+    font-family: var(--bold-font);
+}

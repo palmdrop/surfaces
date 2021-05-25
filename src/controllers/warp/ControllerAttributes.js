@@ -7,7 +7,7 @@ const randomElement = (array) => {
 }
 
 // Helper function for creating noise settings
-const noiseSettings = () => {
+const noiseSettings = (description) => {
     return {
         value: {
             frequency: {
@@ -16,6 +16,8 @@ const noiseSettings = () => {
                 min: 0.0000001,
                 max: 1.0000,
                 type: "1f",
+
+                description: "Speed of change across space"
             },
             octaves: {
                 value: randomElement([1, 3, 5]),
@@ -24,7 +26,9 @@ const noiseSettings = () => {
                 min: 1,
                 max: 5,
                 step: 2,
-                marks: [1, 3, 5]
+                marks: [1, 3, 5],
+
+                description: "Number of noise layers"
             },
             lacunarity: {
                 value: Math.random() * 4 + 1.0,
@@ -32,6 +36,8 @@ const noiseSettings = () => {
                 type: "1f",
                 min: 0.1,
                 max: 10.0,
+
+                description: "Frequency multiplier for each layer"
             },
             persistence: {
                 value: Math.random() * 0.3,
@@ -39,6 +45,8 @@ const noiseSettings = () => {
                 type: "1f",
                 min: 0.1,
                 max: 5.0,
+
+                description: "Amplitude multiplier for each layer"
             },
             amplitude: {
                 value: 1.0,
@@ -46,6 +54,8 @@ const noiseSettings = () => {
                 type: "1f",
                 min: 0.1,
                 max: 10.0,
+
+                description: "The strength (height) of the noise"
             },
             modifications: {
                 value: {
@@ -55,39 +65,51 @@ const noiseSettings = () => {
                         type: "1f",
                         min: 0.5,
                         max: 1.0,
+
+                        description: "Low values sharpens the peaks of the noise"
                     },
                     pow: {
                         value: Math.random() + 1.0,
                         default: 1.0,
                         type: "1f",
                         min: -1.0,
-                        max: 5
+                        max: 5,
+
+                        description: "Applies a power operator to the noise"
                     },
                     mod: {
                         value: 1.0,
                         default: 1.0,
                         type: "1f",
                         min: 1.0,
-                        max: 5
+                        max: 5,
+
+                        description: "Applies a modulus operator to the noise"
                     },
                     xStretch: {
                         value: 1.0,
                         default: 1.0,
                         type: "1f",
                         min: 0.001,
-                        max: 10
+                        max: 10,
+
+                        description: "Stretches the noise in the X direction"
                     },
                     yStretch: {
                         value: 1.0,
                         default: 1.0,
                         type: "1f",
                         min: 0.001,
-                        max: 10
+                        max: 10,
+
+                        description: "Stretches the noise in the Y direction"
                     },
                 },
+                description: "Various modifications that can be applied to the noise"
             }
         },
         isUniform: true,
+        description: description,
     }
 };
 
@@ -98,6 +120,8 @@ const timeSettings = (value, def = null) => {
         default: def || value,
         min: 0.0,
         max: 1,
+
+        description: "Alters the animation speed"
     }
 };
 
@@ -111,7 +135,9 @@ const getTextureAttributes = () => {
             type: "1f",
 
             min: 0.001,
-            max: 3
+            max: 3,
+
+            description: "Zooms the entire texture (can also be controlled using the mouse wheel)"
         },
         iterations: {
             value: randomElement([1, 2, 3, 4]),
@@ -121,6 +147,8 @@ const getTextureAttributes = () => {
 
             min: 0,
             max: 4,
+
+            description: "Number of domain warping steps/iterations"
         },
         warpAmount: {
             value: Math.random() * 2 + 0.5,
@@ -129,7 +157,9 @@ const getTextureAttributes = () => {
             type: "1f",
 
             min: 0.0,
-            max: 5
+            max: 5,
+
+            description: "Strength/amount of the domain warping effect"
         },
         animationSpeed: {
             value: {
@@ -138,12 +168,13 @@ const getTextureAttributes = () => {
                 angleControl: timeSettings(1.0),
                 amountControl: timeSettings(1.0)
             },
+            description: "Controllers for animation speed of the entire animation and the three layers separately",
             isUniform: false,
         },
 
-        source: noiseSettings(),
-        angleControl: noiseSettings(),
-        amountControl: noiseSettings()
+        source: noiseSettings("Noise controller for the source pattern: the domain warp effect is applied to this noise"),
+        angleControl: noiseSettings("Noise controller for angle pattern: this controls the angle/rotation of the domain warp at a given point"),
+        amountControl: noiseSettings("Noise controller for amount pattern: this controls the intensity of the domain warp at a given point")
     };
 }
 
@@ -151,7 +182,7 @@ const getTextureAttributes = () => {
 // COLOR //
 ///////////
 
-const componentController = (source, angle, amount, defaults=[1.0, 1.0, 1.0]) => {
+const componentController = (source, angle, amount, description, defaults=[1.0, 1.0, 1.0]) => {
     return {
         value: {
             mult: {
@@ -160,6 +191,8 @@ const componentController = (source, angle, amount, defaults=[1.0, 1.0, 1.0]) =>
                 type: "1i",
                 min: 0,
                 max: 1,
+
+                description: "If activated, the three components will be multiplied together instead of summed"
             },
             source: {
                 value: source,
@@ -167,6 +200,8 @@ const componentController = (source, angle, amount, defaults=[1.0, 1.0, 1.0]) =>
                 type: "1f",
                 min: -1,
                 max: 1,
+
+                description: "The influence of the source pattern"
             },
             angle: {
                 value: angle,
@@ -174,6 +209,7 @@ const componentController = (source, angle, amount, defaults=[1.0, 1.0, 1.0]) =>
                 type: "1f",
                 min: -1,
                 max: 1,
+                description: "The influence of the angle pattern"
             },
             amount: {
                 value: amount,
@@ -181,8 +217,10 @@ const componentController = (source, angle, amount, defaults=[1.0, 1.0, 1.0]) =>
                 type: "1f",
                 min: -1,
                 max: 1,
+                description: "The influence of the amount pattern"
             }
         },
+        description: description,
         isUniform: true
     };
 };
@@ -196,17 +234,10 @@ const getColorAttributes = () => {
             type: "1f",
 
             min: 0.001,
-            max: 10
-        },
-        /*ditheringAmount: {
-            value: 1.0 / 255.0,
-            default: 1.0 / 255.0,
-            isUniform: true,
-            type: "1f",
+            max: 10,
 
-            min: 0.0,
-            max: 0.2 
-        },*/
+            description: "Applies the power operator to the brightness of the color"
+        },
         general: {
             value: {
                 hue: {
@@ -215,7 +246,9 @@ const getColorAttributes = () => {
                     type: "1f",
 
                     min: -0.5,
-                    max: 0.5
+                    max: 0.5,
+
+                    description: "Hue shift of the output color"
                 },
                 saturation: {
                     value: 0.7,
@@ -224,7 +257,9 @@ const getColorAttributes = () => {
                     type: "1f",
 
                     min: 0.001,
-                    max: 10
+                    max: 10,
+
+                    description: "Saturation of the output color"
                 },
                 brightness: {
                     value: 1.0,
@@ -233,7 +268,9 @@ const getColorAttributes = () => {
                     type: "1f",
 
                     min: 0.001,
-                    max: 4
+                    max: 4,
+
+                    description: "Brightness of the output color"
                 },
                 red: {
                     value: 1.0,
@@ -242,7 +279,8 @@ const getColorAttributes = () => {
                     type: "1f",
 
                     min: 0.001,
-                    max: 4
+                    max: 4,
+                    description: "Multiplier applied to the red channel of the output color"
                 },
                 green: {
                     value: 1.0,
@@ -251,7 +289,8 @@ const getColorAttributes = () => {
                     type: "1f",
 
                     min: 0.001,
-                    max: 4
+                    max: 4,
+                    description: "Multiplier applied to the green channel of the output color"
                 },
                 blue: {
                     value: 1.0,
@@ -260,16 +299,21 @@ const getColorAttributes = () => {
                     type: "1f",
 
                     min: 0.001,
-                    max: 4
+                    max: 4,
+                    description: "Multiplier applied to the blue channel of the output color"
                 }
             },
+            description: "General color settings",
             isUniform: true
         },
         hueController:        componentController(2.0 * Math.random() - 1.0, 2.0 * Math.random() - 1.0, 2.0 * Math.random() - 1.0,
+                                                  "Controls how the three layers influence the hue of the output color",
                                                  [1.0, 1.0, 0.0]),
         saturationController: componentController(1.0 * Math.random(), 1.0 * Math.random(), 1.0 * Math.random(),
+                                                  "Controls how the three layers influence the saturation of the output color",
                                                  [0.0, 1.0, -0.5]),
         brightnessController: componentController(1.0, 0.0, 0.0,
+                                                  "Controls how the three layers influence the brightness of the output color",
                                                  [1.0, 0.0, 0.0]),
     }
 };
@@ -287,7 +331,9 @@ const getRenderAttributes = () => {
             type: "1f",
 
             min: 0.1,
-            max: 3
+            max: 3,
+
+            description: "Multiplier for the width and height of the canvas"
         },
         ditheringAmount: {
             value: 1.0 / 255.0,
@@ -295,7 +341,8 @@ const getRenderAttributes = () => {
             isUniform: false,
 
             min: 0.0,
-            max: 0.2 
+            max: 0.2,
+            description: "Applies dithering (blue noise) to the final color"
         },
         multisampling: {
             value: 0,
@@ -304,7 +351,9 @@ const getRenderAttributes = () => {
             type: "1i",
 
             min: 0,
-            max: 1
+            max: 1,
+
+            description: "Activates multisampling: will use four samples per pixel instead of one, to reduce anti-aliasing"
         },
     }
 }

@@ -1,6 +1,6 @@
 import React from 'react'
 
-import './UpDownArrow.css'
+import './Arrow.css'
 
 const UpDownArrow = ( { direction }) => {
     return (

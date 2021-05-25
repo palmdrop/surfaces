@@ -8,8 +8,9 @@ import { ControlPanelContextProvider } from '../../context/ControlPanelContext'
 import './ControlPanel.css'
 import { forEachProperty } from '../../tools/Utils'
 import Topbar from './Topbar'
+import Tooltip from '../tooltip/Tooltip'
 
-const ControlPanel = ( {categories, topbar} ) => {
+const ControlPanel = ( {categories, topbar, showTooltip } ) => {
     return (
         <div className="control-panel">
             <ControlPanelContextProvider>
@@ -27,6 +28,10 @@ const ControlPanel = ( {categories, topbar} ) => {
                             data={data}
                         />
                     ))
+                }
+                {showTooltip 
+                ? <Tooltip />
+                : null
                 }
             </ControlPanelContextProvider>
         </div>
