@@ -195,10 +195,6 @@ class WarpAppController {
     ///////////////////
     // STATE CONTROL //
     ///////////////////
-    setPaused(paused) {
-        this.setPaused(paused);
-    }
-
     changeAnimationSpeed(delta) {
         const speed = this.TXC.getValue("animationSpeed.general");
         this.updateValue("TXC", "animationSpeed.general", Math.max(speed * (1 + delta)));

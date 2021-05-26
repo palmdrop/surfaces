@@ -372,6 +372,7 @@ const App = (props) => {
 
   const captureButton = (
     <Button
+      key={"captureButton"}
       name={"Capture Frame"}
       onClick={handleCanvasDownload}
       description={"Save a single frame as a PNG image"}
@@ -380,6 +381,7 @@ const App = (props) => {
   
   const pauseButton = (
     <Button
+      key={"pauseButton"}
       name={"Pause"}
       activeName={"Play"}
       onClick={togglePause}
@@ -390,6 +392,7 @@ const App = (props) => {
 
   const recordButton = (
     <Button 
+      key={"recordButton"}
       name={"Record"}
       activeName={"Stop recording"}
       onClick={handleRecording}
@@ -399,6 +402,7 @@ const App = (props) => {
 
   const importButton = (
     <Button
+      key={"importButton"}
       name={"Import"}
       onClick={handleSettingsImport}
       description={"Import a JSON file of settings"}
@@ -415,6 +419,7 @@ const App = (props) => {
 
   const exportButton = (
     <Button
+      key={"exportButton"}
       name={"Export"}
       onClick={handleSettingsDownload}
       description={"Export a JSON file of the current settings"}
@@ -423,6 +428,7 @@ const App = (props) => {
 
   const randomizeButton = (
     <Button
+      key={"randomizeButton"}
       name={"Randomize"}
       onClick={randomize}
       description={"Randomize the settings"}
@@ -431,6 +437,7 @@ const App = (props) => {
 
   const helpButton = (
     <Button
+      key={"helpButton"}
       name={"?"}
       activeName={"?"}
       onClick={toggleHelp}
@@ -442,6 +449,7 @@ const App = (props) => {
   
   const tooltipButton = (
     <Button
+      key={"tooltipButton"}
       name="Show Tooltips"
       activeName="Hide Tooltips"
       onClick={toggleTooltips}
@@ -451,6 +459,7 @@ const App = (props) => {
 
   const contactButton = (
     <Button
+      key={"contactButton"}
       name="Contact"
       onClick={handleContact}
       description={"Show contact information"}
@@ -458,7 +467,10 @@ const App = (props) => {
   );
 
   const separator = (
-    <div className="separator-container">
+    <div 
+      className="separator-container"
+      key={"separator"}
+    >
       <span className="separator">|</span>
     </div>
   );
@@ -536,10 +548,8 @@ const App = (props) => {
     center: [
       randomizeButton,
       separator,
-      <div className="button-group">
-        {importButton}
-        {exportButton}
-      </div>,
+      importButton,
+      exportButton,
     ],
     right: [
       tooltipButton,

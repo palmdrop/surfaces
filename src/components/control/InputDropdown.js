@@ -21,9 +21,12 @@ const InputDropdown = ( { categoryData, attribute, name, parentName, precision }
              + (expanded ? (" " + baseClass + "--expanded") : "");
     }
 
-    const createSection = (attribute, name, parentName, root ) => {
+    const createSection = (attribute, name, parentName, root) => {
         return (
-            <div className={"input-dropdown__section" + (root ? "" : "-sub")}>
+            <div 
+                className={"input-dropdown__section" + (root ? "" : "-sub")}
+                key={parentName} 
+            >
                 {!root 
                  ? <h4 
                         className="input-dropdown__section__title"
@@ -36,11 +39,7 @@ const InputDropdown = ( { categoryData, attribute, name, parentName, precision }
                     const fullName = (parentName ? (parentName + categoryData.separator) : "") + name;
 
                     if(isObject(child.value)) {
-                        return (
-                            <div>
-                                {createSection(child, name, fullName, false)}
-                            </div>
-                        )
+                        return createSection(child, name, fullName, false);
                     }
 
                     return (

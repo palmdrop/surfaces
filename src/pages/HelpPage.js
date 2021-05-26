@@ -13,7 +13,7 @@ const HelpPage = ({descriptions, shortcuts, contact, visibility, page, onCloseCa
 
     useEffect(() => {
         if(page) setCurrentPage(page);
-    }, [page])
+    }, [page]);
 
     const handleClose = (e) => {
         onCloseCallback(e);
@@ -134,7 +134,7 @@ const HelpPage = ({descriptions, shortcuts, contact, visibility, page, onCloseCa
                                 target="_blank"
                                 rel="noreferrer"
                             >
-                                {entry.icon ? <img className="icon" src={entry.icon} /> : null} 
+                                {entry.icon ? <img className="icon" src={entry.icon} alt="" /> : null} 
                                 <div className="contact-category__entry__link__text">
                                     {entry.location}
                                 </div>

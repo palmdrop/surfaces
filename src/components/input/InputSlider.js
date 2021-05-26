@@ -16,7 +16,7 @@ const InputSlider = ({ label, valueGetter, defaultValue, onChange, min, max, ste
     // externally.
     useEffect(() => {
         setState(round(valueGetter()));
-    });
+    }, [valueGetter]);
 
     // Only update the value if it's actually different
     // This avoids unnecessary useEffect triggers in parent classes
@@ -76,7 +76,7 @@ const InputSlider = ({ label, valueGetter, defaultValue, onChange, min, max, ste
                 <div className="input-slider__value">{state}</div>
             </div>
             <Slider className="input-slider__slider"
-                key={fullName}
+                key={fullName + "__slider"}
                 value={state}
                 onChange={(e, v) => handleChange(v)}
                 min={min}

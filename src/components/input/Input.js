@@ -10,11 +10,15 @@ import WAC from '../../controllers/warp/WarpAppController'
 const Input = ({ categoryData, attribute, fullName, precision }) => {
     const [refresh, forceRefresh] = useState(false);
 
+    // Effect for setting an update callback
+    // This enables us to update ONLY This input component when 
+    // the corresponding attribute of the warp controller changes, 
+    // instead of re-rendering the entire control panel
     useEffect(() => {
         WAC.setUpdateCallback(categoryData.controller, fullName, () => {
             forceRefresh(!refresh);
         });
-    }, [refresh])
+    }, [refresh, categoryData.controller, fullName])
 
 
     const getter = categoryData.getter;

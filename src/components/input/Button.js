@@ -40,7 +40,7 @@ const Button = ( {name, activeName, onClick, blurOnClick = true, state, radius, 
         >
             <button 
                 className={getClasses("button")}
-                style={{ "border-radius": radius}}
+                style={{ borderRadius: radius}}
             >
                 {active ? activeName : name}
                 {children}
