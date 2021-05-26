@@ -1,10 +1,11 @@
 import React from 'react'
 
-import { camelToTitle, forEachProperty } from '../../tools/Utils'
-import DataEntry from './DataEntry'
+import { camelToTitle, forEachProperty } from '../../../tools/Utils'
+import DataEntry from '../entry/DataEntry'
 
 import './DataPanel.css'
 
+// Simple panel for displaying related data
 const DataPanel = ({ entries }) => {
     return (
         <div className="data-panel">

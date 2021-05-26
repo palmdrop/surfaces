@@ -1,12 +1,13 @@
 
-import Input from '../../components/input/Input'
+import Input from '../../../components/input/Input'
 import React, { useState } from 'react'
-import { camelToTitle, forEachProperty, isObject } from '../../tools/Utils';
+import { camelToTitle, forEachProperty, isObject } from '../../../tools/Utils';
 
 import './InputDropdown.css'
-import Arrow from '../indicator/arrow/Arrow';
-import { useUpdateHoverContext } from '../../context/ControlPanelContext';
+import Arrow from '../../indicator/arrow/Arrow';
+import { useUpdateHoverContext } from '../../../context/ControlPanelContext';
 
+// Dropdown menu containing various settings
 const InputDropdown = ( { categoryData, attribute, name, parentName, precision } ) => {
     const [expanded, setExpanded] = useState(false);
     const updateHoverLocation = useUpdateHoverContext();
@@ -21,6 +22,8 @@ const InputDropdown = ( { categoryData, attribute, name, parentName, precision }
              + (expanded ? (" " + baseClass + "--expanded") : "");
     }
 
+    // Creates a section of settings
+    // If subsections exist, they will be created recursively (as another section, not another dropdown)
     const createSection = (attribute, name, parentName, root) => {
         return (
             <div 

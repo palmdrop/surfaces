@@ -2,7 +2,8 @@ import React from 'react'
 
 import './Arrow.css'
 
-const UpDownArrow = ( { direction }) => {
+// Simple css arrow. Can be rotated in four direction
+const Arrow = ( { direction }) => {
     return (
         <div className="arrow-container">
             <div className={"arrow arrow--" + direction}></div>
@@ -10,4 +11,4 @@ const UpDownArrow = ( { direction }) => {
     )
 }
 
-export default UpDownArrow
+export default Arrow

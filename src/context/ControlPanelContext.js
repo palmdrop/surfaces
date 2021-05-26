@@ -22,14 +22,14 @@ export const useUpdateHoverContext = () => {
     return useContext(UpdateHoverContext);
 }
 
+// Context for control panel
+// Keeps track of active categories, category data, and hover locations
 export const ControlPanelContextProvider = ({ children }) => {
     const [activeCategory, setActiveCategory] = useState(null);
     const [categoryData, setCategoryData] = useState(null);
-    //const [hoverCallback, setCallback] = useState({});
     const callback = useRef(null);
 
     const updateHoverLocation = (hoverLocation, description) => {
-        //hoverCallback.callback && hoverCallback.callback(hoverLocation);
         callback.current && callback.current(hoverLocation, description);
     };
 

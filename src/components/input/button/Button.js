@@ -1,15 +1,17 @@
 
 import React, { useState, useEffect } from 'react'
-import { useUpdateHoverContext } from '../../context/ControlPanelContext';
+import { useUpdateHoverContext } from '../../../context/ControlPanelContext';
 
 import './Button.css'
 
+// A smart button that can be used for toggleable functionality 
+// or as a regular button
 const Button = ( {name, activeName, onClick, blurOnClick = true, state, radius, description, children } ) => {
     const [active, setActive] = useState(false);
     const updateHoverLocation = useUpdateHoverContext();
 
     useEffect(() => {
-        if(typeof state !== "undefined") {
+        if(typeof state !== "undefined" && state) {
             setActive(state);
         }
     }, [state])

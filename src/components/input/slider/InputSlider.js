@@ -1,6 +1,6 @@
 import React, { useRef, useEffect, useState } from 'react';
 import { Slider } from '@material-ui/core';
-import { round } from '../../tools/Utils'
+import { round } from '../../../tools/Utils'
 import './InputSlider.css';
 
 const InputSlider = ({ label, valueGetter, defaultValue, onChange, min, max, step, marks, precision, fullName }) => {

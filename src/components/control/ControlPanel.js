@@ -1,27 +1,32 @@
 
 import React from 'react'
 
-import CategoryBar from './CategoryBar'
-import CategorySettings from './CategorySettings'
+import CategoryBar from './sidebar/CategoryBar'
+import CategorySettings from './settings/CategorySettings'
+import Topbar from './topbar/Topbar'
+import Tooltip from '../data/tooltip/Tooltip'
+
 import { ControlPanelContextProvider } from '../../context/ControlPanelContext'
+import { forEachProperty } from '../../tools/Utils'
 
 import './ControlPanel.css'
-import { forEachProperty } from '../../tools/Utils'
-import Topbar from './Topbar'
-import Tooltip from '../tooltip/Tooltip'
 
+// Panel for displaying entire user interface
 const ControlPanel = ( {categories, topbar, showTooltip } ) => {
     return (
         <div className="control-panel">
+            {/* Top bar */}
             <ControlPanelContextProvider>
                 <Topbar 
                     left={topbar.left}
                     center={topbar.center}
                     right={topbar.right}
                 />
+                {/* Sidebar */}
                 <CategoryBar categories={categories} />
                 {
                     forEachProperty(categories, (name, data, index) => (
+                        /* Settings */
                         <CategorySettings
                             key={name + "." + index}
                             name={name}
@@ -29,9 +34,10 @@ const ControlPanel = ( {categories, topbar, showTooltip } ) => {
                         />
                     ))
                 }
-                {showTooltip 
-                ? <Tooltip />
-                : null
+                { // Tooltip
+                showTooltip 
+                    ? <Tooltip />
+                    : null
                 }
             </ControlPanelContextProvider>
         </div>

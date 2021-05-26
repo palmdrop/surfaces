@@ -1,11 +1,12 @@
 
 import React from 'react'
-import { useControlPanelContext, useControlPanelUpdateContext, useUpdateHoverContext } from '../../context/ControlPanelContext';
+import { useControlPanelContext, useControlPanelUpdateContext, useUpdateHoverContext } from '../../../context/ControlPanelContext';
 
-import { forEachProperty, camelToTitle } from '../../tools/Utils'
+import { forEachProperty, camelToTitle } from '../../../tools/Utils'
 
 import './CategoryBar.css'
 
+// Bar for selecting category of settings
 const CategoryBar = ( { categories } ) => {
     const [activeCategory, ] = useControlPanelContext();
     const [updateActiveCategory] = useControlPanelUpdateContext();
@@ -17,9 +18,11 @@ const CategoryBar = ( { categories } ) => {
         else updateActiveCategory(category, categories[category]);
     };
 
+
     return (
         <div className="category-bar">
         {
+            // Will create a button for each category 
             forEachProperty(categories, (category, data, index) => (
                 <div 
                     key={category + "." + index}

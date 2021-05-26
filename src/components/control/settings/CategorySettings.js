@@ -1,18 +1,20 @@
 
 import React from 'react'
-import { useControlPanelContext, useUpdateHoverContext } from '../../context/ControlPanelContext'
-import { forEachProperty, isObject } from '../../tools/Utils'
+import { useControlPanelContext, useUpdateHoverContext } from '../../../context/ControlPanelContext'
+import { forEachProperty, isObject } from '../../../tools/Utils'
 
-import Input from '../input/Input'
+import Input from '../../input/Input'
 
 import './CategorySettings.css'
-import InputDropdown from './InputDropdown'
+import InputDropdown from '../dropdown/InputDropdown'
 
+// Settings for a specific category
 const CategorySettings = ( { name, data }) => {
     const [activeCategory, ] = useControlPanelContext();
     const updateHoverLocation = useUpdateHoverContext();
     const precision = 3;
 
+    // Main settings are settings at root level, i.e no dropdown will be created
     const createMainSettings = () => {
         return (
             <div className="category-settings__main-container">
@@ -36,6 +38,7 @@ const CategorySettings = ( { name, data }) => {
         )
     };
 
+    // Secondarty settings have child elements, and hence a dropdown will be created
     const createSecondarySettings = () => {
         return forEachProperty(data.attributes, (name, attribute, index) => {
             if (isObject(attribute.value)) {

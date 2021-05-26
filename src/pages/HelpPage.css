@@ -99,6 +99,7 @@ a:hover {
 
 .shortcut-entry__description {
     text-align: right;
+    padding-top: 0.4rem;
 }
 
 .descriptions-entry {

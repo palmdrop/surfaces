@@ -1,12 +1,14 @@
 import React, { useEffect, useState } from 'react'
 
-import InputSlider from './InputSlider'
-import InputSwitch from './InputSwitch'
+import InputSlider from './slider/InputSlider'
+import InputSwitch from './switch/InputSwitch'
 import { camelToTitle } from '../../tools/Utils'
 
 import './Input.css'
 import WAC from '../../controllers/warp/WarpAppController'
 
+// Takes input data from the user
+// At this point, this is either in the form of a slider or a switch
 const Input = ({ categoryData, attribute, fullName, precision }) => {
     const [refresh, forceRefresh] = useState(false);
 

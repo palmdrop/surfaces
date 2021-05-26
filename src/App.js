@@ -8,8 +8,8 @@ import { useKeyboardInput } from './hooks/KeyboardInputHook'
 import './App.css';
 import HelpPage from './pages/HelpPage'
 import ControlPanel from './components/control/ControlPanel'
-import Button from './components/input/Button';
-import DataPanel from './components/tooltip/DataPanel';
+import Button from './components/input/button/Button';
+import DataPanel from './components/data/panel/DataPanel';
 
 import githubIcon from './resources/icons/github.svg'
 import instagramIcon from './resources/icons/instagram.svg'
@@ -370,6 +370,9 @@ const App = (props) => {
     };
   });
 
+  /////////////
+  // BUTTONS //
+  /////////////
   const captureButton = (
     <Button
       key={"captureButton"}
@@ -479,6 +482,7 @@ const App = (props) => {
   // BODY //
   //////////
 
+  // Setup for data panel visible in the "render" category of the control panel
   const dataPanel = () => {
     const entries = {
       frameRate: {
@@ -511,6 +515,7 @@ const App = (props) => {
     )
   }
 
+  // Setup for sidebar categories, with all relevant data
   const createSidebarCategories = () => {
     const createCategory = (controller, before, after, description) => {
       return {
@@ -538,6 +543,7 @@ const App = (props) => {
     }
   };
 
+  // Setup for topbar, with all buttons and other components
   const topbarComponents = {
     left: [
       helpButton,
@@ -575,6 +581,7 @@ const App = (props) => {
           ref={canvasRef}
         />
         { 
+        // Help page with contents
           <HelpPage 
             visibility={helpVisible}
             page={helpPage}

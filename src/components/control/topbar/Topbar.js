@@ -1,9 +1,8 @@
-
-
 import React from 'react'
 
 import './Topbar.css'
 
+// Simple top bar, places children to the left, center or the right
 const Topbar = ({ left, center, right }) => {
     return (
         <nav className="topbar">
