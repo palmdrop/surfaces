@@ -66,7 +66,7 @@ const noiseSettings = (description) => {
                         min: 0.5,
                         max: 1.0,
 
-                        description: "Low values sharpens the peaks of the noise"
+                        description: "The smoothness/sharpness of the noise peaks (low values sharpens the peaks)"
                     },
                     pow: {
                         value: Math.random() + 1.0,
@@ -114,14 +114,14 @@ const noiseSettings = (description) => {
 };
 
 // Helper function for creating time settings
-const timeSettings = (value, def = null) => {
+const timeSettings = (value, description, def = null) => {
     return {
         value: value,
         default: def || value,
         min: 0.0,
         max: 1,
 
-        description: "Alters the animation speed"
+        description: description
     }
 };
 
@@ -163,10 +163,10 @@ const getTextureAttributes = () => {
         },
         animationSpeed: {
             value: {
-                general: timeSettings(0.1),
-                source: timeSettings(1.0),
-                angleControl: timeSettings(1.0),
-                amountControl: timeSettings(1.0)
+                general: timeSettings(0.1, "General animation speed"),
+                source: timeSettings(1.0, "Animation speed for the source layer"),
+                angleControl: timeSettings(1.0, "Animation speed for the angle layer"),
+                amountControl: timeSettings(1.0, "Animation speed for the amount layer")
             },
             description: "Controllers for animation speed of the entire animation and the three layers separately",
             isUniform: false,
@@ -236,7 +236,7 @@ const getColorAttributes = () => {
             min: 0.001,
             max: 10,
 
-            description: "Applies the power operator to the brightness of the color"
+            description: "Applies a power operator to the brightness of the color"
         },
         general: {
             value: {
@@ -353,7 +353,7 @@ const getRenderAttributes = () => {
             min: 0,
             max: 1,
 
-            description: "Activates multisampling: will use four samples per pixel instead of one, to reduce anti-aliasing"
+            description: "Activates multisampling: will use four samples per pixel instead of one"
         },
     }
 }

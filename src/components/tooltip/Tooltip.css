@@ -28,6 +28,6 @@
 .tooltip__title {
     margin: 0rem;
     padding-bottom: 0.6rem;
-    color: var(--foreground);
+    color: var(--background-bright);
     font-family: var(--bold-font);
 }

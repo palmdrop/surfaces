@@ -381,10 +381,10 @@ const App = (props) => {
   const pauseButton = (
     <Button
       name={"Pause"}
-      activeName={"Unpause"}
+      activeName={"Play"}
       onClick={togglePause}
       state={paused}
-      description={"Pause the animation"}
+      description={"Pause/play the animation"}
     />
   )
 
@@ -401,7 +401,7 @@ const App = (props) => {
     <Button
       name={"Import"}
       onClick={handleSettingsImport}
-      description={"Import an JSON file of settings"}
+      description={"Import a JSON file of settings"}
     >
       <input 
         ref={fileInputRef} 
@@ -442,8 +442,8 @@ const App = (props) => {
   
   const tooltipButton = (
     <Button
-      name="Show Tooltip"
-      activeName="Hide Tooltip"
+      name="Show Tooltips"
+      activeName="Hide Tooltips"
       onClick={toggleTooltips}
       description={"Toggle tooltips"}
     />
@@ -516,12 +516,12 @@ const App = (props) => {
     };
 
     return {
-      texture: createCategory("TXC", null, null, "Controls the overall shape/texture/pattern of the animation"),
-      color: createCategory("CC", null, null, "Controls color and the brightness"),
+      texture: createCategory("TXC", null, null, "Settings for the overall texture, warp effect and animation"),
+      color: createCategory("CC", null, null, "Settings for hue, saturation, brightness, color balance, and so on"),
       render: createCategory("RC", 
         dataPanel(),
         [captureButton, pauseButton, recordButton],
-        "Controls resolution, multisampling, recording, etc"
+        "Settings for resolution, multisampling, recording, and so on"
       ),
     }
   };
