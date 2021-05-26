@@ -5,6 +5,8 @@
     color: var(--foreground-dim);
     font-family: var(--bold-font);
     font-size: 0.8rem;
+
+    box-shadow: var(--box-shadow);
 }
 
 .data-panel__entry-container {

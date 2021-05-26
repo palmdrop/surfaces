@@ -6,10 +6,14 @@ import Arrow from '../components/indicator/arrow/Arrow'
 import './HelpPage.css'
 
 // Help popup to display descriptions, keyboard shortcuts, contact/links and so on
-const HelpPage = ({descriptions, shortcuts, contact, visibility, onCloseCallback}) => {
+const HelpPage = ({descriptions, shortcuts, contact, visibility, page, onCloseCallback}) => {
     // The current visible stage
     const [currentPage, setCurrentPage] = useState(0);
     const max = 2; 
+
+    useEffect(() => {
+        if(page) setCurrentPage(page);
+    }, [page])
 
     const handleClose = (e) => {
         onCloseCallback(e);
@@ -28,6 +32,8 @@ const HelpPage = ({descriptions, shortcuts, contact, visibility, onCloseCallback
             const formatKey = (key) => {
                 switch(key) {
                     case ' ': return "Space";
+                    case '-': return "Minus";
+                    case '+': return "Plus";
                     default: return camelToTitle(key);
                 }
             };
@@ -37,7 +43,7 @@ const HelpPage = ({descriptions, shortcuts, contact, visibility, onCloseCallback
 
             // If multiple keys are linkde to a single command, separate with "/"
             if(Array.isArray(shortcut.keys)) {
-                keys = shortcut.keys.reduce((acc, v) => acc + " / " + formatKey(v))
+                keys = shortcut.keys.reduce((acc, v) => formatKey(acc) + " / " + formatKey(v))
             } else {
             // Otherwise, just format the single key
                 keys = formatKey(shortcut.keys);
@@ -123,11 +129,15 @@ const HelpPage = ({descriptions, shortcuts, contact, visibility, onCloseCallback
                     >
                         <div className="contact-category__entry__location">
                             <a 
+                                className="contact-category__entry__link"
                                 href={entry.link}
                                 target="_blank"
                                 rel="noreferrer"
                             >
-                                {entry.location}
+                                {entry.icon ? <img className="icon" src={entry.icon} /> : null} 
+                                <div className="contact-category__entry__link__text">
+                                    {entry.location}
+                                </div>
                             </a>
                         </div>
                         <div className="contact-category__entry__description">

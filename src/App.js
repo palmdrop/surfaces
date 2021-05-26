@@ -1,10 +1,8 @@
-
 import React, { useRef, useState, useEffect, useLayoutEffect, useReducer } from 'react'
-//import ControlPanel from './components/panel/ControlPanel'
 
 import WAC from './controllers/warp/WarpAppController'
 
-import { downloadJSON, round, promptDownload } from './tools/Utils'
+import { downloadJSON, promptDownload } from './tools/Utils'
 import { useKeyboardInput } from './hooks/KeyboardInputHook'
 
 import './App.css';
@@ -12,7 +10,12 @@ import HelpPage from './pages/HelpPage'
 import ControlPanel from './components/control/ControlPanel'
 import Button from './components/input/Button';
 import DataPanel from './components/tooltip/DataPanel';
-import Tooltip from './components/tooltip/Tooltip';
+
+import githubIcon from './resources/icons/github.svg'
+import instagramIcon from './resources/icons/instagram.svg'
+import emailIcon from './resources/icons/email.svg'
+import blogIcon from './resources/icons/blog.svg'
+import repositoryIcon from './resources/icons/repository.png'
 
 const App = (props) => {
   ////////////////
@@ -30,6 +33,7 @@ const App = (props) => {
 
   const [paused, setPaused] = useState(false); // Pauses/unpauses the animation
   const [helpVisible, setHelpVisible] = useState(false);
+  const [helpPage, setHelpPage] = useState(null);
   const [tooltipsVisible, setTooltipsVisible] = useState(false);
 
   ////////////////////
@@ -91,6 +95,15 @@ const App = (props) => {
     if(e) e.target.blur();
     setTooltipsVisible(!tooltipsVisible);
   }
+
+  const handleContact = (e) => {
+    setHelpPage(null);
+    setTimeout(() => {
+      setHelpPage(2);
+      //setHelpVisible(true);
+      if(!helpVisible) toggleHelp();
+    }, 2);
+  };
 
   // KEYBOARD INPUT
 
@@ -436,6 +449,14 @@ const App = (props) => {
     />
   );
 
+  const contactButton = (
+    <Button
+      name="Contact"
+      onClick={handleContact}
+      description={"Show contact information"}
+    />
+  );
+
   const separator = (
     <div className="separator-container">
       <span className="separator">|</span>
@@ -521,7 +542,8 @@ const App = (props) => {
       </div>,
     ],
     right: [
-      tooltipButton
+      tooltipButton,
+      contactButton
     ]
   }
 
@@ -545,6 +567,7 @@ const App = (props) => {
         { 
           <HelpPage 
             visibility={helpVisible}
+            page={helpPage}
             descriptions={[
               {
                 title: "General",
@@ -637,12 +660,14 @@ const App = (props) => {
                 entries: [
                   { 
                     link: "https://github.com/palmdrop", 
-                    location: "Github Profile", 
-                    description: "My Github profile"},
+                    location: "Github", 
+                    icon: githubIcon,
+                    description: "...where I store my projects and configuration files"},
                   { 
                     link: "https://github.com/palmdrop/webgl-domain-warping-controller", 
-                    location: "This Repository", 
-                    description: "Link to the repository for the development version of this application"
+                    location: "Project Repository", 
+                    icon: repositoryIcon,
+                    description: "...where you can find the source code for this app"
                   }
                 ]
               },
@@ -652,11 +677,13 @@ const App = (props) => {
                   { 
                     link: "https://www.instagram.com/palmdrop/", 
                     location: "Instagram", 
-                    description: "My Instagram profile"},
+                    icon: instagramIcon,
+                    description: "...where I post generative art and experiments"},
                   { 
                     link: "https://palmdrop.github.io/", 
                     location: "Blog", 
-                    description: "Link to personal blog"
+                    icon: blogIcon,
+                    description: "...where I (occassionally) document my techniques"
                   }
                 ]
               },
@@ -666,7 +693,8 @@ const App = (props) => {
                   { 
                     link: "mailto:anton@exlex.se", 
                     location: "Email", 
-                    description: "Personal email"},
+                    icon: emailIcon,
+                    description: "...with which you can reach me if you have questions"},
                 ]
               },
             ]}

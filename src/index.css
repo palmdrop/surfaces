@@ -21,7 +21,7 @@
   --alert: #701010;
   --alert-bright: #FF0000;
 
-  --box-shadow: 0 4px 8px 0 rgba(0,0,0,0.4);
+  --box-shadow: 0 0px 5px 0 rgba(0,0,0,0.3);
 
   /* Button colors */
   --button-border-color: #cecece;

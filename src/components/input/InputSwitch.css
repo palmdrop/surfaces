@@ -5,7 +5,9 @@
     flex-direction: row;
     justify-content: space-between;
     align-items: center;
+
 }
+
 
 /* Label */
 .input-switch__label {
@@ -17,5 +19,10 @@
 
 /* Input switch */
 .input-switch__switch {
+    filter: saturate(0%) brightness(50%);
     flex-grow: 0;
+}
+
+.input-switch__switch--active {
+    filter: saturate(0%) invert() brightness(120%);
 }

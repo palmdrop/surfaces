@@ -1,6 +1,5 @@
 .category-bar {
     position: absolute;
-    box-sizing: border-box;
     top: var(--topbar-height);
     height: calc(100% - var(--topbar-height));
     width: var(--sidebar-category-width);
@@ -27,12 +26,11 @@
 .category-bar__category-container {
     height: 100%;
     width: 100%;
+    
+    background-color: var(--background);
     display: flex;
     flex-direction: column;
     justify-content: center;
-    
-    background-color: var(--background);
-
 
     transition: 0.5s;
     -webkit-transition: 0.5s;
@@ -54,12 +52,8 @@
 }
 
 .category-bar__category {
-    font-size: 2rem; 
-    text-indent: -2rem;
-    text-align-last: center;
-    transform: rotate(-90deg);
-    text-align: center;
-    vertical-align: middle;
+    font-size: calc(min(4vh, 2rem));
+    transform: translateY(130%) rotate(-90deg);
 }
 
 .category-bar__category--active {

@@ -31,11 +31,12 @@ const InputSlider = ({ label, valueGetter, onChange, fullName }) => {
 
     return (
         <div 
-            className="input-switch"
+            className={"input-switch" + (state ? " input-switch--active" : "")}
             ref={ref}
         > 
             <h3 className="input-switch__label">{label}</h3>
-            <Switch className="input-switch__switch"
+            <Switch 
+                className={"input-switch__switch" + (state ? " input-switch__switch--active" : "")}
                 key={fullName}
                 name={fullName}
                 checked={state ? true : false}

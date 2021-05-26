@@ -27,18 +27,14 @@ a:hover {
     top: 10%;
     left: calc(50% - var(--help-page-width) / 2);
     padding: 1rem;
-    margin: -1rem 0 0 -1rem;
 
     filter: drop-shadow(10px, 10px, 20px, var(--foreground));
-    
-    /*box-shadow: var(--box-shadow);
-    */
     box-shadow: 0px 0px 8px black;
 
     font-family: var(--normal-font);
 
     transform: translateY(112%);
-    transition: 1s;
+    transition: 0.8s;
 
     z-index: 1000;
     overflow-y: hidden;
@@ -63,6 +59,10 @@ a:hover {
     font-family: var(--bold-font);
 }
 
+.help-page__content__shortcuts {
+    padding: 0rem 2rem;
+}
+
 .shortcut__columns {
     color: var(--foreground-faded);
     border-bottom: var(--border-width) solid var(--foreground-dark);
@@ -71,7 +71,7 @@ a:hover {
     flex-direction: row;
     justify-content: space-between;
     padding: 0.3rem;
-    margin: 0.5rem 2rem;
+    margin: 0.2rem 2rem;
 
     text-transform: uppercase;
     font-family: var(--bold-font);
@@ -82,15 +82,19 @@ a:hover {
     display: flex;
     flex-direction: row;
     justify-content: space-between;
-    padding: 0.3rem;
+    padding: 0.2rem;
     margin: 0rem 2rem;
 
     border-bottom: var(--border-width) solid var(--foreground-dark);
 }
 
 .shortcut-entry__keys {
-    padding: 0rem 30% 0rem 0rem;
+    padding: 0.5rem;
+    font-size: 0.9rem;
     font-family: var(--bold-font);
+    background-color: var(--background-tertiary);
+    color: var(--foreground-dim);
+    box-shadow: var(--box-shadow);
 }
 
 .shortcut-entry__description {
@@ -105,6 +109,8 @@ a:hover {
     font-family: var(--bold-font);
     text-transform: uppercase;
     color: var(--foreground-faded);
+    margin: 0.0rem 0.0rem;
+    margin-top: 0.3rem;
 }
 
 .descriptions-entry__content {
@@ -112,7 +118,7 @@ a:hover {
 }
 
 .help-page__content__contact {
-    padding: 0.2rem 2rem;
+    padding: 0.2rem 4.3rem;
 }
 
 .contact-category__entry {
@@ -124,9 +130,66 @@ a:hover {
     border-bottom: var(--border-width) solid var(--foreground-dark);
 }
 
+.contact-category__entry__location {
+}
+
+.contact-category__entry__link {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    text-align: center;
+    
+    border-bottom: solid 0px var(--foreground);
+    text-decoration: none;
+
+    background-color: var(--background-secondary);
+    padding: 0.5rem 0.8rem;
+
+    font-family: var(--bold-font);
+    font-size: 0.9rem;
+    color: var(--foreground-dim);
+
+    transition: 0.5s;
+    border-radius: 5px;
+
+    box-shadow: var(--box-shadow);
+}
+
+.contact-category__entry__link:hover {
+
+    color: var(--foreground-dim);
+    border-bottom: solid 0px var(--foreground);
+    filter: brightness(125%);
+}
+
+.contact-category__entry__link__text {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+    text-align: center;
+    padding-left: 0.5rem;
+}
+
+
+.icon {
+    width: 1.5rem;
+    height: 1.5rem;
+    filter: invert() brightness(80%);
+}
+
+.icon g {
+    fill: var(--foreground);
+}
+
+.icon path {
+    stroke: var(--foreground);
+    stroke-width: 10px;
+}
+
 .contact-category__entry__description {
-    text-align: right;
-    padding: 0rem 0rem 0rem 10%;
+    text-align: justify;
+    width: 45%;
+    padding: 0rem 0rem 0rem 0;
 }
 
 .contact-category__title {
