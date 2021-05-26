@@ -11,7 +11,7 @@ const Button = ( {name, activeName, onClick, blurOnClick = true, state, radius, 
     const updateHoverLocation = useUpdateHoverContext();
 
     useEffect(() => {
-        if(typeof state !== "undefined" && state) {
+        if(state !== null) {
             setActive(state);
         }
     }, [state])
@@ -38,7 +38,9 @@ const Button = ( {name, activeName, onClick, blurOnClick = true, state, radius, 
         <div 
             className={getClasses("button-container")}
             onClick={handleClick}
-            onMouseOver={() => updateHoverLocation("button." + name, description)}
+            onMouseOver={() => {
+                updateHoverLocation && updateHoverLocation("button." + name, description)
+            }}
         >
             <button 
                 className={getClasses("button")}

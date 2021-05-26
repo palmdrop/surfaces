@@ -72,19 +72,25 @@ const App = (props) => {
     }
   }
 
+  // Displays the help modal
   const toggleHelp = (e) => {
     if(e) e.target.blur();
     const visible = !helpVisible;
     setHelpVisible(visible);
 
     const handleClose = (e) => {
+      // If escape is pressed or the canvas is clicked, close the modal
       if((e.key && e.key === "Escape") || e.type === "click") {
         setHelpVisible(false);
+
+        // And remove the listener
         window.removeEventListener("keydown", handleClose);
         canvasRef.current.removeEventListener("click", handleClose, true);
       }
     };
 
+    // If visible, subscribe to click events on the canvas, and listen
+    // for the escape key being pressed. Both these events should close the modal
     if(visible) {
       canvasRef.current.addEventListener("click", handleClose, true);
       window.addEventListener("keydown", handleClose);
@@ -96,22 +102,18 @@ const App = (props) => {
     setTooltipsVisible(!tooltipsVisible);
   }
 
+  // Since the contact page is a page of the help modal, 
+  // open the modal and set the correct page
   const handleContact = (e) => {
     setHelpPage(null);
     setTimeout(() => {
       setHelpPage(2);
-      //setHelpVisible(true);
       if(!helpVisible) toggleHelp();
     }, 2);
   };
 
   // KEYBOARD INPUT
-
   // User input through keyboard shortcuts
-  // TODO then use these description for tooltip
-
-  // TODO create better interface for changing values using functions
-  // TODO ability to change values using keyboard and having it reflect in panel automatically
   const shortcuts = [
     {
       keys: ' ', 
@@ -256,7 +258,6 @@ const App = (props) => {
     // Capture the next frame and prompt a download using a callback function
     // This is required since the canvas has to be captured after the render
     // Otherwise, the resulting image will be blank
-    //CC.captureFrame((dataURL) => {
     WAC.captureFrame((dataURL) => {
       promptDownload(dataURL, "canvas.png");
     });
@@ -265,7 +266,6 @@ const App = (props) => {
   // Handle settings download
   const handleSettingsDownload = (event) => {
     // Downloads the current settings of the texture controller
-    //downloadJSON(TXC.exportSettings(), "settings.json");
     downloadJSON(WAC.exportSettings(), "settings.json");
     event.currentTarget.blur();
   };
@@ -288,7 +288,6 @@ const App = (props) => {
       // Read file, and import the contents to the texture controller
       var reader = new FileReader();
       reader.onload = (f) => {
-        //TXC.importSettings(f.target.result);
         WAC.importSettings(f.target.result);
       };
 
@@ -591,39 +590,36 @@ const App = (props) => {
                 content: (
                   <div>
                     <p>
-                      This application provides user control over a shader that performs recursive polar domain warping. 
-                      The implementation of this effect builds 
-                      on <a target="_blank" rel="noreferrer" href="https://en.wikipedia.org/wiki/Simplex_noise">Simplex Noise</a>, a type of 
-                      gradient noise that tend to have less artefacts than traditional Perlin Noise. 
+                      Any image can be seen as a function of space. The input is a pixel location, an XY-coordinate, and the
+                      output is a pixel color. The width and height of the image are the domain. By warping the domain, we alter
+                      the space itself. Sampling a particular XY-coordinate will now (likely) result in a different output color 
+                      than before. This is called domain warping.
                     </p>
                     <p>
-                      The "domain", in this case, is the area in which this noise is sampled. The noise will try to cover
-                      all available space in the browser, as you can see behind this popup, so the domain is this window. Noise 
-                      is sampled for each pixel. However, the domain is "warped", meaning that for each pixel, the actual sampled
-                      position is offset using some other function. 
+                      This technique is commonly used for texture generation, visual effects, or generative art. This application
+                      makes the technique not only accessible, but fast (using GLSL shaders) and easy to try out different configurations
+                      with. 
                     </p>
                     <p>
-                      Polar domain warping uses two noise functions to create the warp. One for defining an angle, and one for defining
-                      an amount. Say we want to sample point <span className="math">[10, 10]</span>. First, we sample the angle noise at that point and get a value for
-                      the angle. Then, we sample the amount noise and get a value for the amount. We produce an offset vector 
-                    </p>  
-                    <p className="math">
-                      [cos(angle) * amount, sin(angle) * amount]
+                      To properly understand everything at work here, I suggest reading Inigo 
+                      Quilez <a target="_blank" rel="noreferrer" href="https://www.iquilezles.org/www/articles/warp/warp.htm">blog post</a> on the topic, 
+                      or my own <a target="_blank" rel="noreferrer" href="https://palmdrop.github.io/post/domain-warping/">blog post</a>, 
+                      where I discuss the specific variant of this technique used on this page. I also suggest reading 
+                      about <a target="_blank" rel="noreferrer" href="https://en.wikipedia.org/wiki/Simplex_noise">Simplex Noise</a>, which is used
+                      as an underlying function of space for both the source function and the functions that alter its domain. 
                     </p>
                     <p>
-                      and add this to our initial position. We'll now sample our source noise at 
-                    </p>
-                    <p className="math">
-                      [10, 10] + [cos(angle) * amount, sin(angle) * amount]
-                    </p>
-                    <p>
-                      I suggest reading Inigo Quilez <a target="_blank" rel="noreferrer" href="https://www.iquilezles.org/www/articles/warp/warp.htm">blog post</a> on the topic, 
-                      or my own <a target="_blank" rel="noreferrer" href="https://palmdrop.github.io/post/domain-warping/">blog post</a> where I discuss the specific technique used on this page. 
+                      There's a lot of settings available to you. They might be overwhelming or incomprehensible. The best way to learn what they 
+                      do is to study the links from the previous paragraph, or just play around with them. If you want more information about what
+                      the obscure sliders actually do, press the "Show Tooltips" button in the upper right corner. Some information about each slider 
+                      or button will be displayed when you hover the mouse over it. 
                     </p>
                     <p>
-                      In the top menu, you'll find a set of functionality to change, save and export the renders. "Capture Frame" will
-                      download the current frame as a PNG image. "Export"/"Import" will save/import your current settings to/from disk. 
-                      "Randomize" will randomize the settings, and so on. Play around.
+                      In the top bar, there are buttons for saving a frame, for exporting or importing the current settings, among other things.
+                      Feel free to post your creations anywhere you like. But do provide a link to this site if you do. 
+                    </p>
+                    <p>
+                      Below follows more information about the three main categories of settings that you'll find in the sidebar.
                     </p>
                   </div>
                 )
@@ -633,12 +629,14 @@ const App = (props) => {
                 content: (
                   <div>
                     <p>
-                      The <i>texture controller</i> changes the characteristics of the underlying noise functions, as well as the warp effect itself. The general sliders control the 
-                      scale, warp and recursion iterations. There's one section for controlling the animation speed of the three layers. Finally, there's a section for each
-                      noise layer: the source, angle and amount layer. The source layer is the core domain being warped. The angle layer control the warp angle and the amount layer
-                      controls the warp amount. Each noise layer have sliders for controlling fractal noise settings (layers of noise). I suggest 
-                      reading <a target="_blank" rel="noreferrer" href="https://palmdrop.github.io/post/characteristics-of-modified-noise/">this post</a>. It also covers some of the 
-                      modifications available.
+                      The <i>texture controller</i> changes the characteristics of the underlying noise functions, as well as the warp effect itself. 
+                      The <i>warp amount</i> controls the strength of the effect. The <i>iterations</i> is the number of times the warp is applied. The <i>source</i>
+                      is the noise function whos domain is sampled. The <i>angle controller</i> controls the angle of the warp effect, across space, and the
+                      <i>amount controller</i> controls the strength of the warp effect. Each layer has sliders for controlling fractal noise settings (layers of noise). 
+                    </p>  
+                    <p>
+                      I suggest reading <a target="_blank" rel="noreferrer" href="https://palmdrop.github.io/post/characteristics-of-modified-noise/">this post</a>. 
+                      It also covers some of the <i>modifications</i> available.
                     </p>
                   </div>
                 )
@@ -648,10 +646,14 @@ const App = (props) => {
                 content: (
                   <div>
                     <p>
-                      The <i>color controller</i> gives precise control over the colors of the render. There are
-                      some (hopefully) self-explanatory general sliders, but also more specific controllers for hue, saturation and brightness. Each one of these sub-controllers
-                      allow you to choose which layers (source, angle and amount) will influence that part of the color. For example, you might want the source layer to increase 
-                      brightness, while the angle layer to decrease it, making the render darker where the angle has a high value. 
+                      The <i>color controller</i> gives precise control over the colors. There are
+                      some (hopefully) self-explanatory <i>general</i> sliders, but also more specific controllers for hue, saturation and brightness. Each of 
+                      these sub-controllers allows you to choose which layers (source, angle, and amount) will influence that part of the color. 
+                      For example, you might want the source layer to increase brightness, while the angle layer decreases it.
+                    </p>
+                    <p>
+                      As a side effect, this might make the <i>source</i> layer have varying influence over the final color. Do not be surprised if altering
+                      the <i>source</i> settings in the <i>texture</i> category does not change the results much. This is likely due to your <i>color</i> settings.
                     </p>
                   </div>
                 )
@@ -661,14 +663,13 @@ const App = (props) => {
                 content: (
                   <div>
                     <p>
-                      The <i>render controller</i> gives you the ability to change resolution, control dithering and multisample, and to
-                      record a section of the animation. Press record, and each frame will be recorded until you press stop. Unfortunately,
-                      there's not yet any support for converting the recorded footage into an actual video: instead, you'll receive a zipped archive 
-                      of PNG images.
+                      The <i>render controller</i> gives you the ability to change resolution, control dithering, and multisampling.
+                      There's also an option to record the animation. Unfortunately, there's not yet support for converting the recorded
+                      frames into a video. Instead, you'll receive a zipped archive of PNG images. 
                     </p>
                   </div>
                 )
-              }
+              },
             ]}
             shortcuts={shortcuts}
             contact={[
