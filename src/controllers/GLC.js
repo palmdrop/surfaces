@@ -16,6 +16,10 @@ class GLController {
         this.KHR_parallel_shader_compile = null; // For paralell shader ocmpilation
     }
 
+    initializeWebGL() {
+
+    }
+
     // Initialize the canvas and webgl context variables
     initialize(canvas) {
         // INITIALIZE THE WEBGL CONTEXT
@@ -29,6 +33,14 @@ class GLController {
 
         // Get the webgl context
         let gl = canvas.getContext('webgl2');
+
+        if(!gl) {
+            console.log("WebGL2 not supported, falling back on WebGL1");
+            gl = canvas.getContext('webgl');
+            this.hasWebGL2 = false;
+        }  else {
+            this.hasWebGL2 = true;
+        }
 
         // If no context was retrieved, try experimental webgl
         if(!gl) {
@@ -46,7 +58,10 @@ class GLController {
         this.EXT_color_buffer_float = gl.getExtension("EXT_color_buffer_float");
         if (!this.EXT_color_buffer_float) {
             alert("need EXT_color_buffer_float");
-            return false;
+            //return false;
+            this.hasFloatColorBuffers = false;
+        } else {
+            this.hasFloatColorBuffers = true;
         }
 
         // Acquire extension for parallel shader compilation (not required)
@@ -63,6 +78,8 @@ class GLController {
 
         return true;
     }
+
+    
 
     isInitialized() {
         return this.initialized;
@@ -248,14 +265,6 @@ class GLController {
     compileAndLinkShader(vertexSource, fragmentSource) {
         return this.compileAndLinkShaders([[vertexSource, fragmentSource]])[0];
     }
-
-    /*_validateShader(shader, shaderType) {
-        if(!this.gl.getShaderParameter(shader, this.gl.COMPILE_STATUS)) {
-            console.error('ERROR compiling ' + shaderType + ' shader', this.gl.getShaderInfoLog(shader));
-            return false;
-        }
-        return true;
-    }*/
 
     _createShader(source, type) {
         const shader = this.gl.createShader(type);
