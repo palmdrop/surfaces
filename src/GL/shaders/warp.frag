@@ -58,7 +58,7 @@ vec3 getColor(vec2 coord, NoiseSettings source, NoiseSettings angle, NoiseSettin
     pack -= pack.yy * vec2(1.0 / 255.0, 0.0);*/
 
     //return vec3(e, a, pack.xy);
-    return vec3(e, a, v);
+    return vec3(v, a, e);
 }
 
 void main()

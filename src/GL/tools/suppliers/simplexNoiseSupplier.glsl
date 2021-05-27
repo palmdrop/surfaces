@@ -29,7 +29,8 @@ float getNoise(vec3 position, float frequency, float amplitude, vec3 offset, Mod
             result = threshold - (result - threshold);
         }
         //TODO fix magic number etc
-        result /= pow(threshold, 0.70);
+        result /= threshold;
+        //pow(threshold, 0.70);
     }
     if(modifications.pow != 1.0) {
         result = pow(result, modifications.pow);
