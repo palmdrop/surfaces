@@ -11,16 +11,16 @@ const noiseSettings = (description) => {
     return {
         value: {
             frequency: {
-                value: Math.random() * 1 + 0.2,
+                value: Math.random() * 0.4 + 0.25,
                 default: 1.0,
                 min: 0.0000001,
-                max: 1.0000,
+                max: 2.0000,
                 type: "1f",
 
                 description: "Speed of change across space"
             },
             octaves: {
-                value: randomElement([1, 3, 5]),
+                value: randomElement([3, 5]),
                 default: 3,
                 type: "1i",
                 min: 1,
@@ -31,7 +31,7 @@ const noiseSettings = (description) => {
                 description: "Number of noise layers"
             },
             lacunarity: {
-                value: Math.random() * 4 + 1.0,
+                value: Math.random() * 6 + 2.0,
                 default: 2.0,
                 type: "1f",
                 min: 0.1,
@@ -60,7 +60,7 @@ const noiseSettings = (description) => {
             modifications: {
                 value: {
                     ridgeThreshold: {
-                        value: Math.random(),
+                        value: 1 - Math.pow(Math.random(), 2),
                         default: 1.0,
                         type: "1f",
                         min: 0.5,
@@ -69,7 +69,7 @@ const noiseSettings = (description) => {
                         description: "The smoothness/sharpness of the noise peaks (low values sharpens the peaks)"
                     },
                     pow: {
-                        value: Math.random() + 1.0,
+                        value: Math.random() * 2 + 1.0,
                         default: 1.0,
                         type: "1f",
                         min: -1.0,
@@ -135,12 +135,12 @@ const getTextureAttributes = () => {
             type: "1f",
 
             min: 0.001,
-            max: 3,
+            max: 10,
 
             description: "Zooms the entire texture (can also be controlled using the mouse wheel)"
         },
         iterations: {
-            value: randomElement([1, 2, 3, 4]),
+            value: randomElement([1, 2, 3]),
             default: 2,
             isUniform: true,
             type: "1i",
@@ -151,7 +151,7 @@ const getTextureAttributes = () => {
             description: "Number of domain warping steps/iterations"
         },
         warpAmount: {
-            value: Math.random() * 2 + 0.5,
+            value: Math.random() * 1 + 0.5,
             default: 1.0,
             isUniform: true,
             type: "1f",
@@ -163,7 +163,7 @@ const getTextureAttributes = () => {
         },
         animationSpeed: {
             value: {
-                general: timeSettings(0.1, "General animation speed"),
+                general: timeSettings(0.05, "General animation speed"),
                 source: timeSettings(1.0, "Animation speed for the source layer"),
                 angleControl: timeSettings(1.0, "Animation speed for the angle layer"),
                 amountControl: timeSettings(1.0, "Animation speed for the amount layer")
@@ -241,7 +241,7 @@ const getColorAttributes = () => {
         general: {
             value: {
                 hue: {
-                    value: 0.0,
+                    value: Math.random(),
                     default: 0.0,
                     type: "1f",
 
@@ -251,7 +251,7 @@ const getColorAttributes = () => {
                     description: "Hue shift of the output color"
                 },
                 saturation: {
-                    value: 0.7,
+                    value: Math.random() * 0.5 + 0.5,
                     default: 0.7,
                     isUniform: true,
                     type: "1f",
@@ -306,7 +306,7 @@ const getColorAttributes = () => {
             description: "General color settings",
             isUniform: true
         },
-        hueController:        componentController(2.0 * Math.random() - 1.0, 2.0 * Math.random() - 1.0, 2.0 * Math.random() - 1.0,
+        hueController:        componentController(1.0 * Math.random() - 0.5, 1.0 * Math.random() - 0.5, 1.0 * Math.random() - 0.5,
                                                   "Controls how the three layers influence the hue of the output color",
                                                  [1.0, 1.0, 0.0]),
         saturationController: componentController(1.0 * Math.random(), 1.0 * Math.random(), 1.0 * Math.random(),
@@ -362,44 +362,6 @@ const getRenderAttributes = () => {
 //////////
 // UTIL //
 //////////
-
-// Randomizer of attributes
-const getRandomAttributes = (attributes) => {
-    const random = (min, max) => {
-        return Math.random() * (Math.abs(max - min) + min);
-    };
-
-    const randomize = (current) => {
-        if(typeof current.value === "object") {
-            for(var name in current.value) {
-                if(Object.prototype.hasOwnProperty.call(current.value, name)) {
-                    current.value[name] = randomize(current.value[name]);
-                }
-            }
-        } else {
-            var result;
-            if(current.marks) {
-                result = current.marks[Math.floor(random(0, current.marks.length))];
-            } else if(current.type === "1i") {
-                result = Math.floor(random(current.min, current.max));
-            } else {
-                result = random(current.min, current.max);
-            }
-
-            current.value = result;
-        }
-
-        return current;
-    }
-
-    for(var name in attributes) {
-        if(Object.prototype.hasOwnProperty.call(attributes, name)) {
-            attributes[name] = randomize(attributes[name]);
-        }
-    }
-
-    return attributes;
-}
 
 // HELPER FUNCTIONS FOR MANAGING ATTRIBUTES
 
@@ -627,7 +589,6 @@ export {
     setUniforms, 
     updateAttributeValue, 
     mergeAttributes, 
-    getRandomAttributes,
 
     AttributeController
 }
