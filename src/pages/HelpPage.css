@@ -98,12 +98,13 @@ a:hover {
 }
 
 .shortcut-entry__description {
-    text-align: right;
+    text-align: justify;
     padding-top: 0.4rem;
 }
 
 .descriptions-entry {
     padding: 0.2rem 2rem;
+    text-align: justify;
 }
 
 .descriptions-entry__title {
@@ -115,7 +116,6 @@ a:hover {
 }
 
 .descriptions-entry__content {
-
 }
 
 .help-page__content__contact {

@@ -680,12 +680,12 @@ const App = (props) => {
                     link: "https://github.com/palmdrop", 
                     location: "Github", 
                     icon: githubIcon,
-                    description: "...where I store my projects and configuration files"},
+                    description: "where I store my projects and configuration files"},
                   { 
                     link: "https://github.com/palmdrop/webgl-domain-warping-controller", 
                     location: "Project Repository", 
                     icon: repositoryIcon,
-                    description: "...where you can find the source code for this app"
+                    description: "where you can find the source code for this app"
                   }
                 ]
               },
@@ -696,12 +696,12 @@ const App = (props) => {
                     link: "https://www.instagram.com/palmdrop/", 
                     location: "Instagram", 
                     icon: instagramIcon,
-                    description: "...where I post generative art and experiments"},
+                    description: "where I post generative art and experiments"},
                   { 
                     link: "https://palmdrop.github.io/", 
                     location: "Blog", 
                     icon: blogIcon,
-                    description: "...where I (occassionally) document my techniques"
+                    description: "where I (occassionally) document my techniques"
                   }
                 ]
               },
@@ -712,7 +712,7 @@ const App = (props) => {
                     link: "mailto:anton@exlex.se", 
                     location: "Email", 
                     icon: emailIcon,
-                    description: "...with which you can reach me if you have questions"},
+                    description: "with which you can reach me if you have questions"},
                 ]
               },
             ]}
