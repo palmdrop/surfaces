@@ -311,15 +311,16 @@ const App = (props) => {
         throw new Error("Warp controlleer failed to intiialize");
       }
 
-      WAC.start((delta) => {
-        executeHeldActions();
-      });
-
       refresh();
     }
 
-    //return () => AM.stop();
-    //TODO this hook runs too often... how to fix?
+    WAC.start(() => {
+      executeHeldActions();
+    });
+
+    console.log("restart");
+
+    return () => WAC.stop();
   });
 
   // WINDOW RESIZE
@@ -586,7 +587,7 @@ const App = (props) => {
             page={helpPage}
             descriptions={[
               {
-                title: "General",
+                title: "",
                 content: (
                   <div>
                     <p>
@@ -616,7 +617,8 @@ const App = (props) => {
                     </p>
                     <p>
                       In the top bar, there are buttons for saving a frame, for exporting or importing the current settings, among other things.
-                      Feel free to post your creations anywhere you like. But do provide a link to this site if you do. 
+                      Feel free to post your creations anywhere you like. But do provide a link to this site if you do. Please note that this application
+                      works best on modern browsers with support for WebGL2.
                     </p>
                     <p>
                       Below follows more information about the three main categories of settings that you'll find in the sidebar.

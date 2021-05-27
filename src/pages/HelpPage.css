@@ -56,6 +56,8 @@ a:hover {
 
 .title {
     text-align: center;
+    margin: 0.5rem 0rem;
+    color: var(--foreground-faded);
     font-family: var(--bold-font);
 }
 
@@ -188,7 +190,7 @@ a:hover {
 }
 
 .contact-category__entry__description {
-    text-align: justify;
+    text-align: left;
     width: 45%;
     padding: 0rem 0rem 0rem 0;
 }
