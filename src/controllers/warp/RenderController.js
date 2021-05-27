@@ -65,8 +65,15 @@ class RenderController extends AttributeController {
 
         const createRenderTexture = (width, height) => {
             const gl = this.GLC.getGL();
-            return this.GLC.createTexture(width, height, gl.RGBA, gl.RGBA32F, gl.FLOAT);
-            //return GLC.createTexture(width, height, gl.RGBA, gl.RGBA8, gl.UNSINGED_BYTE);
+
+            // If float color buffers are supported, use them since this 
+            // will provide more precision
+            if(this.GLC.floatColorBufferSupported()) {
+                return this.GLC.createTexture(width, height, gl.RGBA, gl.RGBA32F, gl.FLOAT);
+            } else {
+                return this.GLC.createTexture(width, height, gl.RGBA, gl.RGBA8, gl.UNSINGED_BYTE);
+            }
+
         };
 
         // Create the render texture

@@ -16,10 +16,6 @@ class GLController {
         this.KHR_parallel_shader_compile = null; // For paralell shader ocmpilation
     }
 
-    initializeWebGL() {
-
-    }
-
     // Initialize the canvas and webgl context variables
     initialize(canvas) {
         // INITIALIZE THE WEBGL CONTEXT
@@ -31,14 +27,15 @@ class GLController {
             return false;
         }
 
-        // Get the webgl context
+        // Get the webgl2 context (required for floating point color buffers)
         let gl = canvas.getContext('webgl2');
 
+        // If webgl2 is not supported, fall back on webgl1
         if(!gl) {
-            console.log("WebGL2 not supported, falling back on WebGL1");
+            console.log('Webgl2 not supported, falling back on webgl1');
             gl = canvas.getContext('webgl');
             this.hasWebGL2 = false;
-        }  else {
+        } else {
             this.hasWebGL2 = true;
         }
 
@@ -57,11 +54,12 @@ class GLController {
         // Acquire the color buffer float extension
         this.EXT_color_buffer_float = gl.getExtension("EXT_color_buffer_float");
         if (!this.EXT_color_buffer_float) {
-            alert("need EXT_color_buffer_float");
+            //alert("need EXT_color_buffer_float");
+            console.log("Floating point color buffers not supported. Quality will be reduced");
             //return false;
-            this.hasFloatColorBuffers = false;
+            this.hasFloatColorBuffer = false;
         } else {
-            this.hasFloatColorBuffers = true;
+            this.hasFloatColorBuffer = true;
         }
 
         // Acquire extension for parallel shader compilation (not required)
@@ -79,7 +77,13 @@ class GLController {
         return true;
     }
 
-    
+    webGL2Supported() {
+        return this.hasWebGL2;
+    }
+
+    floatColorBufferSupported() {
+        return this.hasFloatColorBuffer;
+    }
 
     isInitialized() {
         return this.initialized;
@@ -155,7 +159,9 @@ class GLController {
             colorTexture,
             0
         );
-        this.gl.drawBuffers([this.gl.COLOR_ATTACHMENT0]);
+        if(this.webGL2Supported()) {
+            this.gl.drawBuffers([this.gl.COLOR_ATTACHMENT0]);
+        }
 
         return fb;
     }
@@ -265,6 +271,14 @@ class GLController {
     compileAndLinkShader(vertexSource, fragmentSource) {
         return this.compileAndLinkShaders([[vertexSource, fragmentSource]])[0];
     }
+
+    /*_validateShader(shader, shaderType) {
+        if(!this.gl.getShaderParameter(shader, this.gl.COMPILE_STATUS)) {
+            console.error('ERROR compiling ' + shaderType + ' shader', this.gl.getShaderInfoLog(shader));
+            return false;
+        }
+        return true;
+    }*/
 
     _createShader(source, type) {
         const shader = this.gl.createShader(type);
