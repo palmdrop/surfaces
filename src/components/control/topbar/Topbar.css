@@ -12,6 +12,7 @@
 }
 
 .left-container {
+    margin: 0.1rem;
     display: flex;
     flex-direction: row;
     width: 100%;
@@ -20,6 +21,7 @@
 }
 
 .center-container {
+    margin: 0.1rem;
     display: flex;
     flex-direction: row;
     width: 100%;
@@ -27,17 +29,13 @@
 }
 
 .right-container {
+    margin: 0.1rem;
     display: flex;
     flex-direction: row;
     justify-content: right;
     width: 100%;
 
     padding-right: 0.2rem;
-}
-
-.button-group {
-    display: flex;
-    flex-direction: row;
 }
 
 .separator-container {
@@ -49,6 +47,6 @@
 }
 
 .separator {
-    font-size: 2rem;
-    padding-bottom: 0.5rem;
+    font-size: 2.2rem;
+    padding-bottom: 0.2rem;
 }

@@ -6,7 +6,7 @@ import './Button.css'
 
 // A smart button that can be used for toggleable functionality 
 // or as a regular button
-const Button = ( {name, activeName, onClick, blurOnClick = true, state, radius, description, children } ) => {
+const Button = ( {name, activeName, hideName = false, onClick, blurOnClick = true, state, radius, description, children } ) => {
     const [active, setActive] = useState(false);
     const updateHoverLocation = useUpdateHoverContext();
 
@@ -46,7 +46,7 @@ const Button = ( {name, activeName, onClick, blurOnClick = true, state, radius, 
                 className={getClasses("button")}
                 style={{ borderRadius: radius}}
             >
-                {active ? activeName : name}
+                {hideName ? null : (active ? activeName : name)}
                 {children}
             </button>
         </div>

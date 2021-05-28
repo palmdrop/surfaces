@@ -1,74 +1,12 @@
 .settings {
 }
 
-.data-tooltip {
-    position: absolute;
-    background-color: var(--transparent-background);
-    padding: 0.2vh 0.2vh;
-
-    right: 0;
-    bottom: 0
+.icon-link {
+    margin: 0rem;
+    width: 1.3rem;
+    height: 1.3rem;
+    filter: invert() brightness(80%);
 }
-
-/*.button {
-    width: 100%;
-    font-size: 1.0rem;
-    background-color: transparent;
-    color: var(--foreground);
-    border: var(--border-width) solid var(--button-border-color);
-    transition-duration: var(--on-hover-speed);
-}
-
-.button:hover {
-    color: var(--foreground);
-    background-color: var(--button-hover-color);
-    border: var(--border-width) solid var(--button-hover-color);
-}
-
-.active {
-    color: var(--background);
-    background-color: var(--button-active-color);
-    border: var(--border-width) solid var(--button-active-color);
-}*/
-
-.settings-hidden {
-    transform: translateX(-100%);
-}
-
-.button-container {
-    padding: 0.2vh;
-}
-
-.settings__capture-button-container {
-}
-
-.settings__capture-button-container__button {
-}
-
-.settings__import-export-container {
-    display: flex;
-    flex-direction: row;
-    justify-content: space-evenly;
-}
-
-.settings__export-button-container {
-    width: 50%
-}
-
-.settings__import-button-container {
-    width: 50%
-
-}
-
-.settings__export-button-container__button {
-}
-
-.settings__import-button-container__button {
-}
-
-.settings__auto-hide-button-container {
-}
-
 
 .canvas {
     width: 100%;

@@ -17,6 +17,12 @@ import emailIcon from './resources/icons/email.svg'
 import blogIcon from './resources/icons/blog.svg'
 import repositoryIcon from './resources/icons/repository.png'
 
+const githubLink = "https://github.com/palmdrop";
+const repositoryLink = "https://github.com/palmdrop/webgl-domain-warping-controller";
+const instagramLink = "https://www.instagram.com/palmdrop/"; 
+const blogLink = "https://palmdrop.github.io/"; 
+const emailLink = "mailto:anton@exlex.se"; 
+
 const App = (props) => {
   ////////////////
   // REFERENCES //
@@ -33,7 +39,6 @@ const App = (props) => {
 
   const [paused, setPaused] = useState(false); // Pauses/unpauses the animation
   const [helpVisible, setHelpVisible] = useState(false);
-  const [helpPage, setHelpPage] = useState(null);
   const [tooltipsVisible, setTooltipsVisible] = useState(false);
 
   ////////////////////
@@ -101,16 +106,6 @@ const App = (props) => {
     if(e) e.target.blur();
     setTooltipsVisible(!tooltipsVisible);
   }
-
-  // Since the contact page is a page of the help modal, 
-  // open the modal and set the correct page
-  const handleContact = (e) => {
-    setHelpPage(null);
-    setTimeout(() => {
-      setHelpPage(2);
-      if(!helpVisible) toggleHelp();
-    }, 2);
-  };
 
   // KEYBOARD INPUT
   // User input through keyboard shortcuts
@@ -460,15 +455,29 @@ const App = (props) => {
     />
   );
 
-  const contactButton = (
-    <Button
-      key={"contactButton"}
-      name="Contact"
-      onClick={handleContact}
-      description={"Show contact information"}
-    />
-  );
+  const createContactButton = (icon, alt, link, description) => {
+    const handleClick = () => {
+      window.open(link, "_blank");
+    };
 
+    return(<Button
+        key={link}
+        name={alt}
+        hideName={true}
+        onClick={handleClick}
+        description={description}
+      >
+        <img className="icon-link" src={icon} alt={alt} />
+      </Button>);
+  };
+
+  const instagramButton = createContactButton(instagramIcon, "Instagram", instagramLink, "My instagram profile, dedicated to generative art");
+  const githubButton = createContactButton(githubIcon, "Github", githubLink, "My github profile");
+  const emailButton = createContactButton(emailIcon, "Email", emailLink, "My email");
+
+  ///////////
+  // OTHER //
+  ///////////
   const separator = (
     <div 
       className="separator-container"
@@ -477,6 +486,7 @@ const App = (props) => {
       <span className="separator">|</span>
     </div>
   );
+
 
   //////////
   // BODY //
@@ -559,7 +569,9 @@ const App = (props) => {
     ],
     right: [
       tooltipButton,
-      contactButton
+      instagramButton,
+      githubButton,
+      emailButton
     ]
   }
 
@@ -585,7 +597,6 @@ const App = (props) => {
           <HelpPage 
             mainTitle={"Surfaces"}
             visibility={helpVisible}
-            page={helpPage}
             descriptions={[
               {
                 title: "A Recursive Domain Warping Controller",
@@ -680,12 +691,12 @@ const App = (props) => {
                 title: "Development",
                 entries: [
                   { 
-                    link: "https://github.com/palmdrop", 
+                    link: githubLink,
                     location: "Github", 
                     icon: githubIcon,
                     description: "where I store my projects and configuration files"},
                   { 
-                    link: "https://github.com/palmdrop/webgl-domain-warping-controller", 
+                    link: repositoryLink,
                     location: "Project Repository", 
                     icon: repositoryIcon,
                     description: "where you can find the source code for this app"
@@ -696,12 +707,12 @@ const App = (props) => {
                 title: "Social Media",
                 entries: [
                   { 
-                    link: "https://www.instagram.com/palmdrop/", 
+                    link: instagramLink,
                     location: "Instagram", 
                     icon: instagramIcon,
                     description: "where I post generative art and experiments"},
                   { 
-                    link: "https://palmdrop.github.io/", 
+                    link: blogLink,
                     location: "Blog", 
                     icon: blogIcon,
                     description: "where I (occassionally) document my techniques"
