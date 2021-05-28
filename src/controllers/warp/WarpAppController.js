@@ -301,12 +301,10 @@ class WarpAppController {
             exported[controllerName] = controller.getAttributes();
         }
 
-        return JSON.stringify(exported, null, 2);
+        return exported;
     }
 
-    importSettings(settingsJSON) {
-        const imported = JSON.parse(settingsJSON);
-
+    importSettings(imported) {
         // Iterate over all the controllers
         for (const controllerName in this.controllers) {
             const controller = this._getController(controllerName);

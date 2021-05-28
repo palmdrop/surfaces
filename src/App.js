@@ -17,6 +17,8 @@ import emailIcon from './resources/icons/email.svg'
 import blogIcon from './resources/icons/blog.svg'
 import repositoryIcon from './resources/icons/repository.png'
 
+import defaultSettings from './resources/settings/hearts.json'
+
 const githubLink = "https://github.com/palmdrop";
 const repositoryLink = "https://github.com/palmdrop/webgl-domain-warping-controller";
 const instagramLink = "https://www.instagram.com/palmdrop/"; 
@@ -261,7 +263,10 @@ const App = (props) => {
   // Handle settings download
   const handleSettingsDownload = (event) => {
     // Downloads the current settings of the texture controller
-    downloadJSON(WAC.exportSettings(), "settings.json");
+    downloadJSON(
+      JSON.stringify(WAC.exportSettings(), null, 2), 
+      "settings.json"
+    );
     event.currentTarget.blur();
   };
 
@@ -283,7 +288,7 @@ const App = (props) => {
       // Read file, and import the contents to the texture controller
       var reader = new FileReader();
       reader.onload = (f) => {
-        WAC.importSettings(f.target.result);
+        WAC.importSettings(JSON.parse(f.target.result));
       };
 
       reader.readAsText(file);
@@ -307,6 +312,7 @@ const App = (props) => {
       }
 
       refresh();
+      WAC.importSettings(defaultSettings);
 
       WAC.start(() => {
         executeHeldActions();
