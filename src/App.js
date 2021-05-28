@@ -307,15 +307,13 @@ const App = (props) => {
       }
 
       refresh();
+
+      WAC.start(() => {
+        executeHeldActions();
+      });
     }
 
-    WAC.start(() => {
-      executeHeldActions();
-    });
-
-    console.log("restart");
-
-    return () => WAC.stop();
+    //return () => WAC.stop();
   });
 
   // WINDOW RESIZE

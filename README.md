@@ -1,4 +1,6 @@
-# SURFACES - WebGL Domain Warping Controller
+# _SURFACES_ - A Recursive Domain Warping Controller
+_**LIVE AT [palmdrop.github.io/surfaces/](https://palmdrop.github.io/surfaces/)**_
+
 *Surfaces* is a web application for controlling a shader that implements recursive domain warping using simplex noise. WebGL and GLSL are used to implement the shader itself, while React is used for the user interface. The idea behind *Surfaces* is to make some of the techniques developed in my ongoing [sandbox project](https://github.com/palmdrop/sandbox) accessible and easy to explore. The application runs in real-time and should work in most modern browsers. However, to ensure good quality, a browser with support for WebGL2 is required.
 
 Below are some screenshots of the user interface and some possible shader configurations. 
