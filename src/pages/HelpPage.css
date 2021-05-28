@@ -55,6 +55,7 @@ a:hover {
 }
 
 .title {
+    text-transform: uppercase;
     text-align: center;
     margin: 0.5rem 0rem;
     color: var(--foreground-faded);

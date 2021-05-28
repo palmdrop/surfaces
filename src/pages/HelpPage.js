@@ -6,7 +6,7 @@ import Arrow from '../components/indicator/arrow/Arrow'
 import './HelpPage.css'
 
 // Help popup to display descriptions, keyboard shortcuts, contact/links and so on
-const HelpPage = ({descriptions, shortcuts, contact, visibility, page, onCloseCallback}) => {
+const HelpPage = ({mainTitle, descriptions, shortcuts, contact, visibility, page, onCloseCallback}) => {
     // The current visible stage
     const [currentPage, setCurrentPage] = useState(0);
     const max = 2; 
@@ -105,7 +105,7 @@ const HelpPage = ({descriptions, shortcuts, contact, visibility, page, onCloseCa
             <div
                 className="help-page__content__descriptions"
             >
-                <h2 className="title">Recursive Domain Warping Controller</h2>
+                <h2 className="title">{mainTitle}</h2>
                 {
                     // Iterate over all descriptions...
                     descriptions.map((description, index) => (

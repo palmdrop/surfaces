@@ -583,11 +583,12 @@ const App = (props) => {
         { 
         // Help page with contents
           <HelpPage 
+            mainTitle={"Surfaces"}
             visibility={helpVisible}
             page={helpPage}
             descriptions={[
               {
-                title: "",
+                title: "A Recursive Domain Warping Controller",
                 content: (
                   <div>
                     <p>
