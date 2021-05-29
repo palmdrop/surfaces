@@ -475,9 +475,9 @@ const App = (props) => {
       </Button>);
   };
 
-  const instagramButton = createContactButton(instagramIcon, "Instagram", instagramLink, "My instagram profile, dedicated to generative art");
-  const githubButton = createContactButton(githubIcon, "Github", githubLink, "My github profile");
-  const emailButton = createContactButton(emailIcon, "Email", emailLink, "My email");
+  const instagramButton = createContactButton(instagramIcon, "Instagram", instagramLink, "Personal instagram profile, dedicated to generative art");
+  const repositoryButton = createContactButton(githubIcon, "Github", repositoryLink, "The repository for this project");
+  const emailButton = createContactButton(emailIcon, "Email", emailLink, "Email, the most reliable way of reaching me");
 
   ///////////
   // OTHER //
@@ -574,7 +574,7 @@ const App = (props) => {
     right: [
       tooltipButton,
       instagramButton,
-      githubButton,
+      repositoryButton,
       emailButton
     ]
   }

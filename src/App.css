@@ -1,6 +1,3 @@
-.settings {
-}
-
 .icon-link {
     margin: 0rem;
     width: 1.3rem;
@@ -21,4 +18,5 @@
     height: 100%;
     position: fixed;
     overflow-y: hidden;
+    overflow-x: hidden;
 }
