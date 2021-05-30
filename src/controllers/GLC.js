@@ -69,6 +69,7 @@ class GLController {
         }*/
 
         gl.enableVertexAttribArray(0);
+        this.maxVertexAttrib = 0;
 
         this.canvas = canvas;
         this.gl = gl;
@@ -308,7 +309,16 @@ class GLController {
     }
 
     // Render the default full screen quad
-    renderFullScreenQuad(program) {
+    renderFullScreenQuad(program, enableTexCoords = false) {
+        // Disable all attributes and only enable those that will actually be used
+        // This avoids errors on some systems/browsers
+        for(var i = 0; i <= this.maxVertexAttrib; i++) {
+            this.gl.disableVertexAttribArray(i);
+        }
+        this.gl.enableVertexAttribArray(0);
+        if(enableTexCoords) this.gl.enableVertexAttribArray(1);
+
+        // Switch program
         this.setShaderProgram(program);
 
         // Bind the data
@@ -344,6 +354,7 @@ class GLController {
     // Sets and enables a shader attribute
     setAttribLayout(program, name, numberOfElements, type, vertexSize, offset) {
         var location = this.gl.getAttribLocation(program, name);
+        if(location > this.maxVertexAttrib) this.maxVertexAttrib = location;
 
         if(location === -1) {
             return -1;
