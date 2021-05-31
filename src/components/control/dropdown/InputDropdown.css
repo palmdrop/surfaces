@@ -111,8 +111,9 @@
 }
 
 .input-dropdown__section__title {
-    font-family: 'Bungee', cursive;
-    font-size: 0.9rem;
+    font-family: var(--bold-font);
+    text-transform: uppercase;
+    font-size: 0.85rem;
     padding-bottom: 1.0rem;
     text-align: center;
     background-color: var(--background-tertiary);
