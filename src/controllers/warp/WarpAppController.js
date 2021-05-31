@@ -81,8 +81,8 @@ class WarpAppController {
 
         // Initialize quad that will be used to render to the entire screen
         this.GLC.createFullScreenQuad();
-        this.GLC.setQuadAttributeLayout(textureProgram, "vertPosition");
-        this.GLC.setQuadAttributeLayout(colorProgram, "vertPosition", "inTexCoord");
+        //this.GLC.setQuadAttributeLayout(textureProgram, "vertPosition");
+        //this.GLC.setQuadAttributeLayout(colorProgram, "vertPosition", "inTexCoord");
 
         // Initialize render controller
         if(!(this.RC.initialize(canvas, this.GLC))) {

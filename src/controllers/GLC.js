@@ -54,21 +54,13 @@ class GLController {
         // Acquire the color buffer float extension
         this.EXT_color_buffer_float = gl.getExtension("EXT_color_buffer_float");
         if (!this.EXT_color_buffer_float) {
-            //alert("need EXT_color_buffer_float");
             console.log("Floating point color buffers not supported. Quality will be reduced");
-            //return false;
             this.hasFloatColorBuffer = false;
         } else {
             this.hasFloatColorBuffer = true;
         }
 
-        // Acquire extension for parallel shader compilation (not required)
-        /*this.KHR_parallel_shader_compile = gl.getExtension("KHR_parallel_shader_compile");
-        if(!this.KHR_parallel_shader_compile) {
-            console.log("no support for parallel shader compilation")
-        }*/
-
-        gl.enableVertexAttribArray(0);
+        //gl.enableVertexAttribArray(0);
         this.maxVertexAttrib = 0;
 
         this.canvas = canvas;
@@ -147,6 +139,7 @@ class GLController {
         var buffer = this.gl.createBuffer();
         this.bindBuffer(bufferType, buffer);
         this.gl.bufferData(bufferType, new Float32Array(data), drawMode);
+        return buffer;
     }
 
     // Create frame buffer
@@ -273,14 +266,6 @@ class GLController {
         return this.compileAndLinkShaders([[vertexSource, fragmentSource]])[0];
     }
 
-    /*_validateShader(shader, shaderType) {
-        if(!this.gl.getShaderParameter(shader, this.gl.COMPILE_STATUS)) {
-            console.error('ERROR compiling ' + shaderType + ' shader', this.gl.getShaderInfoLog(shader));
-            return false;
-        }
-        return true;
-    }*/
-
     _createShader(source, type) {
         const shader = this.gl.createShader(type);
         this.gl.shaderSource(shader, source);
@@ -310,19 +295,22 @@ class GLController {
 
     // Render the default full screen quad
     renderFullScreenQuad(program, enableTexCoords = false) {
+        // Switch program
+        this.setShaderProgram(program);
+
         // Disable all attributes and only enable those that will actually be used
         // This avoids errors on some systems/browsers
         for(var i = 0; i <= this.maxVertexAttrib; i++) {
             this.gl.disableVertexAttribArray(i);
         }
-        this.gl.enableVertexAttribArray(0);
-        if(enableTexCoords) this.gl.enableVertexAttribArray(1);
-
-        // Switch program
-        this.setShaderProgram(program);
+        //this.gl.enableVertexAttribArray(0);
+        //if(enableTexCoords) this.gl.enableVertexAttribArray(1);
 
         // Bind the data
         this.bindBuffer(this.gl.ARRAY_BUFFER, this.quadBuffer);
+
+        // Set layout and enable attributes
+        this.setQuadAttributeLayout(program, "vertPosition", enableTexCoords ? "inTexCoord" : null);
 
         // Clear and draw 
         this.clear(0.0, 0.0, 0.0, 1.0);
