@@ -209,7 +209,8 @@ class WarpAppController {
         scale += delta;
 
         // Update the value in the texture controller
-        this.updateValue("TXC", "scale", scale);
+        // and do not alter the position if the value is not updated
+        if(!this.updateValue("TXC", "scale", scale)) return;
 
         // If a source position is supplied, scale around that position
         if(!sourcePosition) return;

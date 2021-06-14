@@ -136,6 +136,7 @@ const getTextureAttributes = () => {
 
             min: 0.001,
             max: 10,
+            actualMax: 1000,
 
             description: "Zooms the entire texture (can also be controlled using the mouse wheel)"
         },
@@ -487,12 +488,14 @@ const updateAttributeValue = (attributes, program, location, value, GLC) => {
     const [isUniform, attribute] = getAttribute(attributes, location);
     if(typeof attribute === "undefined") return false;
 
+    // Check if the value exceeds the actual maximum value, if one exists
+    if(attribute.actualMax && value > attribute.actualMax) value = attribute.actualMax;
+
     // Do nothing if the value is unchanged
-    if(attribute.value === value) return true;
+    if(attribute.value === value) return false;
 
     // Set the new value, and set the corresponding uniform
     attribute.value = value;
-
     if(isUniform && program && GLC) {
         GLC.setUniform(program, location, attribute.type, attribute.value);
     } 
