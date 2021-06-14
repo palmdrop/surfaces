@@ -38,6 +38,7 @@ a:hover {
 
     z-index: 1000;
     overflow-y: hidden;
+    overflow-x: hidden;
 }
 
 .help-page--visible {
@@ -101,7 +102,7 @@ a:hover {
 }
 
 .shortcut-entry__description {
-    text-align: justify;
+    text-align: right;
     padding-top: 0.4rem;
 }
 
@@ -113,6 +114,7 @@ a:hover {
 .descriptions-entry__title {
     font-family: var(--bold-font);
     text-transform: uppercase;
+    text-align: center;
     color: var(--foreground-faded);
     margin: 0.0rem 0.0rem;
     margin-top: 0.3rem;

@@ -701,7 +701,7 @@ const App = (props) => {
                     description: "where I store my projects and configuration files"},
                   { 
                     link: repositoryLink,
-                    location: "Project Repository", 
+                    location: "Repository", 
                     icon: repositoryIcon,
                     description: "where you can find the source code for this app"
                   }
