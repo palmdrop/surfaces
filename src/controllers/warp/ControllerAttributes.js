@@ -129,7 +129,7 @@ const timeSettings = (value, description, def = null) => {
 const getTextureAttributes = () => {
     return {
         scale: {
-            value: 1.0,
+            value: Math.random() * 2 + 2.0,
             default: 1.0,
             isUniform: true,
             type: "1f",
