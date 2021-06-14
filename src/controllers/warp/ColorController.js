@@ -106,7 +106,7 @@ class ColorController extends AttributeController {
 
         GLC.setUniform(this.program, "multisampling", "1i", multisampling);
 
-        GLC.renderFullScreenQuad(this.program, true);
+        GLC.renderFullScreenQuad(this.program);
 
         // Capture the frame if requested
         if(this.captureNext) {

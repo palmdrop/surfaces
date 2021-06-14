@@ -60,7 +60,6 @@ class GLController {
             this.hasFloatColorBuffer = true;
         }
 
-        //gl.enableVertexAttribArray(0);
         this.maxVertexAttrib = 0;
 
         this.canvas = canvas;
@@ -294,23 +293,12 @@ class GLController {
     }
 
     // Render the default full screen quad
-    renderFullScreenQuad(program, enableTexCoords = false) {
+    renderFullScreenQuad(program) {
         // Switch program
         this.setShaderProgram(program);
 
-        // Disable all attributes and only enable those that will actually be used
-        // This avoids errors on some systems/browsers
-        for(var i = 0; i <= this.maxVertexAttrib; i++) {
-            this.gl.disableVertexAttribArray(i);
-        }
-        //this.gl.enableVertexAttribArray(0);
-        //if(enableTexCoords) this.gl.enableVertexAttribArray(1);
-
         // Bind the data
         this.bindBuffer(this.gl.ARRAY_BUFFER, this.quadBuffer);
-
-        // Set layout and enable attributes
-        this.setQuadAttributeLayout(program, "vertPosition", enableTexCoords ? "inTexCoord" : null);
 
         // Clear and draw 
         this.clear(0.0, 0.0, 0.0, 1.0);
@@ -330,8 +318,6 @@ class GLController {
 
     // Sets the viewport of the webgl context
     setViewport(width, height) {
-        //this.canvas.width = width;
-        //this.canvas.height = height;
         this.gl.viewport(0, 0, width, height);
     }
 
@@ -424,7 +410,6 @@ class GLController {
 }
 
 // Create and export a static GLC instance which can be used globally
-//const GLC = new GLCommander();
 export {
     GLController
 }
