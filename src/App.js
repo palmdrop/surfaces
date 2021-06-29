@@ -1,6 +1,7 @@
 import React, { useRef, useState, useEffect, useLayoutEffect, useReducer } from 'react'
 
 import WAC from './controllers/warp/WarpAppController'
+import TAC from './controllers/three/ThreeAppController'
 
 import { downloadJSON, promptDownload } from './tools/Utils'
 import { useKeyboardInput } from './hooks/KeyboardInputHook'
@@ -18,6 +19,7 @@ import blogIcon from './resources/icons/blog.svg'
 import repositoryIcon from './resources/icons/repository.png'
 
 import defaultSettings from './resources/settings/hearts.json'
+import ColorInput from './components/input/color/ColorInput'
 
 const githubLink = "https://github.com/palmdrop";
 const repositoryLink = "https://github.com/palmdrop/webgl-domain-warping-controller";
@@ -29,8 +31,9 @@ const App = (props) => {
   ////////////////
   // REFERENCES //
   ////////////////
-  const canvasRef    = useRef(); // The canvas object who holds the WebGL context
-  const fileInputRef = useRef(); // The file input tag that is used to handle user file choosing
+  const canvasRef      = useRef(); // Reference to canvas for texture generation
+  const threeCanvasRef = useRef(); // Reference to canvas for 3D render mode
+  const fileInputRef   = useRef(); // The file input tag that is used to handle user file choosing
 
   ////////////
   // STATES //
@@ -42,6 +45,8 @@ const App = (props) => {
   const [paused, setPaused] = useState(false); // Pauses/unpauses the animation
   const [helpVisible, setHelpVisible] = useState(false);
   const [tooltipsVisible, setTooltipsVisible] = useState(false);
+
+  const [render3D, setRender3D] = useState(false);
 
   ////////////////////
   // EVENT HANDLERS //
@@ -78,6 +83,17 @@ const App = (props) => {
       WAC.stopRecording();
     }
   }
+
+  const toggle3D = (e) => {
+    if(!render3D) {
+      // Let the warp controller handle the update loop
+      WAC.addUpdateCallback(threeUpdate);
+    } else {
+      WAC.removeUpdateCallback(threeUpdate);
+    }
+
+    setRender3D(!render3D);
+  };
 
   // Displays the help modal
   const toggleHelp = (e) => {
@@ -215,6 +231,14 @@ const App = (props) => {
       },
       onHeld: false,
       description: "Hide/show this help popup"
+    },
+    {
+      keys: '3',
+      action: () => {
+        toggle3D();
+      },
+      onHeld: false,
+      description: "Toggle 3D mode"
     }
   ];
 
@@ -300,6 +324,10 @@ const App = (props) => {
   //////////////////
 
   // INITIALIZATION
+  const threeUpdate = (delta) => {
+    TAC.update(delta);
+    TAC.render(delta);
+  };
 
   // Initialize texture controller
   // A hook is used to ensure that the canvas element has been initialized first
@@ -308,7 +336,7 @@ const App = (props) => {
       const canvas = canvasRef.current;
 
       if(!WAC.initialize(canvas, null)) {
-        throw new Error("Warp controlleer failed to intiialize");
+        throw new Error("Warp controlleer failed to initialize");
       }
 
       refresh();
@@ -319,6 +347,15 @@ const App = (props) => {
       });
     }
 
+    if(!TAC.isInitialized()) {
+      const canvas = threeCanvasRef.current;
+
+      if(!TAC.initialize(canvas, canvasRef.current)) {
+        console.error("Three controller failed to initialize. 3D mode disabled");
+        //TODO disable 3d if failed to initialize
+      }
+    }
+
     //return () => WAC.stop();
   });
 
@@ -327,7 +364,10 @@ const App = (props) => {
   // Handle resize events
   useLayoutEffect(() => {
     // Let the warp controller handle the resize
-    const handleResize = () => WAC.handleResize();
+    const handleResize = () => {
+      WAC.handleResize();
+      TAC.handleResize();
+    }
 
     window.addEventListener('resize', handleResize);
     handleResize();
@@ -389,6 +429,17 @@ const App = (props) => {
       onClick={togglePause}
       state={paused}
       description={"Pause/play the animation"}
+    />
+  )
+
+  const threeDButton = (
+    <Button
+      key={"threeDButton"}
+      name={"Enable 3D"}
+      activeName={"Disable 3D"}
+      onClick={toggle3D}
+      state={render3D}
+      description={"Toggle 3D view"}
     />
   )
 
@@ -546,6 +597,21 @@ const App = (props) => {
       }
     };
 
+    const createThreeCategory = () => {
+      return {
+        attributes: TAC.getAttributes(),
+        getter: (name) => TAC.getValue(name),
+        setter: (name, value) => TAC.updateValue(name, value),
+        default: (name) => TAC.getDefault(name),
+        controller: "TAC",
+        separator: ".",
+        before: null,
+        after: null,
+
+        description: "Settings for 3D mode"
+      }
+    };
+
     return {
       texture: createCategory("TXC", null, null, "Settings for the overall texture, warp effect and animation"),
       color: createCategory("CC", null, null, "Settings for hue, saturation, brightness, color balance, and so on"),
@@ -554,6 +620,7 @@ const App = (props) => {
         [captureButton, pauseButton, recordButton],
         "Settings for resolution, multisampling, recording, and so on"
       ),
+      three: createThreeCategory()
     }
   };
 
@@ -562,6 +629,7 @@ const App = (props) => {
     left: [
       helpButton,
       separator,
+      threeDButton,
       captureButton,
       pauseButton, 
     ],
@@ -579,6 +647,20 @@ const App = (props) => {
     ]
   }
 
+  const textureCanvas = (
+    <canvas 
+      className={"canvas" + (render3D ? " canvas--hidden" : "")}
+      ref={canvasRef}
+    />
+  );
+
+  const threeCanvas = (
+    <canvas
+      className={"canvas" + (!render3D ? " canvas--hidden" : "")}
+      ref={threeCanvasRef}
+    />
+  );
+
   return (
       /* Root container */
       <div className="canvas-container">
@@ -592,10 +674,8 @@ const App = (props) => {
         }
 
         { /* Canvas for WebGL context */}
-        <canvas 
-          className="canvas" 
-          ref={canvasRef}
-        />
+        { textureCanvas }
+        { threeCanvas }
         { 
         // Help page with contents
           <HelpPage 

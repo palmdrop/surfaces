@@ -64,11 +64,17 @@ const Input = ({ categoryData, attribute, fullName, precision }) => {
         )
     };
 
+    const createColorPicker = () => {
+
+    };
+
     const createInputEntry = () => {
         var name = fullName.split(categoryData.separator);
         name = name[name.length - 1];
 
-        if(attribute.min === 0.0 && attribute.max === 1.0 && ((
+        if(attribute.type === 'color') {
+            return createColorPicker();
+        } else if(attribute.min === 0.0 && attribute.max === 1.0 && ((
             attribute.step && attribute.step === 1.0) || attribute.type === "1i")) {
             return createSwitch(name, fullName);
         // Otherwise, create a slider

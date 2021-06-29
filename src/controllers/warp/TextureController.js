@@ -3,7 +3,7 @@
 import { 
     getTextureAttributes, 
     AttributeController, 
-} from './ControllerAttributes';
+} from '../ControllerAttributes';
 
 class TextureController extends AttributeController {
     ////////////////////

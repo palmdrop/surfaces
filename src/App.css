@@ -11,6 +11,12 @@
     position: absolute;
     right: 0;
     z-index: -1;
+    visibility: 1;
+    opacity: 1;
+}
+
+.canvas--hidden {
+    transform: translate(100%);
 }
 
 ::-webkit-scrollbar {

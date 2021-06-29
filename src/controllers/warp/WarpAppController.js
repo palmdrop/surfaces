@@ -13,7 +13,7 @@ import { GLController } from '../GLC'
 import quadVertShaderSoruce from '../../GL/shaders/simple.vert'
 import textureFragShaderSource from '../../GL/shaders/warp.frag'
 import colorFragShaderSource from '../../GL/shaders/color.frag'
-import { mergeAttributes, resetAttributesToDefault } from './ControllerAttributes'
+import { mergeAttributes, resetAttributesToDefault } from '../ControllerAttributes'
 import { RenderController } from './RenderController'
 
 // Resources
@@ -151,11 +151,15 @@ class WarpAppController {
     }
 
     addUpdateCallback(callback) {
-        const previousCallback = this.AM.callback;
-        this.AM.setCallback((delta) => {
-            callback(delta);
-            previousCallback(delta);
-        });
+        this.AM.addCallback(callback);
+    }
+
+    removeUpdateCallback(callback) {
+        this.AM.removeCallback(callback);
+    }
+
+    removeAllUpdateCallbacks() {
+        this.AM.removeAllCallbacks();
     }
 
     // Stops the animation

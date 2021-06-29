@@ -500,6 +500,11 @@ const updateAttributeValue = (attributes, program, location, value, GLC) => {
         GLC.setUniform(program, location, attribute.type, attribute.value);
     } 
 
+    // Call onChange callback, if one exists
+    if(typeof attribute.onChange === "function") {
+        attribute.onChange(value);
+    }
+
     return true;
 }
 

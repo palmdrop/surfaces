@@ -1,7 +1,7 @@
 import { 
     getRenderAttributes, 
     AttributeController, 
-} from './ControllerAttributes';
+} from '../ControllerAttributes';
 
 class RenderController extends AttributeController {
     constructor() {

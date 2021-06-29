@@ -10,7 +10,8 @@ class AnimationManager {
         this.animationFrameId = -1;
 
         // Callback function that will be called each update
-        this.callback = null;
+        //this.callback = null;
+        this.callbacks = [];
 
         // True if the animation loop is currently running
         this.running = false;
@@ -29,7 +30,26 @@ class AnimationManager {
     }
 
     setCallback(callback) {
-        this.callback = callback;
+        this.callbacks = [callback];
+    }
+
+    addCallback(callback) {
+        this.removeCallback(callback); // Remove callback if it already exists
+        this.callbacks.push(callback); // Add callback
+    }
+
+    removeCallback(callback) {
+        this.callbacks = this.callbacks.filter((cb) => {
+            if(''+cb == ''+callback) {
+                return false;
+            }
+
+            return true;
+        });
+    }
+
+    removeAllCallbacks() {
+        this.callbacks = [];
     }
 
     isRunning() {
@@ -37,8 +57,8 @@ class AnimationManager {
     }
 
     start() {
-        // Stop the animatioin frame, to avoid two loops running simulatenously
-        this.stop();
+        // If already running, do nothing
+        if(this.isRunning()) return;
 
         this.running = true;
 
@@ -47,9 +67,10 @@ class AnimationManager {
             const now = Date.now();
             const delta = (now - this.previousMillis) / 1000;
 
-            if(this.callback) {
+            /*if(this.callback) {
                 this.callback(delta);
-            }
+            }*/
+            this.callbacks.forEach(callback => callback(delta));
 
             // Update the time
             this.previousMillis = now;
@@ -104,9 +125,10 @@ class AnimationManager {
 
         // Record a single frame
         const recordFrame = () => {
-            if(this.callback) {
+            /*if(this.callback) {
                 this.callback(delta);
-            }
+            }*/
+            this.callbacks.forEach(callback => callback(delta));
 
             addFrame(canvas).then( () => {
                 // And request a second frame
