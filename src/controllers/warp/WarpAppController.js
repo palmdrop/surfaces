@@ -1,6 +1,8 @@
 // Controllers
 import { TextureController } from './TextureController'
 import { ColorController } from './ColorController'
+import { RenderController } from './RenderController'
+import { ThreeDController } from '../three/ThreeDController'
 
 // Animation
 import { AnimationManager } from '../AnimationManager'
@@ -14,7 +16,6 @@ import quadVertShaderSoruce from '../../GL/shaders/simple.vert'
 import textureFragShaderSource from '../../GL/shaders/warp.frag'
 import colorFragShaderSource from '../../GL/shaders/color.frag'
 import { mergeAttributes, resetAttributesToDefault } from '../ControllerAttributes'
-import { RenderController } from './RenderController'
 
 // Resources
 import ditheringTexture from '../../resources/blue-noise/LDR_RGBA_7.png'
@@ -46,11 +47,15 @@ class WarpAppController {
         this.RC = new RenderController();
         this.TXC = new TextureController();
         this.CC  = new ColorController();
+        this.TDC = new ThreeDController();
+
+        this.render3D = false;
 
         this.controllers = {
             RC: this.RC,
             TXC: this.TXC,
-            CC:  this.CC
+            CC:  this.CC,
+            TDC: this.TDC,
         }; 
 
         this.updateCallbacks = new Map();
@@ -59,7 +64,7 @@ class WarpAppController {
         this.onUpdate = null;
     }
 
-    initialize(canvas, onUpdate) {
+    initialize(canvas, canvas3D, onUpdate) {
         if(this.initialized) return;
 
         // Initialize WebGL controller
@@ -100,6 +105,11 @@ class WarpAppController {
             throw new Error("Color controller failed to initialize");
         }
 
+        // Initialize 3D controller
+        if(!this.TDC.initialize(canvas, canvas3D)) {
+            console.error("3D controller failed to initialize. 3D disabled");
+        } 
+
         this.onUpdate = onUpdate;
         this.canvas = canvas;
         this.initialized = true;
@@ -133,6 +143,11 @@ class WarpAppController {
         this.CC.render(renderTexture, dimensions, 
             this.RC.getValue("multisampling"), ditheringAmount,
             this.paused ? 0.0 : delta);
+
+        // If 3D is enabled, render
+        if(this.render3D) {
+            this.TDC.render(delta);
+        }
     }
 
     // Starts the animation manager
@@ -144,6 +159,12 @@ class WarpAppController {
         // Set the render callback for the animation manager
         this.AM.setCallback((delta) => {
             this._render(delta);
+
+            // If 3D is enabled, update
+            if(this.render3D) {
+                this.TDC.update(delta);
+            }
+
             callback && callback();
         });
 
@@ -183,6 +204,7 @@ class WarpAppController {
     // TODO allow passing custom dimensions
     handleResize() {
         this.RC.handleResize();
+        this.TDC.handleResize();
         this.resizeCallback && this.resizeCallback(this.getDimensions());
     }
 
@@ -193,12 +215,22 @@ class WarpAppController {
     // Capture the next frame
     // The data callback should be a function that takes a data URL of a PNG
     captureFrame(dataCallback) {
-        this.CC.captureFrame(dataCallback);
+        if(!this.render3D) {
+            this.CC.captureFrame(dataCallback);
+        } else {
+            this.TDC.captureFrame(dataCallback);
+        }
     }
 
     ///////////////////
     // STATE CONTROL //
     ///////////////////
+    setRender3D(render3D) {
+        if(!this.TDC.isInitialized()) return;
+        
+        this.render3D = render3D;
+    }
+
     changeAnimationSpeed(delta) {
         const speed = this.TXC.getValue("animationSpeed.general");
         this.updateValue("TXC", "animationSpeed.general", Math.max(speed * (1 + delta)));

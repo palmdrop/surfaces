@@ -3,7 +3,7 @@ import { TrackballControls } from 'three/examples/jsm/controls/TrackballControls
 
 import { AttributeController } from '../ControllerAttributes'
 
-class ThreeAppController extends AttributeController {
+class ThreeDController extends AttributeController {
     constructor() {
         //TODO add descriptions
         super(() => {
@@ -100,12 +100,9 @@ class ThreeAppController extends AttributeController {
 
         this.far = 2;
         this.near = 0.01;
-        // TODO create three attributes in this class, then pass it down! 
-        // TODO add update callbacks for necessary functions
-        // TODO update attribute controller to call these callback, if they exist
     }
 
-    initialize(canvas, textureCanvas) {
+    initialize(textureCanvas, canvas) {
         this.canvas = canvas;
 
         // CREATE RENDERER
@@ -200,6 +197,20 @@ class ThreeAppController extends AttributeController {
 
     render(delta) {
         this.renderer.render(this.scene, this.camera);
+
+        // Capture the frame if requested
+        if(this.captureNext) {
+            this.captureNext = false;
+            const captureData = this.canvas.toDataURL("image/png");
+            this.dataCallback(captureData);
+        }
+    }
+
+    // Used to capture the next frame of animation
+    // The data callback function will be used to return the result
+    captureFrame(dataCallback) {
+        this.captureNext = true;
+        this.dataCallback = dataCallback;
     }
 
     handleResize() {
@@ -221,6 +232,4 @@ class ThreeAppController extends AttributeController {
     }
 }
 
-const TAC = new ThreeAppController();
-
-export default TAC;
+export { ThreeDController };

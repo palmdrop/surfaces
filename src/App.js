@@ -1,7 +1,6 @@
 import React, { useRef, useState, useEffect, useLayoutEffect, useReducer } from 'react'
 
 import WAC from './controllers/warp/WarpAppController'
-import TAC from './controllers/three/ThreeAppController'
 
 import { downloadJSON, promptDownload } from './tools/Utils'
 import { useKeyboardInput } from './hooks/KeyboardInputHook'
@@ -19,7 +18,6 @@ import blogIcon from './resources/icons/blog.svg'
 import repositoryIcon from './resources/icons/repository.png'
 
 import defaultSettings from './resources/settings/hearts.json'
-import ColorInput from './components/input/color/ColorInput'
 
 const githubLink = "https://github.com/palmdrop";
 const repositoryLink = "https://github.com/palmdrop/webgl-domain-warping-controller";
@@ -85,14 +83,8 @@ const App = (props) => {
   }
 
   const toggle3D = (e) => {
-    if(!render3D) {
-      // Let the warp controller handle the update loop
-      WAC.addUpdateCallback(threeUpdate);
-    } else {
-      WAC.removeUpdateCallback(threeUpdate);
-    }
-
-    setRender3D(!render3D);
+    WAC.setRender3D(!render3D);
+    setRender3D(WAC.render3D);
   };
 
   // Displays the help modal
@@ -323,19 +315,14 @@ const App = (props) => {
   // EFFECT HOOKS //
   //////////////////
 
-  // INITIALIZATION
-  const threeUpdate = (delta) => {
-    TAC.update(delta);
-    TAC.render(delta);
-  };
-
   // Initialize texture controller
   // A hook is used to ensure that the canvas element has been initialized first
   useEffect(() => {
     if(!WAC.isInitialized()) {
       const canvas = canvasRef.current;
+      const canvas3D = threeCanvasRef.current;
 
-      if(!WAC.initialize(canvas, null)) {
+      if(!WAC.initialize(canvas, canvas3D, null)) {
         throw new Error("Warp controlleer failed to initialize");
       }
 
@@ -345,15 +332,6 @@ const App = (props) => {
       WAC.start(() => {
         executeHeldActions();
       });
-    }
-
-    if(!TAC.isInitialized()) {
-      const canvas = threeCanvasRef.current;
-
-      if(!TAC.initialize(canvas, canvasRef.current)) {
-        console.error("Three controller failed to initialize. 3D mode disabled");
-        //TODO disable 3d if failed to initialize
-      }
     }
 
     //return () => WAC.stop();
@@ -366,7 +344,6 @@ const App = (props) => {
     // Let the warp controller handle the resize
     const handleResize = () => {
       WAC.handleResize();
-      TAC.handleResize();
     }
 
     window.addEventListener('resize', handleResize);
@@ -582,7 +559,7 @@ const App = (props) => {
 
   // Setup for sidebar categories, with all relevant data
   const createSidebarCategories = () => {
-    const createCategory = (controller, before, after, description) => {
+    const createCategory = (controller, before, after, name, description) => {
       return {
         attributes: WAC.getAttributes(controller),
         getter: (name) => WAC.getValue(controller, name),
@@ -593,34 +570,21 @@ const App = (props) => {
         before: before,
         after: after,
 
+        name: name,
         description: description
       }
     };
 
-    const createThreeCategory = () => {
-      return {
-        attributes: TAC.getAttributes(),
-        getter: (name) => TAC.getValue(name),
-        setter: (name, value) => TAC.updateValue(name, value),
-        default: (name) => TAC.getDefault(name),
-        controller: "TAC",
-        separator: ".",
-        before: null,
-        after: null,
-
-        description: "Settings for 3D mode"
-      }
-    };
-
     return {
-      texture: createCategory("TXC", null, null, "Settings for the overall texture, warp effect and animation"),
-      color: createCategory("CC", null, null, "Settings for hue, saturation, brightness, color balance, and so on"),
+      texture: createCategory("TXC", null, null, "Texture", "Settings for the overall texture, warp effect and animation"),
+      color: createCategory("CC", null, null, "Color", "Settings for hue, saturation, brightness, color balance, and so on"),
       render: createCategory("RC", 
         dataPanel(),
         [captureButton, pauseButton, recordButton],
+        "Render",
         "Settings for resolution, multisampling, recording, and so on"
       ),
-      three: createThreeCategory()
+      three: createCategory("TDC", null, null, "3D", "Settings for 3D mode")
     }
   };
 
@@ -673,7 +637,7 @@ const App = (props) => {
           />
         }
 
-        { /* Canvas for WebGL context */}
+        { /* Canvas for WebGL context */ }
         { textureCanvas }
         { threeCanvas }
         { 
