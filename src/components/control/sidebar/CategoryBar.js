@@ -35,7 +35,7 @@ const CategoryBar = ( { categories } ) => {
                         className={"category-bar__category"
                         + (category === activeCategory ? " category-bar__category--active" : "")}
                     >
-                        {camelToTitle(category)}
+                        {data.name || camelToTitle(category)}
                     </div>
                 </div>
             ))

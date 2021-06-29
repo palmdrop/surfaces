@@ -3,112 +3,210 @@ import { TrackballControls } from 'three/examples/jsm/controls/TrackballControls
 
 import { AttributeController } from '../ControllerAttributes'
 
+const createLightAttributes = (light, description, opts) => {
+    const attributes = {};
+
+    attributes.description = description;
+
+    attributes.value = {
+        intensity: {
+            value: opts.intensity,
+            default: opts.intensity,
+            min: 0,
+            max: 15,
+
+            onChange: (value) => {
+                light().intensity = value;
+            }
+        },
+        color: {
+            value: opts.color,
+            default: opts.color,
+            type: 'color',
+            
+            onChange: (value) => {
+                light().color.set(value);
+            }
+        }
+
+    };
+
+    if(opts.type !== 'ambient') {
+        attributes.value.x = {
+            value: opts.position.x,
+            default: opts.position.x,
+            min: -2,
+            max: 2,
+
+            onChange: (value) => {
+                light().position.x = value;
+            }
+        };
+
+        attributes.value.y = {
+            value: opts.position.y,
+            default: opts.position.y,
+            min: 1,
+            max: 3,
+
+            onChange: (value) => {
+                light().position.y = value;
+            }
+        };
+
+        attributes.value.z = {
+            value: opts.position.z,
+            default: opts.position.z,
+            min: -2,
+            max: 2,
+
+            onChange: (value) => {
+                light().position.z = value;
+            }
+        };
+    }
+
+    if(opts.type === 'point') {
+        attributes.value.distance = {
+            value: opts.distance,
+            default: opts.distance,
+            min: 0.05,
+            max: 3,
+
+            onChange: (value) => {
+                light().distance = value;
+            }
+        };
+
+        attributes.value.decay = {
+            value: opts.decay,
+            default: opts.decay,
+            min: 1,
+            max: 4,
+
+            onChange: (value) => {
+                light().decay = value;
+            }
+        };
+    }
+
+    return attributes;
+};
+
 class ThreeDController extends AttributeController {
     constructor() {
         //TODO add descriptions
-        super(() => {
-            return {
-                metalness: {
-                    value: 0.5,
-                    default: 0.5,
-                    min: 0.0,
-                    max: 1.0,
+        super(() => { return {
+            metalness: {
+                value: 0.5,
+                default: 0.5,
+                min: 0.0,
+                max: 1.0,
 
-                    onChange: (value) => {
-                        this.material.metalness = value;
-                    }
-                },
-                roughness: {
-                    value: 0.5,
-                    default: 0.5,
-                    min: 0.0,
-                    max: 1.0,
-
-                    onChange: (value) => {
-                        this.material.roughness = value;
-                    }
-                },
-                bumpScale: {
-                    value: 0.1,
-                    default: 0.1,
-                    min: 0.0,
-                    max: 1.0,
-
-                    onChange: (value) => {
-                        this.material.bumpScale = value;
-                    }
-                },
-                height: {
-                    value: 0.1,
-                    default: 0.1,
-                    min: 0.0,
-                    max: 1.0,
-
-                    onChange: (value) => {
-                        this.material.displacementScale = value;
-                        this.material.displacementBias = -value / 2;
-                    }
-                },
-                directionalLight: {
-                    value: {
-                        x: {
-                            value: 0,
-                            default: 0,
-                            min: -2,
-                            max: 2,
-
-                            onChange: (value) => {
-                                this.directionalLight.position.x = value;
-                            }
-                        },
-                        y: {
-                            value: 2,
-                            default: 2,
-                            min: 1,
-                            max: 3,
-
-                            onChange: (value) => {
-                                this.directionalLight.position.y = value;
-                            }
-                        },
-                        z: {
-                            value: -2,
-                            default: -2,
-                            min: -2,
-                            max: 2,
-
-                            onChange: (value) => {
-                                this.directionalLight.position.z = value;
-                            }
-                        },
-                        intensity: {
-                            value: 7,
-                            default: 7,
-                            min: 0,
-                            max: 15,
-
-                            onChange: (value) => {
-                                this.directionalLight.intensity = value;
-                            }
-                        },
-                        color: {
-                            value: '#ffffff',
-                            default: '#ffffff',
-                            type: 'color',
-                            
-                            onChange: (value) => {
-                                this.directionalLight.color.set(value);
-                            }
-                        }
-
-                    },
+                onChange: (value) => {
+                    this.material.metalness = value;
                 }
+            },
+            roughness: {
+                value: 0.5,
+                default: 0.5,
+                min: 0.0,
+                max: 1.0,
+
+                onChange: (value) => {
+                    this.material.roughness = value;
+                }
+            },
+            bumpScale: {
+                value: 0.01,
+                default: 0.01,
+                min: 0.0,
+                max: 1.0,
+                step: 0.001,
+
+                onChange: (value) => {
+                    this.material.bumpScale = value;
+                }
+            },
+            height: {
+                value: 0.1,
+                default: 0.1,
+                min: 0.0,
+                max: 1.0,
+
+                onChange: (value) => {
+                    this.material.displacementScale = value;
+                    this.material.displacementBias = -value / 2;
+                }
+            },
+            fog: {
+                value: {
+                    color: {
+                        value: '#000000',
+                        default: '#000000',
+                        type: 'color',
+                        
+                        onChange: (value) => {
+                            this.scene.fog.color.set(value);
+                            this.scene.background.set(value);
+                        }
+                    },
+                    near: {
+                        value: 0.43,
+                        default: 0.43,
+                        min: 0.001,
+                        max: 1.0,
+
+                        onChange: (value) => {
+                            this.scene.fog.near = value;
+                        }
+                    },
+                    far: {
+                        value: 1.8,
+                        default: 1.8,
+                        min: 0.1,
+                        max: 4.0,
+
+                        onChange: (value) => {
+                            this.scene.fog.far = value;
+                        }
+                    }
+                }
+            },
+            ambientLight: createLightAttributes(
+                () => this.ambientLight, 
+                "Ambient light", 
+                {
+                    type: "ambient",
+                    color: '#ffffff',
+                    intensity: 0.3,
+                }
+            ),
+            directionalLight: createLightAttributes(
+                () => this.directionalLight, 
+                "Directional light", 
+                {
+                    type: "directional",
+                    color: '#ffffff',
+                    intensity: 2,
+                    position: new THREE.Vector3(0, 2, -2)
+                }
+            ),
+            pointLight: createLightAttributes(
+                () => this.pointLight, 
+                "Point light", 
+                {
+                    type: "point",
+                    color: '#ffffff',
+                    intensity: 3,
+                    decay: 2,
+                    distance: 5,
+                    position: new THREE.Vector3(0, 1, -0.25)
+                }
+            ),
         }});
 
         this.initialized = false;
-
-        this.far = 2;
-        this.near = 0.01;
     }
 
     initialize(textureCanvas, canvas) {
@@ -139,10 +237,10 @@ class ThreeDController extends AttributeController {
 
         // CREATE SCENE
         this.scene = new THREE.Scene();
-        this.scene.background = new THREE.Color('#000000');
-        this.scene.fog = new THREE.Fog('#ffffff', 
-            this.near,
-            this.far
+        this.scene.background = new THREE.Color(this.getValue("fog.color"));
+        this.scene.fog = new THREE.Fog(this.getValue("fog.color"),
+            this.getValue("fog.near"),
+            this.getValue("fog.far")
         );
 
         // POPULATE SCENE
@@ -162,14 +260,14 @@ class ThreeDController extends AttributeController {
             color: '#ffffff',
             map: texture,
             bumpMap: texture,
-            bumpScale: 0.01,
+            bumpScale: this.getValue("bumpScale"),
 
-            metalness: 0.5,
-            roughness: 0.0,
+            metalness: this.getValue("metalness"),
+            roughness: this.getValue("roughness"),
 
             displacementMap: texture,
-            displacementScale: 0.1,
-            displacementBias: -0.05,
+            displacementScale: this.getValue("height"),
+            displacementBias: -this.getValue("height") / 2
         });
 
         const plane = new THREE.Mesh(geometry, material);
@@ -178,15 +276,38 @@ class ThreeDController extends AttributeController {
         this.material = material;
 
         // Light
-        this.directionalLight = new THREE.DirectionalLight('#ffffff', 7);
-        this.directionalLight.position.set(0, 2, -2);
+        this.ambientLight = new THREE.AmbientLight(
+            this.getValue("ambientLight.color"), 
+            this.getValue("ambientLight.intensity")
+        );
 
-        const ambientLight = new THREE.AmbientLight('#ffffff', 0.3);
+        this.directionalLight = new THREE.DirectionalLight(
+            this.getValue("directionalLight.color"),
+            this.getValue("directionalLight.intensity")
+        );
+        this.directionalLight.position.set(
+            this.getValue("directionalLight.x"),
+            this.getValue("directionalLight.y"),
+            this.getValue("directionalLight.z")
+        );
+
+        this.pointLight = new THREE.PointLight(
+            this.getValue("pointLight.color"),
+            this.getValue("pointLight.intensity"),
+            this.getValue("pointLight.distance"),
+            this.getValue("pointLight.decay"),
+        );
+        this.pointLight.position.set(
+            this.getValue("pointLight.x"),
+            this.getValue("pointLight.y"),
+            this.getValue("pointLight.z")
+        );
 
         this.scene.add(
             plane,
+            this.ambientLight,
             this.directionalLight,
-            ambientLight
+            this.pointLight
         );
 
         this.initialized = true;
