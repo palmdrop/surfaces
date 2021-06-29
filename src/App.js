@@ -11,18 +11,14 @@ import ControlPanel from './components/control/ControlPanel'
 import Button from './components/input/button/Button';
 import DataPanel from './components/data/panel/DataPanel';
 
+import defaultSettings from './resources/settings/hearts.json'
+
 import githubIcon from './resources/icons/github.svg'
 import instagramIcon from './resources/icons/instagram.svg'
 import emailIcon from './resources/icons/email.svg'
-import blogIcon from './resources/icons/blog.svg'
-import repositoryIcon from './resources/icons/repository.png'
 
-import defaultSettings from './resources/settings/hearts.json'
-
-const githubLink = "https://github.com/palmdrop";
 const repositoryLink = "https://github.com/palmdrop/webgl-domain-warping-controller";
 const instagramLink = "https://www.instagram.com/palmdrop/"; 
-const blogLink = "https://palmdrop.github.io/"; 
 const emailLink = "mailto:anton@exlex.se"; 
 
 const App = (props) => {
@@ -645,139 +641,7 @@ const App = (props) => {
           <HelpPage 
             mainTitle={"Surfaces"}
             visibility={helpVisible}
-            descriptions={[
-              {
-                title: "A Recursive Domain Warping Controller",
-                content: (
-                  <div>
-                    <p>
-                      Any image can be seen as a function of space. The input is a pixel location, an XY-coordinate, and the
-                      output is a pixel color. The width and height of the image are the domain. By warping the domain, we alter
-                      the space itself. Sampling a particular XY-coordinate will now (likely) result in a different output color 
-                      than before. This is called domain warping.
-                    </p>
-                    <p>
-                      This technique is commonly used for texture generation, visual effects, or generative art. This application
-                      makes the technique not only accessible, but fast (using GLSL shaders) and easy to try out different configurations
-                      with. 
-                    </p>
-                    <p>
-                      To properly understand everything at work here, I suggest reading Inigo 
-                      Quilez <a target="_blank" rel="noreferrer" href="https://www.iquilezles.org/www/articles/warp/warp.htm">blog post</a> on the topic, 
-                      or my own <a target="_blank" rel="noreferrer" href="https://palmdrop.github.io/post/domain-warping/">blog post</a>, 
-                      where I discuss the specific variant of this technique used on this page. I also suggest reading 
-                      about <a target="_blank" rel="noreferrer" href="https://en.wikipedia.org/wiki/Simplex_noise">Simplex Noise</a>, which is used
-                      as an underlying function of space for both the source function and the functions that alter its domain. 
-                    </p>
-                    <p>
-                      There's a lot of settings available to you. They might be overwhelming or incomprehensible. The best way to learn what they 
-                      do is to study the links from the previous paragraph, or just play around with them. If you want more information about what
-                      the obscure sliders actually do, press the "Show Tooltips" button in the upper right corner. Some information about each slider 
-                      or button will be displayed when you hover the mouse over it. 
-                    </p>
-                    <p>
-                      In the top bar, there are buttons for saving a frame, for exporting or importing the current settings, among other things.
-                      Feel free to post your creations anywhere you like. But do provide a link to this site if you do. Please note that this application
-                      works best on modern browsers with support for WebGL2.
-                    </p>
-                    <p>
-                      Below follows more information about the three main categories of settings that you'll find in the sidebar.
-                    </p>
-                  </div>
-                )
-              },
-              {
-                title: "Texture",
-                content: (
-                  <div>
-                    <p>
-                      The <i>texture controller</i> changes the characteristics of the underlying noise functions, as well as the warp effect itself. 
-                      The <i>warp amount</i> controls the strength of the effect. The <i>iterations</i> is the number of times the warp is applied. The <i>source</i>
-                      is the noise function whos domain is sampled. The <i>angle controller</i> controls the angle of the warp effect, across space, and the
-                      <i>amount controller</i> controls the strength of the warp effect. Each layer has sliders for controlling fractal noise settings (layers of noise). 
-                    </p>  
-                    <p>
-                      I suggest reading <a target="_blank" rel="noreferrer" href="https://palmdrop.github.io/post/characteristics-of-modified-noise/">this post</a>. 
-                      It also covers some of the <i>modifications</i> available.
-                    </p>
-                  </div>
-                )
-              },
-              {
-                title: "Color",
-                content: (
-                  <div>
-                    <p>
-                      The <i>color controller</i> gives precise control over the colors. There are
-                      some (hopefully) self-explanatory <i>general</i> sliders, but also more specific controllers for hue, saturation and brightness. Each of 
-                      these sub-controllers allows you to choose which layers (source, angle, and amount) will influence that part of the color. 
-                      For example, you might want the source layer to increase brightness, while the angle layer decreases it.
-                    </p>
-                    <p>
-                      As a side effect, this might make the <i>source</i> layer have varying influence over the final color. Do not be surprised if altering
-                      the <i>source</i> settings in the <i>texture</i> category does not change the results much. This is likely due to your <i>color</i> settings.
-                    </p>
-                  </div>
-                )
-              },
-              {
-                title: "Render",
-                content: (
-                  <div>
-                    <p>
-                      The <i>render controller</i> gives you the ability to change resolution, control dithering, and multisampling.
-                      There's also an option to record the animation. Unfortunately, there's not yet support for converting the recorded
-                      frames into a video. Instead, you'll receive a zipped archive of PNG images. 
-                    </p>
-                  </div>
-                )
-              },
-            ]}
             shortcuts={shortcuts}
-            contact={[
-              {
-                title: "Development",
-                entries: [
-                  { 
-                    link: githubLink,
-                    location: "Github", 
-                    icon: githubIcon,
-                    description: "where I store my projects and configuration files"},
-                  { 
-                    link: repositoryLink,
-                    location: "Repository", 
-                    icon: repositoryIcon,
-                    description: "where you can find the source code for this app"
-                  }
-                ]
-              },
-              {
-                title: "Social Media",
-                entries: [
-                  { 
-                    link: instagramLink,
-                    location: "Instagram", 
-                    icon: instagramIcon,
-                    description: "where I post generative art and experiments"},
-                  { 
-                    link: blogLink,
-                    location: "Blog", 
-                    icon: blogIcon,
-                    description: "where I (occassionally) document my techniques"
-                  }
-                ]
-              },
-              {
-                title: "Contact",
-                entries: [
-                  { 
-                    link: "mailto:anton@exlex.se", 
-                    location: "Email", 
-                    icon: emailIcon,
-                    description: "with which you can reach me if you have questions"},
-                ]
-              },
-            ]}
             onCloseCallback={() => toggleHelp()}
           />
         }
