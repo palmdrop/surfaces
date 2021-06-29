@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react'
 
 import InputSlider from './slider/InputSlider'
 import InputSwitch from './switch/InputSwitch'
+import InputColor from './color/InputColor'
 import { camelToTitle } from '../../tools/Utils'
 
 import './Input.css'
@@ -64,8 +65,16 @@ const Input = ({ categoryData, attribute, fullName, precision }) => {
         )
     };
 
-    const createColorPicker = () => {
-
+    const createColorPicker = (name, fullName) => {
+        return (
+            <InputColor 
+                key={fullName}
+                label={camelToTitle(name)}
+                valueGetter={() => getter(fullName)}
+                onChange={(v) => setter(fullName, v)}
+                fullName={fullName}
+            />
+        );
     };
 
     const createInputEntry = () => {
@@ -73,7 +82,7 @@ const Input = ({ categoryData, attribute, fullName, precision }) => {
         name = name[name.length - 1];
 
         if(attribute.type === 'color') {
-            return createColorPicker();
+            return createColorPicker(name, fullName);
         } else if(attribute.min === 0.0 && attribute.max === 1.0 && ((
             attribute.step && attribute.step === 1.0) || attribute.type === "1i")) {
             return createSwitch(name, fullName);

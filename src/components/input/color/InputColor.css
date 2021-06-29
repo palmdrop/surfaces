@@ -1,0 +1,16 @@
+.input-color {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.input-color__label {
+    font-size: 1.1em;
+    padding-bottom: 0.4rem;
+    font-family: var(--bold-font);
+    color: var(--foreground);
+}
+
+.input-color .react-colorful {
+    width: auto;
+}

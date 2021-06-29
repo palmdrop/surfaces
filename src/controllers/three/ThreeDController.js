@@ -90,6 +90,15 @@ class ThreeDController extends AttributeController {
                             onChange: (value) => {
                                 this.directionalLight.intensity = value;
                             }
+                        },
+                        color: {
+                            value: '#ffffff',
+                            default: '#ffffff',
+                            type: 'color',
+                            
+                            onChange: (value) => {
+                                this.directionalLight.color.set(value);
+                            }
                         }
 
                     },
