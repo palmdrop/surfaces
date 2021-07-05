@@ -13,6 +13,7 @@
     "glsl-noise": "^0.0.0",
     "glslify": "^7.1.1",
     "glslify-loader": "^2.0.0",
+    "postprocessing": "^6.22.1",
     "raw-loader": "^4.0.2",
     "react": "^17.0.2",
     "react-colorful": "^5.2.2",

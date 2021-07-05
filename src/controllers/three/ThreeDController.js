@@ -1,7 +1,10 @@
 import * as THREE from 'three'
+import * as POSTPROCESSING from 'postprocessing';
 import { TrackballControls } from 'three/examples/jsm/controls/TrackballControls'
 
 import { AttributeController } from '../ControllerAttributes'
+import { TextureProcessor } from './processing/TextureProcessor';
+import { NormalMapShader } from './shaders/NormalMapShader';
 
 const createLightAttributes = (light, description, opts) => {
     const attributes = {};
@@ -118,25 +121,40 @@ class ThreeDController extends AttributeController {
                 }
             },
             bumpScale: {
-                value: 0.01,
-                default: 0.01,
+                value: 0.1,
+                default: 0.1,
                 min: 0.0,
                 max: 1.0,
                 step: 0.001,
 
                 onChange: (value) => {
-                    this.material.bumpScale = value;
+                    //this.material.bumpScale = value;
+                    this.material.normalScale = new THREE.Vector2(value, value)
                 }
             },
-            height: {
-                value: 0.1,
-                default: 0.1,
-                min: 0.0,
-                max: 1.0,
+            displacement: {
+                value: {
+                    amount: {
+                        value: 0.3,
+                        default: 0.3,
+                        min: 0.0,
+                        max: 1.0,
 
-                onChange: (value) => {
-                    this.material.displacementScale = value;
-                    this.material.displacementBias = -value / 2;
+                        onChange: (value) => {
+                            this.material.displacementScale = value;
+                            this.material.displacementBias = -value / 2;
+                        }
+                    },
+                    smoothness: {
+                        value: 0.2,
+                        default: 0.2,
+                        min: 0.0,
+                        max: 1.0,
+
+                        onChange: (value) => {
+                            this.blurPass.scale = value;
+                        }
+                    }
                 }
             },
             fog: {
@@ -173,38 +191,45 @@ class ThreeDController extends AttributeController {
                     }
                 }
             },
-            ambientLight: createLightAttributes(
-                () => this.ambientLight, 
-                "Ambient light", 
-                {
-                    type: "ambient",
-                    color: '#ffffff',
-                    intensity: 0.3,
+            lighting: {
+                value: {
+                    ambientLight: createLightAttributes(
+                        () => this.ambientLight, 
+                        "Ambient light", 
+                        {
+                            type: "ambient",
+                            color: '#ffffff',
+                            intensity: 0.3,
+                        }
+                    ),
+                    directionalLight: createLightAttributes(
+                        () => this.directionalLight, 
+                        "Directional light", 
+                        {
+                            type: "directional",
+                            color: '#ffffff',
+                            intensity: 2,
+                            position: new THREE.Vector3(0, 2, -2)
+                        }
+                    ),
+                    pointLight: createLightAttributes(
+                        () => this.pointLight, 
+                        "Point light", 
+                        {
+                            type: "point",
+                            color: '#ffffff',
+                            intensity: 3,
+                            decay: 2,
+                            distance: 5,
+                            position: new THREE.Vector3(0, 1, -0.25)
+                        }
+                    )
                 }
-            ),
-            directionalLight: createLightAttributes(
-                () => this.directionalLight, 
-                "Directional light", 
-                {
-                    type: "directional",
-                    color: '#ffffff',
-                    intensity: 2,
-                    position: new THREE.Vector3(0, 2, -2)
-                }
-            ),
-            pointLight: createLightAttributes(
-                () => this.pointLight, 
-                "Point light", 
-                {
-                    type: "point",
-                    color: '#ffffff',
-                    intensity: 3,
-                    decay: 2,
-                    distance: 5,
-                    position: new THREE.Vector3(0, 1, -0.25)
-                }
-            ),
+            }
         }});
+
+        this.near = 0.01;
+        this.far = 50;
 
         this.initialized = false;
     }
@@ -215,7 +240,7 @@ class ThreeDController extends AttributeController {
         // CREATE RENDERER
         this.renderer = new THREE.WebGLRenderer({
             canvas: canvas,
-            antialias: true,
+            antialias: false,
             powerPreference: 'high-performance'
         });
         //this.renderer.outputEncoding = THREE.sRGBEncoding;
@@ -248,10 +273,37 @@ class ThreeDController extends AttributeController {
         // Texture
         const texture = new THREE.CanvasTexture(textureCanvas);
         texture.needsUpdate = true;
+        texture.magFilter = THREE.LinearFilter;
+        texture.minFilter = THREE.LinearFilter;
         this.texture = texture;
 
-        //TODO create filtered versions of the texture,
-        // TODO make height increase falloff, blur bumpMap slightly
+        // Texture processing
+        // Calculate normal map
+        this.normalMaterial = new THREE.ShaderMaterial(NormalMapShader);
+        this.normalMaterial.uniforms.width.value = canvas.clientWidth;
+        this.normalMaterial.uniforms.height.value = canvas.clientHeight;
+
+        const normalPass = new POSTPROCESSING.ShaderPass(
+            this.normalMaterial,
+            'tDiffuse'
+        );
+
+        this.normalMapProducer = new TextureProcessor(this.renderer, texture, canvas.clientWidth, canvas.clientHeight, [
+            normalPass
+        ]);
+
+        // Calculate heightmap
+        const blurPass = new POSTPROCESSING.BlurPass({
+            kernelSize: POSTPROCESSING.KernelSize.MEDIUM
+        });
+        this.blurPass = blurPass;
+
+        this.heightMapProducer = new TextureProcessor(this.renderer, texture, canvas.clientWidth, canvas.clientHeight, [
+            blurPass
+        ]);
+
+        const normalMap = this.normalMapProducer.getProcessedTexture();
+        const heightMap = this.heightMapProducer.getProcessedTexture();
 
         // Plane
         const detail = 500;
@@ -259,15 +311,19 @@ class ThreeDController extends AttributeController {
         const material = new THREE.MeshStandardMaterial({
             color: '#ffffff',
             map: texture,
-            bumpMap: texture,
-            bumpScale: this.getValue("bumpScale"),
 
             metalness: this.getValue("metalness"),
             roughness: this.getValue("roughness"),
 
-            displacementMap: texture,
-            displacementScale: this.getValue("height"),
-            displacementBias: -this.getValue("height") / 2
+            normalMap: normalMap,
+            normalScale: new THREE.Vector2(
+                this.getValue("bumpScale"),
+                this.getValue("bumpScale")
+            ),
+
+            displacementMap: heightMap,
+            displacementScale: this.getValue("displacement.amount"),
+            displacementBias: -this.getValue("displacement.amount") / 2
         });
 
         const plane = new THREE.Mesh(geometry, material);
@@ -277,30 +333,30 @@ class ThreeDController extends AttributeController {
 
         // Light
         this.ambientLight = new THREE.AmbientLight(
-            this.getValue("ambientLight.color"), 
-            this.getValue("ambientLight.intensity")
+            this.getValue("lighting.ambientLight.color"), 
+            this.getValue("lighting.ambientLight.intensity")
         );
 
         this.directionalLight = new THREE.DirectionalLight(
-            this.getValue("directionalLight.color"),
-            this.getValue("directionalLight.intensity")
+            this.getValue("lighting.directionalLight.color"),
+            this.getValue("lighting.directionalLight.intensity")
         );
         this.directionalLight.position.set(
-            this.getValue("directionalLight.x"),
-            this.getValue("directionalLight.y"),
-            this.getValue("directionalLight.z")
+            this.getValue("lighting.directionalLight.x"),
+            this.getValue("lighting.directionalLight.y"),
+            this.getValue("lighting.directionalLight.z")
         );
 
         this.pointLight = new THREE.PointLight(
-            this.getValue("pointLight.color"),
-            this.getValue("pointLight.intensity"),
-            this.getValue("pointLight.distance"),
-            this.getValue("pointLight.decay"),
+            this.getValue("lighting.pointLight.color"),
+            this.getValue("lighting.pointLight.intensity"),
+            this.getValue("lighting.pointLight.distance"),
+            this.getValue("lighting.pointLight.decay"),
         );
         this.pointLight.position.set(
-            this.getValue("pointLight.x"),
-            this.getValue("pointLight.y"),
-            this.getValue("pointLight.z")
+            this.getValue("lighting.pointLight.x"),
+            this.getValue("lighting.pointLight.y"),
+            this.getValue("lighting.pointLight.z")
         );
 
         this.scene.add(
@@ -326,6 +382,10 @@ class ThreeDController extends AttributeController {
     }
 
     render(delta) {
+        this.normalMapProducer.render(delta);
+        this.heightMapProducer.render(delta);
+
+        this.renderer.setRenderTarget(null);
         this.renderer.render(this.scene, this.camera);
 
         // Capture the frame if requested
@@ -357,8 +417,14 @@ class ThreeDController extends AttributeController {
 
         this.renderer.setSize( newSize.x, newSize.y, false );
 
+        this.normalMaterial.uniforms.width.value = newSize.x;
+        this.normalMaterial.uniforms.height.value = newSize.y;
+
         this.camera.aspect = newSize.x / newSize.y;
         this.camera.updateProjectionMatrix();
+
+        this.normalMapProducer.setSize( newSize.x, newSize.y );
+        this.heightMapProducer.setSize( newSize.x, newSize.y );
     }
 }
 

@@ -92,7 +92,7 @@
 .input-dropdown-content--expanded {
     overflow: hidden;
     height: auto;
-    max-height: 800px;
+    max-height: 1200px;
     visibility: 1;
     transition: max-height 0.6s, visibility 0.3s ease;
 }
