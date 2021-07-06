@@ -23,7 +23,9 @@ const createLightAttributes = (light, description, opts) => {
 
             onChange: (value) => {
                 light().intensity = value;
-            }
+            },
+
+            description: "Intensity/brightness of the light"
         },
         color: {
             value: opts.color,
@@ -32,7 +34,9 @@ const createLightAttributes = (light, description, opts) => {
             
             onChange: (value) => {
                 light().color.set(value);
-            }
+            },
+
+            description: "Color of the light"
         }
 
     };
@@ -46,7 +50,9 @@ const createLightAttributes = (light, description, opts) => {
 
             onChange: (value) => {
                 light().position.x = value;
-            }
+            },
+
+            description: "X-coordinate of the light"
         };
 
         attributes.value.y = {
@@ -57,7 +63,9 @@ const createLightAttributes = (light, description, opts) => {
 
             onChange: (value) => {
                 light().position.y = value;
-            }
+            },
+
+            description: "Y-coordinate of the light"
         };
 
         attributes.value.z = {
@@ -68,7 +76,9 @@ const createLightAttributes = (light, description, opts) => {
 
             onChange: (value) => {
                 light().position.z = value;
-            }
+            },
+
+            description: "Z-coordinate of the light"
         };
     }
 
@@ -81,7 +91,9 @@ const createLightAttributes = (light, description, opts) => {
 
             onChange: (value) => {
                 light().distance = value;
-            }
+            },
+
+            description: "How far away the light reaches" 
         };
 
         attributes.value.decay = {
@@ -92,7 +104,9 @@ const createLightAttributes = (light, description, opts) => {
 
             onChange: (value) => {
                 light().decay = value;
-            }
+            },
+
+            description: "How much the light decreases in intensity across distance"
         };
     }
 
@@ -101,7 +115,6 @@ const createLightAttributes = (light, description, opts) => {
 
 class ThreeDController extends AttributeController {
     constructor() {
-        //TODO add descriptions
         super(() => { return {
             metalness: {
                 value: 0.5,
@@ -111,7 +124,9 @@ class ThreeDController extends AttributeController {
 
                 onChange: (value) => {
                     this.material.metalness = value;
-                }
+                },
+
+                description: "How metallic the surface looks"
             },
             roughness: {
                 value: 0.5,
@@ -121,7 +136,9 @@ class ThreeDController extends AttributeController {
 
                 onChange: (value) => {
                     this.material.roughness = value;
-                }
+                },
+
+                description: "How rough the surface is. A low value means clearer reflections"  
             },
             bumpScale: {
                 value: 0.1,
@@ -131,9 +148,10 @@ class ThreeDController extends AttributeController {
                 step: 0.001,
 
                 onChange: (value) => {
-                    //this.material.bumpScale = value;
                     this.material.normalScale = new THREE.Vector2(value, value)
-                }
+                },
+
+                description: "The amount of small details"
             },
             displacement: {
                 value: {
@@ -146,7 +164,9 @@ class ThreeDController extends AttributeController {
                         onChange: (value) => {
                             this.material.displacementScale = value;
                             this.material.displacementBias = -value / 2;
-                        }
+                        },
+
+                        description: "The height of the surface peaks"
                     },
                     smoothness: {
                         value: 0.2,
@@ -156,7 +176,9 @@ class ThreeDController extends AttributeController {
 
                         onChange: (value) => {
                             this.blurPass.scale = value;
-                        }
+                        },
+
+                        description: "The smoothness of the surface peaks"
                     }
                 }
             },
@@ -170,7 +192,9 @@ class ThreeDController extends AttributeController {
                         onChange: (value) => {
                             this.scene.fog.color.set(value);
                             this.scene.background.set(value);
-                        }
+                        },
+
+                        description: "The color of the background and fog"
                     },
                     near: {
                         value: 0.43,
@@ -180,7 +204,9 @@ class ThreeDController extends AttributeController {
 
                         onChange: (value) => {
                             this.scene.fog.near = value;
-                        }
+                        },
+
+                        description: "At what distance the fog starts to take affect"
                     },
                     far: {
                         value: 1.8,
@@ -190,7 +216,9 @@ class ThreeDController extends AttributeController {
 
                         onChange: (value) => {
                             this.scene.fog.far = value;
-                        }
+                        },
+
+                        description: "At what distance the fog takes full effect"
                     }
                 }
             },
@@ -227,7 +255,9 @@ class ThreeDController extends AttributeController {
                             position: new THREE.Vector3(0, 1, -0.25)
                         }
                     )
-                }
+                },
+
+                description: "Settings for the lights"
             }
         }});
 
@@ -280,7 +310,6 @@ class ThreeDController extends AttributeController {
         texture.minFilter = THREE.LinearFilter;
         this.texture = texture;
 
-        // Texture processing
         // Calculate normal map
         this.normalMaterial = new THREE.ShaderMaterial(NormalMapShader);
         this.normalMaterial.uniforms.width.value = canvas.clientWidth;
@@ -393,8 +422,6 @@ class ThreeDController extends AttributeController {
         this.normalMapProducer.render(delta);
         this.heightMapProducer.render(delta);
 
-        //this.renderer.setRenderTarget(null);
-        //this.renderer.render(this.scene, this.camera);
         this.composer.render(delta);
 
         // Capture the frame if requested

@@ -78,10 +78,15 @@ const App = (props) => {
     }
   }
 
-  const toggle3D = (e) => {
-    WAC.setRender3D(!render3D);
+  const set3D = (state) => {
+    WAC.setRender3D(state);
     setRender3D(WAC.render3D);
+  }
+
+  const toggle3D = (e) => {
+    set3D(!render3D);
   };
+
 
   // Displays the help modal
   const toggleHelp = (e) => {
@@ -555,7 +560,7 @@ const App = (props) => {
 
   // Setup for sidebar categories, with all relevant data
   const createSidebarCategories = () => {
-    const createCategory = (controller, before, after, name, description) => {
+    const createCategory = (controller, before, after, name, description, callback) => {
       return {
         attributes: WAC.getAttributes(controller),
         getter: (name) => WAC.getValue(controller, name),
@@ -567,7 +572,9 @@ const App = (props) => {
         after: after,
 
         name: name,
-        description: description
+        description: description,
+
+        onClickCallback: callback
       }
     };
 
@@ -580,7 +587,9 @@ const App = (props) => {
         "Render",
         "Settings for resolution, multisampling, recording, and so on"
       ),
-      three: createCategory("TDC", null, null, "3D", "Settings for 3D mode")
+      three: createCategory("TDC", null, null, "3D", "Settings for 3D mode", (isActive) => {
+        if(!isActive) set3D(true);
+      })
     }
   };
 

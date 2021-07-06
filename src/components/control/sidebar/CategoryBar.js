@@ -12,10 +12,12 @@ const CategoryBar = ( { categories } ) => {
     const [updateActiveCategory] = useControlPanelUpdateContext();
     const updateHoverLocation = useUpdateHoverContext();
 
-    const handleClick = (e, category) => {
+    const handleClick = (e, category, data) => {
         if(e) e.currentTarget.blur();
         if(activeCategory === category) updateActiveCategory(null, null);
         else updateActiveCategory(category, categories[category]);
+
+        data.onClickCallback && data.onClickCallback(activeCategory === category);
     };
 
 
@@ -28,7 +30,7 @@ const CategoryBar = ( { categories } ) => {
                     key={category + "." + index}
                     className={"category-bar__category-container" 
                     + (category === activeCategory ? " category-bar__category-container--active" : "")}
-                    onClick={(e) => handleClick(e, category)}
+                    onClick={(e) => handleClick(e, category, data)}
                     onMouseOver={() => updateHoverLocation(category, data.description)}
                 >
                     <div 
