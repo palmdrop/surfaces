@@ -11,7 +11,7 @@ import ControlPanel from './components/control/ControlPanel'
 import Button from './components/input/button/Button';
 import DataPanel from './components/data/panel/DataPanel';
 
-import defaultSettings from './resources/settings/hearts.json'
+//import defaultSettings from './resources/settings/hearts.json'
 
 import githubIcon from './resources/icons/github.svg'
 import instagramIcon from './resources/icons/instagram.svg'
@@ -328,7 +328,7 @@ const App = (props) => {
       }
 
       refresh();
-      WAC.importSettings(defaultSettings);
+      //WAC.importSettings(defaultSettings);
 
       WAC.start(() => {
         executeHeldActions();
