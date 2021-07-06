@@ -6,6 +6,9 @@ import { AttributeController } from '../ControllerAttributes'
 import { TextureProcessor } from './processing/TextureProcessor';
 import { NormalMapShader } from './shaders/NormalMapShader';
 
+import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer';
+import { SSAARenderPass } from 'three/examples/jsm/postprocessing/SSAARenderPass'; 
+
 const createLightAttributes = (light, description, opts) => {
     const attributes = {};
 
@@ -208,7 +211,7 @@ class ThreeDController extends AttributeController {
                         {
                             type: "directional",
                             color: '#ffffff',
-                            intensity: 2,
+                            intensity: 2.1,
                             position: new THREE.Vector3(0, 2, -2)
                         }
                     ),
@@ -218,7 +221,7 @@ class ThreeDController extends AttributeController {
                         {
                             type: "point",
                             color: '#ffffff',
-                            intensity: 3,
+                            intensity: 1.9,
                             decay: 2,
                             distance: 5,
                             position: new THREE.Vector3(0, 1, -0.25)
@@ -289,7 +292,7 @@ class ThreeDController extends AttributeController {
         );
 
         this.normalMapProducer = new TextureProcessor(this.renderer, texture, canvas.clientWidth, canvas.clientHeight, [
-            normalPass
+            normalPass,
         ]);
 
         // Calculate heightmap
@@ -366,6 +369,11 @@ class ThreeDController extends AttributeController {
             this.pointLight
         );
 
+        // Post processing
+        this.composer = new EffectComposer(this.renderer);
+        this.composer.addPass(new SSAARenderPass(this.scene, this.camera));
+        this.composer.setPixelRatio(window.devicePixelRatio);
+
         this.initialized = true;
 
         this.handleResize();
@@ -385,8 +393,9 @@ class ThreeDController extends AttributeController {
         this.normalMapProducer.render(delta);
         this.heightMapProducer.render(delta);
 
-        this.renderer.setRenderTarget(null);
-        this.renderer.render(this.scene, this.camera);
+        //this.renderer.setRenderTarget(null);
+        //this.renderer.render(this.scene, this.camera);
+        this.composer.render(delta);
 
         // Capture the frame if requested
         if(this.captureNext) {
@@ -416,6 +425,7 @@ class ThreeDController extends AttributeController {
         if(currentSize.equals(newSize)) return;
 
         this.renderer.setSize( newSize.x, newSize.y, false );
+        this.composer.setSize( newSize.x, newSize.y );
 
         this.normalMaterial.uniforms.width.value = newSize.x;
         this.normalMaterial.uniforms.height.value = newSize.y;

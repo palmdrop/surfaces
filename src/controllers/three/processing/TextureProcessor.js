@@ -1,17 +1,10 @@
 import * as THREE from 'three';
 import * as POSTPROCESSING from 'postprocessing';
-//import * as POSTPROCESSING from 'three/examples/jsm/postprocessing'
-//import * as POSTPROCESSING from 'three/examples/jsm/postprocessing/*';
-import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer';
-import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass';
-import { ShaderPass } from 'three/examples/jsm/postprocessing/ShaderPass';
-import { CopyShader } from 'three/examples/jsm/shaders/CopyShader';
 
 // Class for rendering a texture using a custom shader
 // Useful for applying effects or filters to a texture
 export class TextureProcessor {
     constructor(renderer, texture, width, height, passes) {
-        //this.shader = shader;
         this.renderer = renderer;
 
         // Create Camera
@@ -42,8 +35,6 @@ export class TextureProcessor {
         });
 
         // Create material
-        //shader.uniforms["tDiffuse"].value = texture;
-        //const material = new THREE.ShaderMaterial(shader);
         const material = new THREE.MeshBasicMaterial({
             map: texture
         });
@@ -70,11 +61,7 @@ export class TextureProcessor {
         this.camera.bottom = -height / 2;
         this.camera.updateProjectionMatrix();
 
-        // Update render target
-        //this.renderTarget.setSize(width, height);
-
-        // Update composer 
-        //this.composer.setSize(width, height);
+        // Update size
         this.composer.setSize();
 
         // Update quad
@@ -84,11 +71,9 @@ export class TextureProcessor {
 
     render(delta) {
         this.composer.render(delta);
-        //this.composer.swapBuffers();
     }
 
     getProcessedTexture() {
-        //return this.renderTarget.texture;
         return this.composer.outputBuffer.texture;
     }
 

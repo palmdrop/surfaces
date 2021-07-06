@@ -43,8 +43,8 @@ var NormalMapShader = {
 			float ty1 = toGray(texture2D( tDiffuse, uv + vec2(0, offsetX)));
 
 			vec3 normal = normalize(vec3(
-				(tx0 - tx1) / (2.0 * offsetX),
-				(ty0 - ty1) / (2.0 * offsetY),
+				(tx0 - tx1) / (offsetX),
+				(ty0 - ty1) / (offsetY),
 				1
 			));
 
