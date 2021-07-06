@@ -117,8 +117,8 @@ class ThreeDController extends AttributeController {
     constructor() {
         super(() => { return {
             metalness: {
-                value: 0.5,
-                default: 0.5,
+                value: 0.1,
+                default: 0.1,
                 min: 0.0,
                 max: 1.0,
 
@@ -129,8 +129,8 @@ class ThreeDController extends AttributeController {
                 description: "How metallic the surface looks"
             },
             roughness: {
-                value: 0.5,
-                default: 0.5,
+                value: 0.3,
+                default: 0.3,
                 min: 0.0,
                 max: 1.0,
 
@@ -141,8 +141,8 @@ class ThreeDController extends AttributeController {
                 description: "How rough the surface is. A low value means clearer reflections"  
             },
             bumpScale: {
-                value: 0.1,
-                default: 0.1,
+                value: 0.03,
+                default: 0.03,
                 min: 0.0,
                 max: 1.0,
                 step: 0.001,
@@ -156,8 +156,8 @@ class ThreeDController extends AttributeController {
             displacement: {
                 value: {
                     amount: {
-                        value: 0.3,
-                        default: 0.3,
+                        value: 0.2,
+                        default: 0.2,
                         min: 0.0,
                         max: 1.0,
 
@@ -169,8 +169,8 @@ class ThreeDController extends AttributeController {
                         description: "The height of the surface peaks"
                     },
                     smoothness: {
-                        value: 0.2,
-                        default: 0.2,
+                        value: 0.1,
+                        default: 0.1,
                         min: 0.0,
                         max: 1.0,
 
@@ -226,7 +226,7 @@ class ThreeDController extends AttributeController {
                 value: {
                     ambientLight: createLightAttributes(
                         () => this.ambientLight, 
-                        "Ambient light", 
+                        "Static, ambient background lighting",
                         {
                             type: "ambient",
                             color: '#ffffff',
@@ -235,17 +235,17 @@ class ThreeDController extends AttributeController {
                     ),
                     directionalLight: createLightAttributes(
                         () => this.directionalLight, 
-                        "Directional light", 
+                        "Directional light, similar to the sun or another far away light source", 
                         {
                             type: "directional",
                             color: '#ffffff',
-                            intensity: 2.1,
+                            intensity: 0.75,
                             position: new THREE.Vector3(0, 2, -2)
                         }
                     ),
                     pointLight: createLightAttributes(
                         () => this.pointLight, 
-                        "Point light", 
+                        "Positional light that affects the scene based on the proximity to the light source",
                         {
                             type: "point",
                             color: '#ffffff',
@@ -276,7 +276,6 @@ class ThreeDController extends AttributeController {
             antialias: false,
             powerPreference: 'high-performance'
         });
-        //this.renderer.outputEncoding = THREE.sRGBEncoding;
         this.renderer.physicallyCorrectLights = true;
 
         // CREATE CAMERA
