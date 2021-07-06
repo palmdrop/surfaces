@@ -347,6 +347,8 @@ class WarpAppController {
             const controller = this._getController(controllerName);
 
             const importedAttributes = imported[controllerName];
+            if(!importedAttributes) continue;  
+
             const oldAttributes = controller.getAttributes();
 
             // Merge the imported attributes with the default attributes

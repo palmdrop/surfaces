@@ -82,7 +82,7 @@ class TextureController extends AttributeController {
         console.log("Setting uniforms");
 
         this.GLC.setShaderProgram(this.program);
-        this._setUniforms();
+        this._update();
 
         // Finally, set internal states
         console.log("Done initializing texture controller");

@@ -561,28 +561,34 @@ class AttributeController {
         return this.attributes;
     }
 
-    _setUniforms() {
+    _update() {
+        // Update uniforms
         if(this.GLC && this.program) {
             setUniforms(this.attributes, this.program, this.GLC);
         }
+
+        // Callbacks
+        forEach(this.attributes, attribute => {
+            attribute.onChange && attribute.onChange(attribute.value);
+        });
     }
 
     // Sets all attributes, and updates uniforms (if such exist)
     setAttributes(attributes) {
         this.attributes = attributes;
-        this._setUniforms();
+        this._update();
     }
 
     // Resets all values to their defaults
     reset() {
         this.attributes = resetAttributesToDefault(this.attributes);
-        this._setUniforms();
+        this._update();
     }
 
     // Randomizes the values (by fetching new attributes)
     randomize() {
         this.attributes = this._attributeGetter();
-        this._setUniforms();
+        this._update();
     }
 }
 

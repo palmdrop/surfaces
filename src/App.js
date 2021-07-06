@@ -306,6 +306,7 @@ const App = (props) => {
       var reader = new FileReader();
       reader.onload = (f) => {
         WAC.importSettings(JSON.parse(f.target.result));
+        refresh();
       };
 
       reader.readAsText(file);
