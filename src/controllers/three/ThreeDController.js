@@ -144,7 +144,7 @@ class ThreeDController extends AttributeController {
                 value: 0.03,
                 default: 0.03,
                 min: 0.0,
-                max: 1.0,
+                max: 0.2,
                 step: 0.001,
 
                 onChange: (value) => {
