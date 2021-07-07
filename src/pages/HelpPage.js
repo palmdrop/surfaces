@@ -52,7 +52,7 @@ const descriptions=[{
                 works best on modern browsers with support for WebGL2.
             </p>
             <p>
-                Below follows more information about the three main categories of settings that you'll find in the sidebar.
+                There also exist a 3D mode, where the texture is converted to a 3D height map. See more information below.
             </p>
             </div>
         )
@@ -103,6 +103,18 @@ const descriptions=[{
             </div>
         )
     },
+    {
+        title: "3D",
+        content: (
+            <div>
+            <p>
+                The <i>3D controller</i> controls the 3D mode of the application. The 3D mode displays the domain warp texture as 
+                a 3D height map that is lit by a set of lights. The material of the height map can be modified using a set of sliders,
+                as well as the height of the peaks, the lighting and the background fog.
+            </p>
+            </div>
+        )
+    }
 ];
 
 const contact=[{
