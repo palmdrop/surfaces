@@ -18,7 +18,7 @@ The project was created using [create-react-app](https://github.com/facebook/cre
 Under `img/example` you'll find a few example images generated using this application. Feel free to use the app as you like, and post your creations wherever you wish. However, please leave a link to this repository if you do.
 
 ## Usage
-Go to [palmdrop.github.io/surfaces/](palmdrop.github.io/surfaces/) or clone this repository and run it using `npm`. You'll find a short installation tutorial in the following section.
+Go to [palmdrop.github.io/surfaces/](https://palmdrop.github.io/surfaces/) or clone this repository and run it using `npm`. You'll find a short installation tutorial in the following section.
 
 You can start the program using `npm start`. The page will then open at `localhost:3000`. 
 
