@@ -32,4 +32,4 @@ Make sure you install [node.js and npm](https://docs.npmjs.com/downloading-and-i
 
 :camera: [Instagram](https://www.instagram.com/palmdrop/) (where I showcase a lot of my work)
 
-:computer: [Blog](https://palmdrop.github.io/) (where I occasionally write posts about my process)
+:computer: [Site](https://palmdrop.site) (experimental personal website)
