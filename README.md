@@ -11,7 +11,7 @@ Below are some screenshots of the user interface and some possible shader config
 ![Example 2](/img/example/interface2.png)
 ![Example 4](/img/example/interface4.png)
 
-For an explanation of the underlying techniques, I suggest reading my blog post about [domain warping](https://palmdrop.github.io/post/domain-warping/), and possibly also [this post](https://palmdrop.github.io/post/alien-patterns/) which describes how domain warping can be done recursively, and when combined with modified noise, produce extremely complex visual effects.
+For an explanation of the underlying techniques, I suggest reading my blog post about [domain warping](https://palmdrop.site/nodes/domain-warping/), and possibly also [this post](https://palmdrop.site/nodes/alien-patterns/) which describes how domain warping can be done recursively, and when combined with modified noise, produce extremely complex visual effects.
 
 The project was created using [create-react-app](https://github.com/facebook/create-react-app). A GLSL loader ([glslify](https://github.com/glslify/glslify-loader)) is used to simplify shader source management. To use this loader, webpack had to be configured slightly. Instead of ejecting, [rescripts](https://github.com/harrysolovay/rescripts) was used, with [this](https://gist.github.com/Bjvanminnen/595d9fef3b1320d1f94632f8c2d323ef#gistcomment-3085086) `.rescriptrc` file. 
 

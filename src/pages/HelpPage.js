@@ -12,7 +12,7 @@ import repositoryIcon from '../resources/icons/repository.png'
 import './HelpPage.css'
 
 const githubLink = "https://github.com/palmdrop";
-const repositoryLink = "https://github.com/palmdrop/webgl-domain-warping-controller";
+const repositoryLink = "https://github.com/palmdrop/surfaces";
 const instagramLink = "https://www.instagram.com/palmdrop/"; 
 const blogLink = "https://palmdrop.github.io/"; 
 const emailLink = "mailto:anton@exlex.se"; 
@@ -35,7 +35,7 @@ const descriptions=[{
             <p>
                 To properly understand everything at work here, I suggest reading Inigo 
                 Quilez <a target="_blank" rel="noreferrer" href="https://www.iquilezles.org/www/articles/warp/warp.htm">blog post</a> on the topic, 
-                or my own <a target="_blank" rel="noreferrer" href="https://palmdrop.github.io/post/domain-warping/">blog post</a>, 
+                or my own <a target="_blank" rel="noreferrer" href="https://palmdrop.site/nodes/domain-warping">blog post</a>, 
                 where I discuss the specific variant of this technique used on this page. I also suggest reading 
                 about <a target="_blank" rel="noreferrer" href="https://en.wikipedia.org/wiki/Simplex_noise">Simplex Noise</a>, which is used
                 as an underlying function of space for both the source function and the functions that alter its domain. 
@@ -68,7 +68,7 @@ const descriptions=[{
                 <i>amount controller</i> controls the strength of the warp effect. Each layer has sliders for controlling fractal noise settings (layers of noise). 
             </p>  
             <p>
-                I suggest reading <a target="_blank" rel="noreferrer" href="https://palmdrop.github.io/post/characteristics-of-modified-noise/">this post</a>. 
+                I suggest reading <a target="_blank" rel="noreferrer" href="https://palmdrop.site/nodes/modified-noise">this post</a>. 
                 It also covers some of the <i>modifications</i> available.
             </p>
             </div>
