@@ -23,8 +23,8 @@
     "web-vitals": "^1.1.2"
   },
   "scripts": {
-    "start": "rescripts start",
-    "build": "rescripts build",
+    "start": "rescripts --openssl-legacy-provider start",
+    "build": "rescripts --openssl-legacy-provider build",
     "test": "rescripts test"
   },
   "eslintConfig": {
